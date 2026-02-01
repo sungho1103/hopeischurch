@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>주보 | 희망은교회</title>
+  <style>
+    :root{ --side:220px; --max:1100px; }
+    body{ margin:0; font-family:system-ui,-apple-system,"Noto Sans KR",Arial; color:#111; }
+    .wrap{ display:flex; min-height:100vh; }
+    aside{
+      width:var(--side); padding:24px 18px; border-right:1px solid #eee;
+      position:sticky; top:0; height:100vh; box-sizing:border-box;
+      background:#fff;
+    }
+    .brand{ font-weight:800; letter-spacing:-.02em; margin-bottom:12px; }
+    nav a{ display:block; padding:8px 0; color:#111; text-decoration:none; }
+    nav a:hover{ text-decoration:underline; }
+
+    main{ flex:1; }
+    .container{ max-width:var(--max); padding:36px 20px; margin:0 auto; }
+
+    .topbar{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
+    h1{ margin:0; font-size:34px; letter-spacing:-.02em; }
+    .meta{ color:#666; font-size:14px; text-align:right; line-height:1.5; }
+
+    hr{ border:0; border-top:1px solid #eee; margin:18px 0; }
+
+    .controls{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    select, button{
+      font:inherit; padding:8px 10px; border:1px solid #ddd; border-radius:10px; background:#fff;
+    }
+    button{ cursor:pointer; }
+    button:hover{ border-color:#bbb; }
+
+    /* 3단 주보 */
+    .columns{ column-count:3; column-gap:24px; }
+    .block{ break-inside:avoid; margin:0 0 16px; padding:10px 0; border-bottom:1px solid #f0f0f0; }
+    .block h2{ margin:0 0 8px; font-size:18px; }
+    .muted{ color:#666; font-size:14px; line-height:1.7; }
+    ul{ margin:8px 0 0 18px; padding:0; }
+    li{ margin:4px 0; line-height:1.7; }
+
+    table{ width:100%; border-collapse:collapse; font-size:14px; }
+    th,td{ border:1px solid #e6e6e6; padding:6px 8px; text-align:left; vertical-align:top; }
+
+    .badge{ display:inline-block; padding:4px 10px; border:1px solid #e6e6e6; border-radius:999px; color:#555; font-size:12px; }
+
+    @media (max-width: 860px){
+      .wrap{ display:block; }
+      aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
+      .columns{ column-count:1; }
+      .topbar{ flex-direction:column; align-items:flex-start; }
+      .meta{ text-align:left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <aside>
+      <div class="brand">희망은교회</div>
+      <nav>
+        <a href="/">홈</a>
+        <a href="/bulletin/">주보</a>
+      </nav>
+    </aside>
+
+    <main>
+      <div class="container">
+        <div class="topbar">
+          <div>
+            <h1>주보</h1>
+            <div class="controls" style="margin-top:10px;">
+              <label class="muted" for="weekSelect">주차 선택</label>
+              <select id="weekSelect"></select>
+              <button id="prevBtn">이전 주</button>
+              <button id="nextBtn">다음 주</button>
+            </div>
+          </div>
+          <div class="meta">
+            <div><span class="badge" id="issueText">—</span></div>
+            <div id="dateText" style="margin-top:8px;">—</div>
+          </div>
+        </div>
+
+        <hr/>
+
+        <div class="columns" id="bulletinBody">
+          <section class="block">
+            <h2>불러오는 중…</h2>
+            <div class="muted">주보 데이터를 가져오고 있습니다.</div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+  // ✅ 당신의 Apps Script 웹앱 URL
+  const API_BASE = "https://script.google.com/macros/s/AKfycbywALVBKpOx6icnde7WdZAGPT8GK-OFIS2-Fm1YLO09NNDpLXLjisWUP3J9zKIizbBt/exec";
+
+  const qs = new URLSearchParams(location.search);
+  const weekParam = qs.get("week");
+
+  const weekSelect = document.getElementById("weekSelect");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  function setWeekInUrl(weekId){
+    const u = new URL(location.href);
+    u.searchParams.set("week", weekId);
+    location.href = u.toString();
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function formatWeekLabel(w){
+    // 표시: 2026.02.01 (26-05호) 주일예배
+    const date = w.date || w.week_id || "";
+    const issue = w.issue ? `(${w.issue}호)` : "";
+    const title = w.title ? ` ${w.title}` : "";
+    return `${date} ${issue}${title}`.trim();
+  }
+
+  async function fetchJSON(url){
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("fetch failed");
+    return await res.json();
+  }
+
+  async function loadWeeks(){
+    const data = await fetchJSON(API_BASE); // { weeks: [...] }
+    const weeks = data.weeks || [];
+    if(!weeks.length){
+      weekSelect.innerHTML = `<option value="">주차 데이터가 없습니다</option>`;
+      return { weeks: [], selected: "" };
+    }
+
+    weekSelect.innerHTML = weeks.map(w =>
+      `<option value="${escapeHtml(w.week_id)}">${escapeHtml(formatWeekLabel(w))}</option>`
+    ).join("");
+
+    const selected = (weekParam && weeks.some(w => w.week_id === weekParam))
+      ? weekParam
+      : weeks[0].week_id; // 최신이 위로 오도록 API에서 정렬됨
+
+    weekSelect.value = selected;
+
+    weekSelect.addEventListener("change", () => {
+      setWeekInUrl(weekSelect.value);
+    });
+
+    return { weeks, selected };
+  }
+
+  function hookPrevNext(weeks, selected){
+    const idx = weeks.findIndex(w => w.week_id === selected);
+
+    // weeks[0]이 최신, idx+1이 더 과거(이전 주)
+    prevBtn.onclick = () => {
+      if(idx < 0 || idx >= weeks.length - 1) return;
+      setWeekInUrl(weeks[idx + 1].week_id);
+    };
+
+    // idx-1이 더 최신(다음 주)
+    nextBtn.onclick = () => {
+      if(idx <= 0) return;
+      setWeekInUrl(weeks[idx - 1].week_id);
+    };
+  }
+
+  function renderBulletin(data){
+    const meta = data.meta || {};
+    document.getElementById("issueText").textContent = meta.issue ? `주보 ${meta.issue}호` : "주보";
+    document.getElementById("dateText").textContent = meta.date || data.week_id || "";
+
+    const news = (data.news || []).map(r => r.text).filter(Boolean);
+    const committee = (data.committee || []).filter(r => r.role && r.name);
+    const order = (data.worship_order || []);
+    const memory = data.memory_verse;
+
+    const body = document.getElementById("bulletinBody");
+    body.innerHTML = `
+      <section class="block">
+        <h2>희망은 소식</h2>
+        ${news.length ? `<ul>${news.map(t=>`<li>${escapeHtml(t)}</li>`).join("")}</ul>`
+                     : `<div class="muted">등록된 소식이 없습니다.</div>`}
+      </section>
+
+      <section class="block">
+        <h2>외울 말씀</h2>
+        ${memory?.reference || memory?.text
+          ? `<div class="muted"><b>${escapeHtml(memory.reference || "")}</b><br/>${escapeHtml(memory.text || "")}</div>`
+          : `<div class="muted">등록된 외울 말씀이 없습니다.</div>`}
+      </section>
+
+      <section class="block">
+        <h2>예배순서</h2>
+        ${order.length ? `
+          <table>
+            <thead><tr><th>순서</th><th>내용</th><th>담당</th></tr></thead>
+            <tbody>
+              ${order.map(r => `
+                <tr>
+                  <td>${escapeHtml(r.step || "")}</td>
+                  <td>${escapeHtml(r.content || "")}</td>
+                  <td>${escapeHtml(r.person || "")}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        ` : `<div class="muted">예배순서가 없습니다.</div>`}
+      </section>
+
+      <section class="block">
+        <h2>예배위원</h2>
+        ${committee.length ? `
+          <table>
+            <thead><tr><th>구분</th><th>담당</th></tr></thead>
+            <tbody>
+              ${committee.map(r => `
+                <tr>
+                  <td>${escapeHtml(r.role)}</td>
+                  <td>${escapeHtml(r.name)}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        ` : `<div class="muted">예배위원 정보가 없습니다.</div>`}
+      </section>
+
+      <section class="block">
+        <h2>교회 안내</h2>
+        <div class="muted">
+          주소: (주소)<br/>
+          예배: 주일 11:00 / 수요 19:30<br/>
+          문의: (연락처)
+        </div>
+      </section>
+    `;
+  }
+
+  async function main(){
+    const { weeks, selected } = await loadWeeks();
+    if(!weeks.length) return;
+
+    hookPrevNext(weeks, selected);
+
+    const data = await fetchJSON(`${API_BASE}?week=${encodeURIComponent(selected)}`);
+    renderBulletin(data);
+  }
+
+  main().catch(err => {
+    console.error(err);
+    document.getElementById("bulletinBody").innerHTML = `
+      <section class="block">
+        <h2>주보 불러오기 실패</h2>
+        <div class="muted">
+          Apps Script 웹앱 공개 설정(링크가 있는 모든 사용자)과 URL을 확인해주세요.
+        </div>
+      </section>
+    `;
+  });
+</script>
+</body>
+</html>
