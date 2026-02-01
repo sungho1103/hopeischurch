@@ -3,27 +3,43 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>희망은교회</title>
+  <title>주일 설교 | 희망은교회</title>
   <style>
-    :root{ --side:220px; --max:900px; }
+    :root{ --side:220px; --max:980px; }
     body{ margin:0; font-family:system-ui,-apple-system,"Noto Sans KR",Arial; color:#111; }
     .wrap{ display:flex; min-height:100vh; }
     aside{
       width:var(--side); padding:24px 18px; border-right:1px solid #eee;
-      position:sticky; top:0; height:100vh; box-sizing:border-box;
-      background:#fff;
+      position:sticky; top:0; height:100vh; box-sizing:border-box; background:#fff;
     }
     .brand{ font-weight:800; letter-spacing:-.02em; margin-bottom:12px; }
     nav a{ display:block; padding:8px 0; color:#111; text-decoration:none; }
     nav a:hover{ text-decoration:underline; }
     main{ flex:1; }
-    .container{ max-width:var(--max); padding:48px 20px; margin:0 auto; }
-    h1{ font-size:44px; margin:0 0 10px; letter-spacing:-.02em; }
-    .sub{ color:#666; margin:0 0 28px; line-height:1.7; }
-    hr{ border:0; border-top:1px solid #eee; margin:28px 0; }
-    .card{ border:1px solid #eee; border-radius:16px; padding:16px; }
-    @media (max-width: 840px){
-      .wrap{ display:block; }
+    .container{ max-width:var(--max); padding:36px 20px; margin:0 auto; }
+
+    .top{ display:flex; justify-content:space-between; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+    h1{ margin:0; font-size:32px; letter-spacing:-.02em; }
+    .muted{ color:#666; font-size:14px; line-height:1.7; }
+    hr{ border:0; border-top:1px solid #eee; margin:18px 0; }
+
+    .grid{ display:grid; grid-template-columns: 320px 1fr; gap:16px; }
+    .panel{ border:1px solid #eee; border-radius:16px; padding:14px; }
+    .list a{ display:block; padding:10px 8px; border-radius:12px; text-decoration:none; color:#111; }
+    .list a:hover{ background:#f7f7f7; }
+    .list .active{ background:#111; color:#fff; }
+    .badge{ display:inline-block; padding:4px 10px; border:1px solid #e6e6e6; border-radius:999px; color:#555; font-size:12px; }
+
+    .sermon-title{ font-size:22px; margin:0 0 10px; letter-spacing:-.02em; }
+    .meta-row{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; }
+    pre{
+      margin:0; white-space:pre-wrap; word-break:break-word;
+      font-size:15px; line-height:1.8;
+      font-family:inherit;
+    }
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
       aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
     }
   </style>
@@ -33,52 +49,181 @@
     <aside>
       <div class="brand">희망은교회</div>
       <nav>
-        <a href="./">홈</a>
-        <a href="./bulletin/">주보</a>
-        <a href="#worship">예배 및 모임 안내</a>
-        <a href="#pastor">담임목사 인사말</a>
-        <a href="#map">찾아오는 길</a>
+        <!-- GitHub Pages(프로젝트 사이트)이므로 상대경로 사용 -->
+        <a href="../">홈</a>
+        <a href="../bulletin/">주보</a>
+        <a href="./">주일 설교</a>
       </nav>
     </aside>
 
     <main>
       <div class="container">
-        <h1>희망은교회</h1>
-        <p class="sub">주님의 말씀 안에서 함께 자라가는 공동체</p>
-
-        <div class="card">
-          <b>이번 주 주보 보기</b><br/>
-          <a href="./bulletin/" style="display:inline-block; margin-top:10px;">주보 페이지로 이동 →</a>
+        <div class="top">
+          <div>
+            <h1>주일 설교</h1>
+            <div class="muted">설교 TXT 파일을 올리면 목록이 자동으로 업데이트됩니다.</div>
+          </div>
+          <div class="muted" id="status">불러오는 중…</div>
         </div>
 
         <hr/>
 
-        <section id="worship">
-          <h2>예배 및 모임 안내</h2>
-          <p><b>주일예배</b><br/>주일 오전 11:00 / 본당</p>
-          <p><b>수요예배</b><br/>수요일 오후 7:30</p>
-        </section>
+        <div class="grid">
+          <section class="panel">
+            <div class="muted" style="margin-bottom:10px;">설교 목록</div>
+            <div class="list" id="list"></div>
+            <hr/>
+            <div class="muted">
+              파일 추가 방법: <br/>
+              <span class="badge">sermon/texts/2026-02-01.txt</span> 형식으로 업로드
+            </div>
+          </section>
 
-        <hr/>
-
-        <section id="pastor">
-          <h2>담임목사 인사말</h2>
-          <p class="sub" style="margin:0;">
-            방문하신 모든 분들을 주님의 이름으로 환영합니다. <br/>
-            희망은교회는 말씀과 기도로 함께 성장하는 공동체입니다.
-          </p>
-        </section>
-
-        <hr/>
-
-        <section id="map">
-          <h2>찾아오는 길</h2>
-          <p>주소: (주소 입력)</p>
-          <p>연락처: (연락처 입력)</p>
-          <p><a href="https://map.naver.com/" target="_blank" rel="noreferrer">네이버 지도 열기</a></p>
-        </section>
+          <section class="panel" id="viewer">
+            <div class="muted">왼쪽에서 설교를 선택하세요.</div>
+          </section>
+        </div>
       </div>
     </main>
   </div>
+
+<script>
+  // ✅ 당신 GitHub 정보(고정)
+  const OWNER = "sungho1103";
+  const REPO  = "hopeischurch";
+  const BRANCH = "main";
+  const TEXTS_PATH = "sermon/texts"; // 폴더
+
+  // 목록: GitHub Contents API로 폴더 파일 목록 가져오기
+  const LIST_API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${TEXTS_PATH}?ref=${BRANCH}`;
+  // raw 텍스트 가져오기
+  const RAW_BASE = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${TEXTS_PATH}/`;
+
+  const listEl = document.getElementById("list");
+  const viewerEl = document.getElementById("viewer");
+  const statusEl = document.getElementById("status");
+
+  const qs = new URLSearchParams(location.search);
+  const currentFile = qs.get("file"); // 예: 2026-02-01.txt
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function setFileParam(filename){
+    const u = new URL(location.href);
+    u.searchParams.set("file", filename);
+    location.href = u.toString();
+  }
+
+  function parseSermonTxt(txt){
+    // 첫 "빈 줄" 전까지를 메타 라인으로 간주 (예: "제목: ...")
+    const lines = txt.replace(/\r\n/g, "\n").split("\n");
+
+    const meta = {};
+    let i = 0;
+    for(; i < lines.length; i++){
+      const line = lines[i].trim();
+      if(line === "") { i++; break; }
+      const m = line.match(/^([^:]+)\s*:\s*(.*)$/);
+      if(m){
+        meta[m[1].trim()] = m[2].trim();
+      }
+    }
+
+    const body = lines.slice(i).join("\n").trim();
+    return { meta, body };
+  }
+
+  function formatTitleFromFilename(name){
+    // 파일명 2026-02-01.txt -> 2026-02-01
+    return name.replace(/\.txt$/i, "");
+  }
+
+  async function fetchJSON(url){
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(`fetch failed: ${res.status}`);
+    return await res.json();
+  }
+
+  async function fetchText(url){
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(`fetch failed: ${res.status}`);
+    return await res.text();
+  }
+
+  async function loadList(){
+    const data = await fetchJSON(LIST_API);
+    const files = (Array.isArray(data) ? data : [])
+      .filter(x => x.type === "file" && /\.txt$/i.test(x.name))
+      .map(x => x.name)
+      // 날짜 파일명 기준 내림차순 (최신이 위)
+      .sort((a,b) => b.localeCompare(a));
+
+    if(!files.length){
+      listEl.innerHTML = `<div class="muted">아직 설교 txt 파일이 없습니다.</div>`;
+      statusEl.textContent = "목록 없음";
+      return { files, selected: null };
+    }
+
+    const selected = (currentFile && files.includes(currentFile)) ? currentFile : files[0];
+
+    listEl.innerHTML = files.map(name => {
+      const active = (name === selected) ? "active" : "";
+      return `<a class="${active}" href="javascript:void(0)" onclick="(${setFileParam.toString()})('${name}')">
+        ${escapeHtml(formatTitleFromFilename(name))}
+      </a>`;
+    }).join("");
+
+    statusEl.textContent = `총 ${files.length}개`;
+    return { files, selected };
+  }
+
+  async function renderFile(filename){
+    viewerEl.innerHTML = `<div class="muted">불러오는 중…</div>`;
+
+    const txt = await fetchText(RAW_BASE + encodeURIComponent(filename));
+    const { meta, body } = parseSermonTxt(txt);
+
+    const title = meta["제목"] || meta["title"] || formatTitleFromFilename(filename);
+    const date  = meta["날짜"] || meta["date"] || formatTitleFromFilename(filename);
+    const ref   = meta["본문"] || meta["text"] || "";
+    const who   = meta["설교자"] || meta["preacher"] || "";
+
+    viewerEl.innerHTML = `
+      <div class="muted" style="margin-bottom:6px;">${escapeHtml(date)}</div>
+      <h2 class="sermon-title">${escapeHtml(title)}</h2>
+      <div class="meta-row">
+        ${ref ? `<span class="badge">본문: ${escapeHtml(ref)}</span>` : ""}
+        ${who ? `<span class="badge">설교자: ${escapeHtml(who)}</span>` : ""}
+        <span class="badge">파일: ${escapeHtml(filename)}</span>
+      </div>
+      <pre>${escapeHtml(body || "(본문이 비어 있습니다)")}</pre>
+    `;
+  }
+
+  (async function main(){
+    try{
+      const { selected } = await loadList();
+      if(selected) await renderFile(selected);
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "불러오기 실패";
+      viewerEl.innerHTML = `
+        <div class="muted">
+          설교 목록을 불러오지 못했습니다.<br/>
+          - GitHub에 <b>sermon/texts</b> 폴더가 있는지<br/>
+          - 저장소가 Public인지<br/>
+          를 확인해주세요.
+        </div>
+      `;
+    }
+  })();
+</script>
 </body>
 </html>
