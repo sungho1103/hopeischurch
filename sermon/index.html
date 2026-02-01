@@ -174,11 +174,11 @@
     const selected = (currentFile && files.includes(currentFile)) ? currentFile : files[0];
 
     listEl.innerHTML = files.map(name => {
-      const active = (name === selected) ? "active" : "";
-      return `<a class="${active}" href="javascript:void(0)" onclick="(${setFileParam.toString()})('${name}')">
-        ${escapeHtml(formatTitleFromFilename(name))}
-      </a>`;
-    }).join("");
+  const active = (name === selected) ? "active" : "";
+  return `<a class="${active}" href="./?file=${encodeURIComponent(name)}">
+    ${escapeHtml(formatTitleFromFilename(name))}
+  </a>`;
+}).join("");
 
     statusEl.textContent = `총 ${files.length}개`;
     return { files, selected };
