@@ -192,7 +192,7 @@
         ${news.length ? `<ul>${news.map(t=>`<li>${escapeHtml(t)}</li>`).join("")}</ul>`
                      : `<div class="muted">등록된 소식이 없습니다.</div>`}
       </section>
-
+<br/>
       <section class="block">
         <h2>외울 말씀</h2>
         ${memory?.reference || memory?.text
@@ -231,7 +231,7 @@
                 </tr>
               `).join("")}
             </tbody>
-          </table>
+          </table><br/><br/>
         ` : `<div class="muted">예배위원 정보가 없습니다.</div>`}
       </section>
 
