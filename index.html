@@ -26,9 +26,8 @@
       .wrap{ display:block; }
       aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
     }
-    /* ✅ 모바일에서: 1줄(브랜드) + 2줄(가로 스크롤 메뉴) 상단 고정 */
+    /* ✅ 모바일에서: 1줄 브랜드 + 2줄 가로 스크롤 메뉴 (갈색 배경) */
 @media (max-width: 860px){
-  /* 왼쪽 사이드바 느낌 제거 → 상단바로 */
   aside{
     position: sticky;
     top: 0;
@@ -36,9 +35,9 @@
     width: auto;
     height: auto;
     border-right: 0;
-    border-bottom: 1px solid #eee;
-    padding: 12px 14px 8px;
-    background: #fff;
+    border-bottom: 1px solid #e0d6c8;
+    padding: 12px 14px 10px;
+    background: #f3eee6; /* 희미한 갈색 */
   }
 
   /* 1줄: 희망은교회 */
@@ -49,36 +48,38 @@
     line-height: 1.2;
   }
 
-  /* 2줄: 메뉴를 가로 스크롤 */
+  /* 2줄: 가로 스크롤 메뉴 */
   nav{
     display: flex;
-    gap: 10px;
+    gap: 14px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
-    padding-bottom: 6px; /* iOS 스크롤바 공간 */
+    padding-bottom: 6px;
   }
 
-  /* 메뉴 탭(칩) 스타일 */
+  /* ❌ 동그라미 제거 → 텍스트 탭 형태 */
   nav a{
     flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 12px;
-    border: 1px solid #eee;
-    border-radius: 999px;
-    background: #fff;
+    padding: 6px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    font-weight: 600;
     text-decoration: none;
+    color: #333;
   }
 
-  nav a:hover{ text-decoration: none; }
+  nav a:hover{
+    text-decoration: underline;
+  }
 
-  /* 버튼(.btn)은 강조(검정 바탕) 유지 */
+  /* 강조 메뉴(주일 설교 버튼) */
   nav a.btn{
-    background:#111;
-    border-color:#111;
-    color:#fff;
+    background: transparent;
+    border: 0;
+    color: #111;
+    font-weight: 800;
   }
 }
 
