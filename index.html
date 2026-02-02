@@ -26,50 +26,55 @@
       .wrap{ display:block; }
       aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
     }
- /* ✅ 모바일 상단바 최종 튜닝 (초슬림) */
+/* ✅ 모바일 상단바 – sermon/index.html 기준으로 통일 */
 @media (max-width: 860px){
 
+  /* 상단바 전체 */
   aside{
     position: sticky;
     top: 0;
     z-index: 1000;
 
-    /* ⬇️ 전체 높이 결정의 핵심 */
-    padding: 8px 14px 2px;   /* 위는 여유, 아래는 최소 */
+    /* 🔑 기준값 (위·아래 여백 통일) */
+    padding-top: 10px;   /* ← sermon 기준 */
+    padding-bottom: 6px;/* ← sermon 기준 */
+    padding-left: 14px;
+    padding-right: 14px;
+
     background: #fff;
     border-bottom: 1px solid #eee;
   }
 
-  /* 1줄: 희망은교회 (위에 숨 쉴 공간 확보) */
+  /* 1줄: 희망은교회 */
   .brand{
-    margin: 0 0 2px;        /* ⬅️ 아래 간격만 아주 조금 */
-    padding-top: 2px;       /* ⬅️ 위에 숨 쉴 여백 */
+    margin: 0;                 /* ❗ margin 제거 */
+    padding-bottom: 4px;       /* 🔑 브랜드-메뉴 간격 통일 */
     font-size: 16px;
     font-weight: 800;
-    line-height: 1.2;       /* ⬅️ 너무 조이지 않게 */
+    line-height: 1.25;         /* 카카오비즈니스 느낌 */
   }
 
   /* 2줄: 메뉴 바 */
   nav{
-    margin: 0;
+    margin: 0;                 /* ❗ 기본 margin 제거 */
     padding: 0;
 
     display: flex;
-    align-items: center;    /* ⬅️ 세로 가운데 정렬 */
-    gap: 26px;              /* ⬅️ 메뉴 사이 간격 */
+    align-items: center;
+    gap: 26px;                 /* 메뉴 간격 (가독성) */
     overflow-x: auto;
     white-space: nowrap;
 
-    line-height: 1.1;       /* ⬅️ 메뉴 높이 강제 축소 */
+    line-height: 1.2;          /* 메뉴 아래 공간 제거 핵심 */
   }
 
-  /* 메뉴 텍스트 자체 높이 축소 */
+  /* 메뉴 항목 */
   nav a{
-    padding: 0;             /* ⬅️ 핵심: 아래 여백 제거 */
     margin: 0;
+    padding: 0;                /* ❗ 아래 여백의 원흉 제거 */
     font-size: 15px;
     font-weight: 600;
-    line-height: 1.1;
+    line-height: 1.2;
     color: #333;
     text-decoration: none;
   }
