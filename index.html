@@ -26,47 +26,54 @@
       .wrap{ display:block; }
       aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
     }
-    /* ✅ 모바일: 얇은 상단바 + 가로 스크롤 메뉴 (연한 갈색) */
+    /* ✅ 모바일 상단 고정: 카카오비즈니스 스타일 */
 @media (max-width: 860px){
+
+  /* 전체 상단 영역 */
   aside{
     position: sticky;
     top: 0;
     z-index: 1000;
     width: auto;
     height: auto;
+
+    /* ⬇️ 핵심: 여백 최소화 */
+    padding: 6px 14px 4px;
+
+    background: #fff;          /* 배경색 제거 */
     border-right: 0;
-    border-bottom: 1px solid #e2d8ca;
-    padding: 8px 14px 6px;   /* 🔽 높이 줄임 */
-    background: #f3eee6;
+    border-bottom: 1px solid #eee;
   }
 
-  /* 1줄: 희망은교회 (컴팩트) */
+  /* 1줄: 희망은교회 */
   .brand{
-    margin: 0 0 6px;        /* 🔽 간격 줄임 */
+    margin: 0 0 4px;           /* ⬇️ 위아래 여백 최소 */
+    padding: 0;
+    font-size: 16px;
     font-weight: 800;
-    font-size: 17px;
-    line-height: 1.15;
+    line-height: 1.1;
   }
 
-  /* 2줄: 가로 스크롤 메뉴 */
+  /* 2줄: 메뉴 영역 */
   nav{
+    margin: 0;                 /* ⬅️ 중요 */
+    padding: 0;
+
     display: flex;
-    gap: 22px;              /* 🔼 메뉴 사이 간격 넓힘 */
+    gap: 24px;                 /* ⬆️ 메뉴 간격 넓힘 */
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     white-space: nowrap;
-    padding-bottom: 4px;    /* 🔽 여백 축소 */
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* 텍스트 탭 스타일 (동그라미 제거 유지) */
+  /* 메뉴 텍스트 */
   nav a{
-    flex: 0 0 auto;
-    padding: 4px 0;         /* 🔽 높이 얇게 */
+    padding: 2px 0;            /* ⬇️ 세로 높이 최소 */
+    margin: 0;
     border: 0;
-    border-radius: 0;
     background: transparent;
-    font-weight: 600;
     font-size: 15px;
+    font-weight: 600;
     color: #333;
     text-decoration: none;
   }
@@ -75,12 +82,13 @@
     text-decoration: underline;
   }
 
-  /* 강조 메뉴 */
+  /* 강조 메뉴 (주일 설교) */
   nav a.btn{
     font-weight: 800;
-    color: #111;
+    color: #000;
   }
 }
+
 
   </style>
 </head>
