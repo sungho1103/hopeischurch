@@ -97,6 +97,30 @@
     margin: 12px 0 !important;
   }
 }
+/* 모바일/태블릿: 좌(메뉴) + 우(본문) → 위(메뉴) + 아래(본문) */
+@media (max-width: 900px) {
+  .wrap {
+    flex-direction: column;
+  }
+
+  aside {
+    width: 100%;
+    flex: none;
+    position: static;   /* sticky 해제 */
+    height: auto;       /* 100vh 해제 */
+    border-right: 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  main {
+    width: 100%;
+  }
+
+  /* 본문 안의 2컬럼 그리드(320px 1fr)도 모바일에서 1컬럼으로 */
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
 
     
   </style>
