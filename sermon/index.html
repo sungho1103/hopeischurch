@@ -296,6 +296,22 @@ const toggleLabel = document.getElementById("sermonToggleLabel");
     return await res.text();
   }
 
+function openToggle(){
+  toggleBtn.setAttribute("aria-expanded", "true");
+  toggleBody.hidden = false;
+}
+
+function closeToggle(){
+  toggleBtn.setAttribute("aria-expanded", "false");
+  toggleBody.hidden = true;
+}
+
+toggleBtn.addEventListener("click", () => {
+  const expanded = toggleBtn.getAttribute("aria-expanded") === "true";
+  expanded ? closeToggle() : openToggle();
+});
+
+  
   async function loadList(){
     const data = await fetchJSON(LIST_API);
     const files = (Array.isArray(data) ? data : [])
@@ -312,6 +328,10 @@ const toggleLabel = document.getElementById("sermonToggleLabel");
 
     const selected = (currentFile && files.includes(currentFile)) ? currentFile : files[0];
 
+toggleLabel.textContent = formatTitleFromFilename(selected);
+closeToggle();
+
+    
     listEl.innerHTML = files.map(name => {
   const active = (name === selected) ? "active" : "";
   return `<a class="${active}" href="./?file=${encodeURIComponent(name)}">
