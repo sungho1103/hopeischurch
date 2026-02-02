@@ -4,65 +4,30 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>주보 | 희망은교회</title>
-  <style>
-    :root{ --side:220px; --max:1100px; }
-    body{ margin:0; font-family:system-ui,-apple-system,"Noto Sans KR",Arial; color:#111; }
-    .wrap{ display:flex; min-height:100vh; }
-    aside{
-      width:var(--side); padding:24px 18px; border-right:1px solid #eee;
-      position:sticky; top:0; height:100vh; box-sizing:border-box;
-      background:#fff;
-    }
-    .brand{ font-weight:800; letter-spacing:-.02em; margin-bottom:12px; }
-    nav a{ display:block; padding:8px 0; color:#111; text-decoration:none; }
-    nav a:hover{ text-decoration:underline; }
+<link rel="stylesheet" href="./assets/common.css">
 
-    main{ flex:1; }
-    .container{ max-width:var(--max); padding:36px 20px; margin:0 auto; }
-
-    .topbar{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
-    h1{ margin:0; font-size:34px; letter-spacing:-.02em; }
-    .meta{ color:#666; font-size:14px; text-align:right; line-height:1.5; }
-
-    hr{ border:0; border-top:1px solid #eee; margin:18px 0; }
-
-    .controls{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    select, button{
-      font:inherit; padding:8px 10px; border:1px solid #ddd; border-radius:10px; background:#fff;
-    }
-    button{ cursor:pointer; }
-    button:hover{ border-color:#bbb; }
-
-    /* 3단 주보 */
-    .columns{ column-count:3; column-gap:24px; }
-    .block{ break-inside:avoid; margin:0 0 16px; padding:10px 0; border-bottom:1px solid #f0f0f0; }
-    .block h2{ margin:0 0 8px; font-size:18px; }
-    .muted{ color:#666; font-size:14px; line-height:1.7; }
-    ul{ margin:8px 0 0 18px; padding:0; }
-    li{ margin:4px 0; line-height:1.7; }
-
-    table{ width:100%; border-collapse:collapse; font-size:14px; }
-    th,td{ border:1px solid #e6e6e6; padding:6px 8px; text-align:left; vertical-align:top; }
-
-    .badge{ display:inline-block; padding:4px 10px; border:1px solid #e6e6e6; border-radius:999px; color:#555; font-size:12px; }
-
-    @media (max-width: 860px){
-      .wrap{ display:block; }
-      aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
-      .columns{ column-count:1; }
-      .topbar{ flex-direction:column; align-items:flex-start; }
-      .meta{ text-align:left; }
-    }
-  </style>
 </head>
 <body>
   <div class="wrap">
     <aside>
-      <div class="brand">희망은교회</div>
-      <nav>
-        <a href="https://sungho1103.github.io/hopeischurch/">홈</a>
-      </nav>
-    </aside>
+  <div class="brand">희망은교회</div>
+
+  <nav id="menu">
+    <a href="../" data-nav="home">홈</a>
+    <a href="#worship" data-nav="worship">예배 시간</a>
+    <a href="#pastor" data-nav="pastor">섬기는 이들</a>
+    <a href="../bulletin/" data-nav="bulletin">주보 보기</a>
+    <a href="#map" data-nav="map">찾아오는 길</a>
+    <a href="../sermon/" data-nav="sermon">주일 설교</a>
+  </nav>
+
+  <div class="notice">
+    <strong>행사</strong>
+    <span>성경암송대회(2/22)</span>
+    <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42" target="_blank">시편42편</a>
+  </div>
+</aside>
+
 
     <main>
       <div class="container">
