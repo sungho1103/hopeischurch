@@ -122,6 +122,41 @@
   }
 }
 
+.toggle-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.toggle-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  border:1px solid #e6e6e6;
+  border-radius:12px;
+  background:#fff;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.toggle-btn .chev{
+  display:inline-block;
+  transition:transform .15s ease;
+}
+
+.toggle-btn[aria-expanded="true"] .chev{
+  transform:rotate(180deg);
+}
+
+/* 목록이 많아질 때 패널 안에서 스크롤 */
+.toggle-body{
+  margin-top:12px;
+  max-height:320px;
+  overflow:auto;
+}
+
     
   </style>
 </head>
@@ -150,15 +185,33 @@
         <hr/>
 
         <div class="grid">
-          <section class="panel">
-            <div class="muted" style="margin-bottom:10px;">설교 목록</div>
-            <div class="list" id="list"></div>
-            <hr/>
-            <div class="muted">
-              파일 추가 방법: <br/>
-              <span class="badge">sermon/texts/2026-02-01.txt</span> file upload
-            </div>
-          </section>
+       <section class="panel">
+  <div class="toggle-head">
+    <div class="muted" style="margin:0;">설교 목록</div>
+
+    <button
+      class="toggle-btn"
+      id="sermonToggleBtn"
+      type="button"
+      aria-expanded="false"
+      aria-controls="sermonToggleBody"
+    >
+      <span id="sermonToggleLabel">날짜 선택</span>
+      <span class="chev" aria-hidden="true">▾</span>
+    </button>
+  </div>
+
+  <div class="toggle-body" id="sermonToggleBody" hidden>
+    <div class="list" id="list"></div>
+  </div>
+
+  <hr/>
+  <div class="muted">
+    파일 추가 방법: <br/>
+    <span class="badge">sermon/texts/2026-02-01.txt</span> file upload
+  </div>
+</section>
+
 
           <section class="panel" id="viewer">
             <div class="muted">왼쪽에서 설교를 선택하세요.</div>
