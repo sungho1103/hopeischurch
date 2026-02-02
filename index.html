@@ -6,101 +6,153 @@
   <title>희망은교회</title>
   <style>
     :root{ --side:220px; --max:900px; }
+
     body{ margin:0; font-family:system-ui,-apple-system,"Noto Sans KR",Arial; color:#111; }
     .wrap{ display:flex; min-height:100vh; }
+
     aside{
-      width:var(--side); padding:24px 18px; border-right:1px solid #eee;
-      position:sticky; top:0; height:100vh; box-sizing:border-box;
+      width:var(--side);
+      padding:24px 18px;
+      border-right:1px solid #eee;
+      position:sticky;
+      top:0;
+      height:100vh;
+      box-sizing:border-box;
       background:#fff;
     }
+
     .brand{ font-weight:800; letter-spacing:-.02em; margin-bottom:12px; }
-    nav a{ display:block; padding:8px 0; color:#111; text-decoration:none; }
+
+    nav a{
+      display:block;
+      padding:8px 0;
+      color:#111;
+      text-decoration:none;
+    }
     nav a:hover{ text-decoration:underline; }
+
+    /* ✅ 현재 섹션/현재 페이지 강조 */
+    nav a.is-active{
+      font-weight:800;
+      color:#111;
+      text-decoration:underline;
+      text-underline-offset: 3px;
+    }
+
+    /* ✅ 공지바(행사) */
+    .notice{
+      margin-top:14px;
+      padding:10px 12px;
+      border:1px solid #eee;
+      border-radius:14px;
+      background:#fafafa;
+      font-size:13px;
+      line-height:1.4;
+      color:#555;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .notice strong{ color:#333; font-weight:800; }
+    .notice a{ color:#333; text-decoration:underline; text-underline-offset:3px; }
+
     main{ flex:1; }
     .container{ max-width:var(--max); padding:48px 20px; margin:0 auto; }
+
     h1{ font-size:44px; margin:0 0 10px; letter-spacing:-.02em; }
     .sub{ color:#666; margin:0 0 28px; line-height:1.7; }
+
     hr{ border:0; border-top:1px solid #eee; margin:28px 0; }
     .card{ border:1px solid #eee; border-radius:16px; padding:16px; }
-    @media (max-width: 840px){
+
+    /* ✅ 모바일/태블릿: 사이드바 → 상단바(단, sticky 유지) */
+    @media (max-width: 900px){
       .wrap{ display:block; }
-      aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
+      aside{
+        width:auto;
+        height:auto;
+        border-right:0;
+        border-bottom:1px solid #eee;
+      }
     }
-/* ✅ 모바일에서 카카오비즈니스처럼: 상단은 얇게, 본문은 바로 붙게 */
-@media (max-width: 860px){
 
-  /* 1) 상단바(희망은교회 + 메뉴) 높이 정리 */
-  aside{
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background:#fff;
-    border-bottom:1px solid #eee;
+    /* ✅ 모바일에서 카카오비즈니스처럼: 상단은 얇게, 본문은 바로 붙게 */
+    @media (max-width: 860px){
+      aside{
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background:#fff;
+        border-bottom:1px solid #eee;
+        padding: 12px 14px 10px; /* 공지바가 생겨서 아래 padding 약간만 */
+      }
 
-    padding: 12px 14px 8px;   /* ✅ 카카오처럼 위/아래 적당히 */
-  }
+      .brand{
+        margin: 0 0 10px;
+        font-size: 18px;
+        font-weight: 800;
+        line-height: 1.2;
+      }
 
-  .brand{
-    margin: 0 0 10px;         /* ✅ 브랜드 아래 간격 */
-    font-size: 18px;
-    font-weight: 800;
-    line-height: 1.2;
-  }
+      nav{
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 26px;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        line-height: 1.2;
+      }
 
-  nav{
-    margin: 0;                /* ✅ 기본 여백 제거 */
-    padding: 0;
-    display: flex;
-    gap: 26px;                /* ✅ 메뉴 간격 넓게 */
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
+      nav a{
+        padding: 0;
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #333;
+        text-decoration: none;
+        display:inline-block;
+      }
 
-    line-height: 1.2;
-  }
+      nav a:hover{ text-decoration: underline; }
 
-  nav a{
-    padding: 0;               /* ✅ 메뉴 아래 빈공간 원흉 제거 */
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 1.2;
-    color: #333;
-    text-decoration: none;
-  }
+      /* ✅ 메뉴 아래가 넓은 원인 = 본문 상단 padding */
+      .container{ padding-top: 16px !important; }
+      hr{ margin: 12px 0 !important; }
 
-  nav a:hover{ text-decoration: underline; }
-
-  /* 2) ✅ 핵심: 메뉴 아래가 넓은 원인 = 본문 상단 padding */
-  .container{
-    padding-top: 16px !important;   /* 기존 36px 같은 값 누르고 줄임 */
-  }
-
-  /* (있으면) 본문 상단 HR도 간격 줄이기 */
-  hr{
-    margin: 12px 0 !important;
-  }
-}
-
-
+      /* ✅ 모바일 공지바를 더 얇게 */
+      .notice{
+        margin-top:10px;
+        padding:8px 10px;
+        border-radius:12px;
+        font-size:12.5px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <aside>
       <div class="brand">희망은교회</div>
-      <nav>
-        <a href="./">홈</a>
-      
-        <a href="#worship">예배 시간</a>
-        <a href="#pastor">섬기는 이들</a>
-        <a href="./bulletin/">주보 보기</a>
-        <a href="#map">찾아오는 길</a>
-        <a href="./sermon/">주일 설교</a>
-        <br/><br/><br/><br/>
-        <i>행사|성경암송대회(2/22)</i>
-        <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42">시편42편</a>
+
+      <nav id="menu">
+        <a href="./" data-nav="home">홈</a>
+        <a href="#worship" data-nav="worship">예배 시간</a>
+        <a href="#pastor" data-nav="pastor">섬기는 이들</a>
+        <a href="./bulletin/" data-nav="bulletin">주보 보기</a>
+        <a href="#map" data-nav="map">찾아오는 길</a>
+        <a href="./sermon/" data-nav="sermon">주일 설교</a>
       </nav>
+
+      <!-- ✅ nav 밖으로 빼서 공지바로 -->
+      <div class="notice">
+        <strong>행사</strong>
+        <span>성경암송대회(2/22)</span>
+        <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42" target="_blank" rel="noreferrer">시편42편</a>
+      </div>
     </aside>
 
     <main>
@@ -150,10 +202,58 @@
           <h2>찾아오는 길</h2>
           <p>주소: 경기도 부천시 소사구 은성로 62번길 13(3층)</p>
           <p>연락처: 010-7795-2102</p>
-          <p><a href="https://map.naver.com/v5/search/경기도%20부천시%20소사구%20은성로%2062번길%2013" target="_blank" rel="noreferrer">네이버 지도 열기</a></p>
+          <p>
+            <a href="https://map.naver.com/v5/search/경기도%20부천시%20소사구%20은성로%2062번길%2013"
+               target="_blank" rel="noreferrer">네이버 지도 열기</a>
+          </p>
         </section>
       </div>
     </main>
   </div>
+
+  <script>
+    // ✅ 현재 섹션(#worship/#pastor/#map) 자동 강조
+    // - 외부 링크(./bulletin/ ./sermon/)는 스크롤 강조 대상에서 제외
+    const menu = document.getElementById("menu");
+    const hashLinks = Array.from(menu.querySelectorAll('a[href^="#"]'));
+
+    function setActiveByHash(hash){
+      hashLinks.forEach(a => a.classList.remove("is-active"));
+      const target = hashLinks.find(a => a.getAttribute("href") === hash);
+      if(target) target.classList.add("is-active");
+    }
+
+    // 처음 로드 시: 해시가 있으면 그걸 강조
+    if (location.hash) setActiveByHash(location.hash);
+
+    // IntersectionObserver로 스크롤 위치에 맞춰 강조
+    const sections = hashLinks
+      .map(a => document.querySelector(a.getAttribute("href")))
+      .filter(Boolean);
+
+    if ("IntersectionObserver" in window && sections.length){
+      const io = new IntersectionObserver((entries) => {
+        // 화면에 들어온 섹션 중 가장 많이 보이는 것 선택
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if(visible && visible.target && visible.target.id){
+          const hash = "#" + visible.target.id;
+          setActiveByHash(hash);
+
+          // 주소창 해시 동기화(원치 않으면 아래 2줄 지워도 됨)
+          history.replaceState(null, "", hash);
+        }
+      }, { root: null, threshold: [0.2, 0.35, 0.5, 0.65] });
+
+      sections.forEach(sec => io.observe(sec));
+    }
+
+    // 해시 클릭 시 즉시 강조
+    hashLinks.forEach(a => {
+      a.addEventListener("click", () => setActiveByHash(a.getAttribute("href")));
+    });
+  </script>
 </body>
 </html>
