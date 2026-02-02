@@ -4,173 +4,30 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>주일 설교 | 희망은교회</title>
-  <style>
-    :root{ --side:220px; --max:980px; }
-    body{ margin:0; font-family:system-ui,-apple-system,"Noto Sans KR",Arial; color:#111; }
-    .wrap{ display:flex; min-height:100vh; }
-    aside{
-      width:var(--side); padding:24px 18px; border-right:1px solid #eee;
-      position:sticky; top:0; height:100vh; box-sizing:border-box; background:#fff;
-    }
-    .brand{ font-weight:800; letter-spacing:-.02em; margin-bottom:12px; }
-    nav a{ display:block; padding:8px 0; color:#111; text-decoration:none; }
-    nav a:hover{ text-decoration:underline; }
-    main{ flex:1; }
-    .container{ max-width:var(--max); padding:36px 20px; margin:0 auto; }
+  <link rel="stylesheet" href="./assets/common.css">
 
-    .top{ display:flex; justify-content:space-between; gap:12px; align-items:flex-end; flex-wrap:wrap; }
-    h1{ margin:0; font-size:32px; letter-spacing:-.02em; }
-    .muted{ color:#666; font-size:14px; line-height:1.7; }
-    hr{ border:0; border-top:1px solid #eee; margin:18px 0; }
-
-    .grid{ display:grid; grid-template-columns: 320px 1fr; gap:16px; }
-    .panel{ border:1px solid #eee; border-radius:16px; padding:14px; }
-    .list a{ display:block; padding:10px 8px; border-radius:12px; text-decoration:none; color:#111; }
-    .list a:hover{ background:#f7f7f7; }
-    .list .active{ background:#111; color:#fff; }
-    .badge{ display:inline-block; padding:4px 10px; border:1px solid #e6e6e6; border-radius:999px; color:#555; font-size:12px; }
-
-    .sermon-title{ font-size:22px; margin:0 0 10px; letter-spacing:-.02em; }
-    .meta-row{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; }
-    pre{
-      margin:0; white-space:pre-wrap; word-break:break-word;
-      font-size:15px; line-height:1.8;
-      font-family:inherit;
-    }
-
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr; }
-      aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
-    }
-/* ✅ 모바일에서 카카오비즈니스처럼: 상단은 얇게, 본문은 바로 붙게 */
-@media (max-width: 860px){
-
-  /* 1) 상단바(희망은교회 + 메뉴) 높이 정리 */
-  aside{
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background:#fff;
-    border-bottom:1px solid #eee;
-
-    padding: 12px 14px 8px;   /* ✅ 카카오처럼 위/아래 적당히 */
-  }
-
-  .brand{
-    margin: 0 0 10px;         /* ✅ 브랜드 아래 간격 */
-    font-size: 18px;
-    font-weight: 800;
-    line-height: 1.2;
-  }
-
-  nav{
-    margin: 0;                /* ✅ 기본 여백 제거 */
-    padding: 0;
-    display: flex;
-    gap: 26px;                /* ✅ 메뉴 간격 넓게 */
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-
-    line-height: 1.2;
-  }
-
-  nav a{
-    padding: 0;               /* ✅ 메뉴 아래 빈공간 원흉 제거 */
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 1.2;
-    color: #333;
-    text-decoration: none;
-  }
-
-  nav a:hover{ text-decoration: underline; }
-
-  /* 2) ✅ 핵심: 메뉴 아래가 넓은 원인 = 본문 상단 padding */
-  .container{
-    padding-top: 16px !important;   /* 기존 36px 같은 값 누르고 줄임 */
-  }
-
-  /* (있으면) 본문 상단 HR도 간격 줄이기 */
-  hr{
-    margin: 12px 0 !important;
-  }
-}
-/* 모바일/태블릿: 좌(메뉴) + 우(본문) → 위(메뉴) + 아래(본문) */
-@media (max-width: 900px) {
-  .wrap {
-    flex-direction: column;
-  }
-
-  aside {
-    width: 100%;
-    flex: none;
-    position: sticky;   /* sticky 해제 */
-    height: auto;       /* 100vh 해제 */
-    border-right: 0;
-    border-bottom: 1px solid #eee;
-  }
-
-  main {
-    width: 100%;
-  }
-
-  /* 본문 안의 2컬럼 그리드(320px 1fr)도 모바일에서 1컬럼으로 */
-  .grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.toggle-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.toggle-btn{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 12px;
-  border:1px solid #e6e6e6;
-  border-radius:12px;
-  background:#fff;
-  cursor:pointer;
-  font-size:14px;
-}
-
-.toggle-btn .chev{
-  display:inline-block;
-  transition:transform .15s ease;
-}
-
-.toggle-btn[aria-expanded="true"] .chev{
-  transform:rotate(180deg);
-}
-
-/* 목록이 많아질 때 패널 안에서 스크롤 */
-.toggle-body{
-  margin-top:12px;
-  max-height:320px;
-  overflow:auto;
-}
-
-    
-  </style>
 </head>
 <body>
   <div class="wrap">
     <aside>
-      <div class="brand">희망은교회</div>
-      <nav>
-        <!-- GitHub Pages(프로젝트 사이트)이므로 상대경로 사용 -->
-        <a href="../">홈</a>
-        <a href="../bulletin/">주보</a>
-        <a href="./">주일 설교</a>
-      </nav>
-    </aside>
+  <div class="brand">희망은교회</div>
+
+  <nav id="menu">
+    <a href="../" data-nav="home">홈</a>
+    <a href="#worship" data-nav="worship">예배 시간</a>
+    <a href="#pastor" data-nav="pastor">섬기는 이들</a>
+    <a href="../bulletin/" data-nav="bulletin">주보 보기</a>
+    <a href="#map" data-nav="map">찾아오는 길</a>
+    <a href="../sermon/" data-nav="sermon">주일 설교</a>
+  </nav>
+
+  <div class="notice">
+    <strong>행사</strong>
+    <span>성경암송대회(2/22)</span>
+    <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42" target="_blank">시편42편</a>
+  </div>
+</aside>
+
 
     <main>
       <div class="container">
