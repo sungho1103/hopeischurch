@@ -26,7 +26,7 @@
       .wrap{ display:block; }
       aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
     }
-    /* ✅ 모바일에서: 1줄 브랜드 + 2줄 가로 스크롤 메뉴 (갈색 배경) */
+    /* ✅ 모바일: 얇은 상단바 + 가로 스크롤 메뉴 (연한 갈색) */
 @media (max-width: 860px){
   aside{
     position: sticky;
@@ -35,51 +35,50 @@
     width: auto;
     height: auto;
     border-right: 0;
-    border-bottom: 1px solid #e0d6c8;
-    padding: 12px 14px 10px;
-    background: #f3eee6; /* 희미한 갈색 */
+    border-bottom: 1px solid #e2d8ca;
+    padding: 8px 14px 6px;   /* 🔽 높이 줄임 */
+    background: #f3eee6;
   }
 
-  /* 1줄: 희망은교회 */
+  /* 1줄: 희망은교회 (컴팩트) */
   .brand{
-    margin: 0 0 10px;
+    margin: 0 0 6px;        /* 🔽 간격 줄임 */
     font-weight: 800;
-    font-size: 18px;
-    line-height: 1.2;
+    font-size: 17px;
+    line-height: 1.15;
   }
 
   /* 2줄: 가로 스크롤 메뉴 */
   nav{
     display: flex;
-    gap: 14px;
+    gap: 22px;              /* 🔼 메뉴 사이 간격 넓힘 */
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
-    padding-bottom: 6px;
+    padding-bottom: 4px;    /* 🔽 여백 축소 */
   }
 
-  /* ❌ 동그라미 제거 → 텍스트 탭 형태 */
+  /* 텍스트 탭 스타일 (동그라미 제거 유지) */
   nav a{
     flex: 0 0 auto;
-    padding: 6px 0;
+    padding: 4px 0;         /* 🔽 높이 얇게 */
     border: 0;
     border-radius: 0;
     background: transparent;
     font-weight: 600;
-    text-decoration: none;
+    font-size: 15px;
     color: #333;
+    text-decoration: none;
   }
 
   nav a:hover{
     text-decoration: underline;
   }
 
-  /* 강조 메뉴(주일 설교 버튼) */
+  /* 강조 메뉴 */
   nav a.btn{
-    background: transparent;
-    border: 0;
-    color: #111;
     font-weight: 800;
+    color: #111;
   }
 }
 
