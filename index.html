@@ -26,67 +26,59 @@
       .wrap{ display:block; }
       aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
     }
-/* ✅ 모바일 상단바 – sermon/index.html 기준으로 통일 */
+/* ✅ 모바일에서 카카오비즈니스처럼: 상단은 얇게, 본문은 바로 붙게 */
 @media (max-width: 860px){
 
-  /* 상단바 전체 */
+  /* 1) 상단바(희망은교회 + 메뉴) 높이 정리 */
   aside{
     position: sticky;
     top: 0;
     z-index: 1000;
+    background:#fff;
+    border-bottom:1px solid #eee;
 
-    /* 🔑 기준값 (위·아래 여백 통일) */
-    padding-top: 10px;   /* ← sermon 기준 */
-    padding-bottom: 6px;/* ← sermon 기준 */
-    padding-left: 14px;
-    padding-right: 14px;
-
-    background: #fff;
-    border-bottom: 1px solid #eee;
+    padding: 12px 14px 8px;   /* ✅ 카카오처럼 위/아래 적당히 */
   }
 
-  /* 1줄: 희망은교회 */
   .brand{
-    margin: 0;                 /* ❗ margin 제거 */
-    padding-bottom: 4px;       /* 🔑 브랜드-메뉴 간격 통일 */
-    font-size: 16px;
+    margin: 0 0 10px;         /* ✅ 브랜드 아래 간격 */
+    font-size: 18px;
     font-weight: 800;
-    line-height: 1.25;         /* 카카오비즈니스 느낌 */
+    line-height: 1.2;
   }
 
-  /* 2줄: 메뉴 바 */
   nav{
-    margin: 0;                 /* ❗ 기본 margin 제거 */
+    margin: 0;                /* ✅ 기본 여백 제거 */
     padding: 0;
-
     display: flex;
-    align-items: center;
-    gap: 26px;                 /* 메뉴 간격 (가독성) */
+    gap: 26px;                /* ✅ 메뉴 간격 넓게 */
     overflow-x: auto;
     white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
 
-    line-height: 1.2;          /* 메뉴 아래 공간 제거 핵심 */
+    line-height: 1.2;
   }
 
-  /* 메뉴 항목 */
   nav a{
+    padding: 0;               /* ✅ 메뉴 아래 빈공간 원흉 제거 */
     margin: 0;
-    padding: 0;                /* ❗ 아래 여백의 원흉 제거 */
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
     line-height: 1.2;
     color: #333;
     text-decoration: none;
   }
 
-  nav a:hover{
-    text-decoration: underline;
+  nav a:hover{ text-decoration: underline; }
+
+  /* 2) ✅ 핵심: 메뉴 아래가 넓은 원인 = 본문 상단 padding */
+  .container{
+    padding-top: 16px !important;   /* 기존 36px 같은 값 누르고 줄임 */
   }
 
-  /* 강조 메뉴 */
-  nav a.btn{
-    font-weight: 800;
-    color: #000;
+  /* (있으면) 본문 상단 HR도 간격 줄이기 */
+  hr{
+    margin: 12px 0 !important;
   }
 }
 
