@@ -42,6 +42,63 @@
       .grid{ grid-template-columns: 1fr; }
       aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
     }
+/* ✅ 모바일에서 카카오비즈니스처럼: 상단은 얇게, 본문은 바로 붙게 */
+@media (max-width: 860px){
+
+  /* 1) 상단바(희망은교회 + 메뉴) 높이 정리 */
+  aside{
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background:#fff;
+    border-bottom:1px solid #eee;
+
+    padding: 12px 14px 8px;   /* ✅ 카카오처럼 위/아래 적당히 */
+  }
+
+  .brand{
+    margin: 0 0 10px;         /* ✅ 브랜드 아래 간격 */
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  nav{
+    margin: 0;                /* ✅ 기본 여백 제거 */
+    padding: 0;
+    display: flex;
+    gap: 26px;                /* ✅ 메뉴 간격 넓게 */
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+
+    line-height: 1.2;
+  }
+
+  nav a{
+    padding: 0;               /* ✅ 메뉴 아래 빈공간 원흉 제거 */
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #333;
+    text-decoration: none;
+  }
+
+  nav a:hover{ text-decoration: underline; }
+
+  /* 2) ✅ 핵심: 메뉴 아래가 넓은 원인 = 본문 상단 padding */
+  .container{
+    padding-top: 16px !important;   /* 기존 36px 같은 값 누르고 줄임 */
+  }
+
+  /* (있으면) 본문 상단 HR도 간격 줄이기 */
+  hr{
+    margin: 12px 0 !important;
+  }
+}
+
+    
   </style>
 </head>
 <body>
