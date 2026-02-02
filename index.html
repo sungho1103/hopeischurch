@@ -26,6 +26,62 @@
       .wrap{ display:block; }
       aside{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid #eee; }
     }
+    /* ✅ 모바일에서: 1줄(브랜드) + 2줄(가로 스크롤 메뉴) 상단 고정 */
+@media (max-width: 860px){
+  /* 왼쪽 사이드바 느낌 제거 → 상단바로 */
+  aside{
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: auto;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid #eee;
+    padding: 12px 14px 8px;
+    background: #fff;
+  }
+
+  /* 1줄: 희망은교회 */
+  .brand{
+    margin: 0 0 10px;
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.2;
+  }
+
+  /* 2줄: 메뉴를 가로 스크롤 */
+  nav{
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    padding-bottom: 6px; /* iOS 스크롤바 공간 */
+  }
+
+  /* 메뉴 탭(칩) 스타일 */
+  nav a{
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px;
+    border: 1px solid #eee;
+    border-radius: 999px;
+    background: #fff;
+    text-decoration: none;
+  }
+
+  nav a:hover{ text-decoration: none; }
+
+  /* 버튼(.btn)은 강조(검정 바탕) 유지 */
+  nav a.btn{
+    background:#111;
+    border-color:#111;
+    color:#fff;
+  }
+}
+
   </style>
 </head>
 <body>
