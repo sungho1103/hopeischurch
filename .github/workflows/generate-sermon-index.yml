@@ -1,0 +1,38 @@
+name: Generate sermon index.json
+
+on:
+  push:
+    paths:
+      - "sermon/texts/*.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate index.json
+        run: node scripts/generate_sermon_index.mjs
+
+      - name: Commit & push if changed
+        run: |
+          git add sermon/texts/index.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update sermon index.json"
+          git push
