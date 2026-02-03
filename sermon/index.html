@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>주일 설교 | 희망은교회</title>
 
-  <!-- 공통 레이아웃 -->
+  <!-- ✅ 모든 페이지 공통 레이아웃 -->
   <link rel="stylesheet" href="/hopeischurch/assets/common.css?v=20260203-01">
 
+  <!-- ✅ 설교 페이지 전용 스타일: 반드시 page scope로 격리 -->
   <style>
     /* ==================================================
        Sermon Page (Scoped)
-       ================================================== */
-    .page-sermon main{
-      background:#f3f5f9;
-    }
+       - 공통 헤더/상단메뉴/기본 스타일 깨짐 방지
+       - 이 페이지에서만 적용되도록 .page-sermon로 스코프
+    ================================================== */
 
     .page-sermon .sermon-top{
       display:flex;
@@ -22,7 +22,6 @@
       gap:12px;
       align-items:flex-end;
       flex-wrap:wrap;
-      margin-bottom:16px;
     }
 
     .page-sermon .muted{
@@ -31,16 +30,11 @@
       line-height:1.7;
     }
 
+    /* ❌ h1 전역 금지 → ✅ 설교 페이지 main 제목만 */
     .page-sermon main h1{
       margin:0;
       font-size:32px;
       letter-spacing:-.02em;
-    }
-
-    .page-sermon .divider{
-      height:1px;
-      background:#e6e9ef;
-      margin:18px 0;
     }
 
     .page-sermon .grid{
@@ -49,12 +43,11 @@
       gap:16px;
     }
 
-    /* 카드 공통 */
-    .page-sermon .card{
-      background:#fff;
+    .page-sermon .panel{
+      border:1px solid #eee;
       border-radius:16px;
-      padding:18px 18px;
-      box-shadow:0 6px 14px rgba(0,0,0,.06);
+      padding:14px;
+      background:#fff;
     }
 
     .page-sermon .select{
@@ -86,7 +79,7 @@
       display:flex;
       flex-wrap:wrap;
       gap:8px;
-      margin:0 0 14px;
+      margin:0 0 12px;
     }
 
     .page-sermon pre{
@@ -94,20 +87,12 @@
       white-space:pre-wrap;
       word-break:break-word;
       font-size:15px;
-      line-height:1.85;
+      line-height:1.8;
       font-family:inherit;
-      color:#333;
-    }
-
-    /* 안내 카드 */
-    .page-sermon .guide{
-      background:#f7f9ff;
-      border-left:5px solid #4a6cf7;
-      margin-top:14px;
     }
 
     @media (max-width: 980px){
-      .page-sermon .grid{ grid-template-columns:1fr; }
+      .page-sermon .grid{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -118,11 +103,11 @@
       <div class="brand">희망은교회</div>
 
       <nav id="menu">
-        <a href="/hopeischurch/">홈</a>
-        <a href="/hopeischurch/#worship">교회안내</a>
-        <a href="/hopeischurch/bulletin/">주보</a>
-        <a href="/hopeischurch/#map">찾아오는 길</a>
-        <a href="/hopeischurch/sermon/">주일설교</a>
+        <a href="/hopeischurch/" data-nav="home">홈</a>
+        <a href="/hopeischurch/#worship" data-nav="worship">교회안내</a>
+        <a href="/hopeischurch/bulletin/" data-nav="bulletin">주보</a>
+        <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
+        <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
       </nav>
 
       <div class="notice">
@@ -142,26 +127,25 @@
           <div class="muted" id="status">불러오는 중…</div>
         </div>
 
-        <div class="divider"></div>
+        <hr/>
 
         <div class="grid">
-          <!-- 왼쪽: 설교 목록 -->
-          <section class="card">
+          <section class="panel">
             <div class="muted" style="margin-bottom:10px;">설교 목록</div>
+
+            <!-- ✅ 드롭다운 -->
             <select class="select" id="select">
               <option>불러오는 중…</option>
             </select>
 
-            <div class="card guide">
-              <div class="muted">
-                파일 추가 방법<br/>
-                <span class="badge">sermon/texts/2026-02-01.txt</span>
-              </div>
+            <hr/>
+            <div class="muted">
+              파일 추가 방법: <br/>
+              <span class="badge">sermon/texts/2026-02-01.txt</span> file upload
             </div>
           </section>
 
-          <!-- 오른쪽: 설교 본문 -->
-          <section class="card" id="viewer">
+          <section class="panel" id="viewer">
             <div class="muted">왼쪽에서 설교를 선택하세요.</div>
           </section>
         </div>
@@ -170,6 +154,7 @@
   </div>
 
 <script>
+  // ✅ 안정적: GitHub API 대신 "우리 사이트"의 정적 파일을 읽음
   const LIST_URL  = "/hopeischurch/sermon/texts/index.json";
   const TEXT_BASE = "/hopeischurch/sermon/texts/";
 
@@ -178,7 +163,7 @@
   const statusEl = document.getElementById("status");
 
   const qs = new URLSearchParams(location.search);
-  const currentFile = qs.get("file");
+  const currentFile = qs.get("file"); // 예: 2026-02-02.txt
 
   function escapeHtml(s){
     return String(s ?? "")
@@ -190,52 +175,113 @@
   }
 
   function parseSermonTxt(txt){
-    const lines = txt.replace(/\r\n/g,"\n").split("\n");
+    const lines = txt.replace(/\r\n/g, "\n").split("\n");
     const meta = {};
-    let i=0;
-    for(; i<lines.length; i++){
+    let i = 0;
+
+    for(; i < lines.length; i++){
       const line = lines[i].trim();
-      if(line===""){ i++; break; }
-      const m=line.match(/^([^:]+)\s*:\s*(.*)$/);
-      if(m) meta[m[1].trim()]=m[2].trim();
+      if(line === "") { i++; break; }
+      const m = line.match(/^([^:]+)\s*:\s*(.*)$/);
+      if(m) meta[m[1].trim()] = m[2].trim();
     }
-    return { meta, body: lines.slice(i).join("\n").trim() };
+
+    const body = lines.slice(i).join("\n").trim();
+    return { meta, body };
+  }
+
+  function formatTitleFromFilename(name){
+    return name.replace(/\.txt$/i, "");
+  }
+
+  function setFileParam(filename){
+    const u = new URL(location.href);
+    u.searchParams.set("file", filename);
+    location.href = u.toString();
+  }
+
+  async function fetchJSON(url){
+    const res = await fetch(url, { cache:"no-store" });
+    if(!res.ok) throw new Error(`JSON fetch failed: ${res.status}`);
+    return await res.json();
+  }
+
+  async function fetchText(url){
+    const res = await fetch(url, { cache:"no-store" });
+    if(!res.ok) throw new Error(`TXT fetch failed: ${res.status}`);
+    return await res.text();
   }
 
   async function loadList(){
-    const res = await fetch(LIST_URL,{cache:"no-store"});
-    const data = await res.json();
-    const files=(data.files||[]).filter(f=>/\.txt$/i.test(f)).sort((a,b)=>b.localeCompare(a));
-    const selected = currentFile && files.includes(currentFile) ? currentFile : files[0];
-    selectEl.innerHTML = files.map(f=>`<option ${f===selected?"selected":""}>${f.replace(".txt","")}</option>`).join("");
+    const data = await fetchJSON(LIST_URL);
+    const files = (data.files || [])
+      .filter(name => /\.txt$/i.test(name))
+      .sort((a,b) => b.localeCompare(a));
+
+    if(!files.length){
+      selectEl.innerHTML = `<option>(설교 파일 없음)</option>`;
+      statusEl.textContent = "목록 없음";
+      return { files, selected: null };
+    }
+
+    const selected = (currentFile && files.includes(currentFile)) ? currentFile : files[0];
+
+    selectEl.innerHTML = files.map(name => {
+      const label = formatTitleFromFilename(name);
+      const sel = (name === selected) ? "selected" : "";
+      return `<option value="${escapeHtml(name)}" ${sel}>${escapeHtml(label)}</option>`;
+    }).join("");
+
     statusEl.textContent = `총 ${files.length}개`;
-    return selected;
+    return { files, selected };
   }
 
-  async function renderFile(name){
+  async function renderFile(filename){
     viewerEl.innerHTML = `<div class="muted">불러오는 중…</div>`;
-    const txt = await fetch(TEXT_BASE+encodeURIComponent(name),{cache:"no-store"}).then(r=>r.text());
-    const {meta, body} = parseSermonTxt(txt);
+
+    const url = TEXT_BASE + encodeURIComponent(filename);
+    const txt = await fetchText(url);
+
+    const { meta, body } = parseSermonTxt(txt);
+
+    const title = meta["제목"] || meta["title"] || formatTitleFromFilename(filename);
+    const date  = meta["날짜"] || meta["date"] || formatTitleFromFilename(filename);
+    const ref   = meta["본문"] || meta["text"] || "";
+    const who   = meta["설교자"] || meta["preacher"] || "";
+
     viewerEl.innerHTML = `
-      <div class="muted">${escapeHtml(meta["날짜"]||"")}</div>
-      <h2 class="sermon-title">${escapeHtml(meta["제목"]||name)}</h2>
+      <div class="muted" style="margin-bottom:6px;">${escapeHtml(date)}</div>
+      <h2 class="sermon-title">${escapeHtml(title)}</h2>
       <div class="meta-row">
-        ${meta["본문"]?`<span class="badge">본문: ${escapeHtml(meta["본문"])}</span>`:""}
-        ${meta["설교자"]?`<span class="badge">설교자: ${escapeHtml(meta["설교자"])}</span>`:""}
+        ${ref ? `<span class="badge">본문: ${escapeHtml(ref)}</span>` : ""}
+        ${who ? `<span class="badge">설교자: ${escapeHtml(who)}</span>` : ""}
+        <span class="badge">파일: ${escapeHtml(filename)}</span>
       </div>
-      <pre>${escapeHtml(body)}</pre>
+      <pre>${escapeHtml(body || "(본문이 비어 있습니다)")}</pre>
     `;
   }
 
-  selectEl.addEventListener("change",()=>{
-    const u=new URL(location.href);
-    u.searchParams.set("file",selectEl.value+".txt");
-    location.href=u.toString();
+  selectEl.addEventListener("change", () => {
+    const filename = selectEl.value;
+    if(filename) setFileParam(filename);
   });
 
-  (async()=>{
-    const sel=await loadList();
-    if(sel) await renderFile(sel);
+  (async function main(){
+    try{
+      const { selected } = await loadList();
+      if(selected) await renderFile(selected);
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "불러오기 실패";
+      viewerEl.innerHTML = `
+        <div class="muted">
+          설교를 불러오지 못했습니다.<br/><br/>
+          <span class="badge">오류</span> ${escapeHtml(err.message)}<br/>
+          <span class="badge">LIST</span> ${escapeHtml(LIST_URL)}<br/>
+          <span class="badge">TEXT</span> ${escapeHtml(TEXT_BASE)}YYYY-MM-DD.txt
+        </div>
+      `;
+    }
   })();
 </script>
 </body>
