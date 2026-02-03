@@ -5,14 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>주일 설교 | 희망은교회</title>
 
-  <!-- ✅ 모든 페이지 공통 레이아웃 -->
   <link rel="stylesheet" href="/hopeischurch/assets/common.css?v=20260203-01">
 
-  <!-- ✅ 설교 페이지 전용 스타일(필요한 것만) -->
   <style>
-    /* common.css의 --max(900px)가 설교 본문에 좁게 느껴지면 여기서만 살짝 늘릴 수 있어요 */
-    /* .container{ max-width:980px; }  // 필요하면 주석 해제 */
-
     .top{
       display:flex;
       justify-content:space-between;
@@ -20,32 +15,21 @@
       align-items:flex-end;
       flex-wrap:wrap;
     }
-
     .muted{ color:#666; font-size:14px; line-height:1.7; }
 
-    /* 설교 페이지 본문 타이포 */
     h1{ margin:0; font-size:32px; letter-spacing:-.02em; }
-    h2{ margin:0; }
 
-    /* 목록/뷰어 그리드 */
     .grid{ display:grid; grid-template-columns: 320px 1fr; gap:16px; }
+    .panel{ border:1px solid #eee; border-radius:16px; padding:14px; background:#fff; }
 
-    .panel{
-      border:1px solid #eee;
-      border-radius:16px;
-      padding:14px;
+    .select{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid #e6e6e6;
+      border-radius:12px;
+      font-size:14px;
       background:#fff;
     }
-
-    .list a{
-      display:block;
-      padding:10px 8px;
-      border-radius:12px;
-      text-decoration:none;
-      color:#111;
-    }
-    .list a:hover{ background:#f7f7f7; }
-    .list .active{ background:#111; color:#fff; }
 
     .badge{
       display:inline-block;
@@ -69,17 +53,6 @@
       font-family:inherit;
     }
 
-    /* 드롭다운(설교 목록을 select로 쓸 경우 대비) */
-    .select{
-      width:100%;
-      padding:10px 12px;
-      border:1px solid #e6e6e6;
-      border-radius:12px;
-      font-size:14px;
-      background:#fff;
-    }
-
-    /* ✅ 모바일: 1컬럼 */
     @media (max-width: 980px){
       .grid{ grid-template-columns: 1fr; }
     }
@@ -91,7 +64,6 @@
     <aside>
       <div class="brand">희망은교회</div>
 
-      <!-- ✅ “모든 페이지 동일 메뉴”를 위해 절대경로로 통일 추천 -->
       <nav id="menu">
         <a href="/hopeischurch/" data-nav="home">홈</a>
         <a href="/hopeischurch/#worship" data-nav="worship">교회안내</a>
@@ -123,8 +95,10 @@
           <section class="panel">
             <div class="muted" style="margin-bottom:10px;">설교 목록</div>
 
-            <!-- 기존처럼 링크 목록을 쓰는 구조 -->
-            <div class="list" id="list"></div>
+            <!-- ✅ 드롭다운 -->
+            <select class="select" id="select">
+              <option>불러오는 중…</option>
+            </select>
 
             <hr/>
             <div class="muted">
@@ -142,21 +116,16 @@
   </div>
 
 <script>
-  // ✅ GitHub 정보(고정)
-  const OWNER = "sungho1103";
-  const REPO  = "hopeischurch";
-  const BRANCH = "main";
-  const TEXTS_PATH = "sermon/texts"; // 폴더
+  // ✅ 안정적: GitHub API 대신 "우리 사이트"의 정적 파일을 읽음
+  const LIST_URL  = "/hopeischurch/sermon/texts/index.json";
+  const TEXT_BASE = "/hopeischurch/sermon/texts/";
 
-  const LIST_API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${TEXTS_PATH}?ref=${BRANCH}`;
-  const RAW_BASE = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${TEXTS_PATH}/`;
-
-  const listEl = document.getElementById("list");
+  const selectEl = document.getElementById("select");
   const viewerEl = document.getElementById("viewer");
   const statusEl = document.getElementById("status");
 
   const qs = new URLSearchParams(location.search);
-  const currentFile = qs.get("file"); // 예: 2026-02-01.txt
+  const currentFile = qs.get("file"); // 예: 2026-02-02.txt
 
   function escapeHtml(s){
     return String(s ?? "")
@@ -183,4 +152,99 @@
     return { meta, body };
   }
 
-  function formatTitleFromFilename(name
+  function formatTitleFromFilename(name){
+    return name.replace(/\.txt$/i, "");
+  }
+
+  function setFileParam(filename){
+    const u = new URL(location.href);
+    u.searchParams.set("file", filename);
+    location.href = u.toString();
+  }
+
+  async function fetchJSON(url){
+    const res = await fetch(url, { cache:"no-store" });
+    if(!res.ok) throw new Error(`JSON fetch failed: ${res.status}`);
+    return await res.json();
+  }
+
+  async function fetchText(url){
+    const res = await fetch(url, { cache:"no-store" });
+    if(!res.ok) throw new Error(`TXT fetch failed: ${res.status}`);
+    return await res.text();
+  }
+
+  async function loadList(){
+    const data = await fetchJSON(LIST_URL);
+    const files = (data.files || [])
+      .filter(name => /\.txt$/i.test(name))
+      .sort((a,b) => b.localeCompare(a));
+
+    if(!files.length){
+      selectEl.innerHTML = `<option>(설교 파일 없음)</option>`;
+      statusEl.textContent = "목록 없음";
+      return { files, selected: null };
+    }
+
+    const selected = (currentFile && files.includes(currentFile)) ? currentFile : files[0];
+
+    selectEl.innerHTML = files.map(name => {
+      const label = formatTitleFromFilename(name);
+      const sel = (name === selected) ? "selected" : "";
+      return `<option value="${escapeHtml(name)}" ${sel}>${escapeHtml(label)}</option>`;
+    }).join("");
+
+    statusEl.textContent = `총 ${files.length}개`;
+    return { files, selected };
+  }
+
+  async function renderFile(filename){
+    viewerEl.innerHTML = `<div class="muted">불러오는 중…</div>`;
+
+    const url = TEXT_BASE + encodeURIComponent(filename);
+    const txt = await fetchText(url);
+
+    const { meta, body } = parseSermonTxt(txt);
+
+    const title = meta["제목"] || meta["title"] || formatTitleFromFilename(filename);
+    const date  = meta["날짜"] || meta["date"] || formatTitleFromFilename(filename);
+    const ref   = meta["본문"] || meta["text"] || "";
+    const who   = meta["설교자"] || meta["preacher"] || "";
+
+    viewerEl.innerHTML = `
+      <div class="muted" style="margin-bottom:6px;">${escapeHtml(date)}</div>
+      <h2 class="sermon-title">${escapeHtml(title)}</h2>
+      <div class="meta-row">
+        ${ref ? `<span class="badge">본문: ${escapeHtml(ref)}</span>` : ""}
+        ${who ? `<span class="badge">설교자: ${escapeHtml(who)}</span>` : ""}
+        <span class="badge">파일: ${escapeHtml(filename)}</span>
+      </div>
+      <pre>${escapeHtml(body || "(본문이 비어 있습니다)")}</pre>
+    `;
+  }
+
+  selectEl.addEventListener("change", () => {
+    const filename = selectEl.value;
+    if(filename) setFileParam(filename);
+  });
+
+  (async function main(){
+    try{
+      const { selected } = await loadList();
+      if(selected) await renderFile(selected);
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "불러오기 실패";
+      viewerEl.innerHTML = `
+        <div class="muted">
+          설교를 불러오지 못했습니다.<br/><br/>
+          <span class="badge">오류</span> ${escapeHtml(err.message)}<br/>
+          <span class="badge">LIST</span> ${escapeHtml(LIST_URL)}<br/>
+          <span class="badge">TEXT</span> ${escapeHtml(TEXT_BASE)}YYYY-MM-DD.txt
+        </div>
+      `;
+    }
+  })();
+</script>
+</body>
+</html>
