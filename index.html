@@ -18,9 +18,70 @@
           }
 
           .wrap {
-                  max-width: 800px;
+                  display: flex;
+                  gap: 20px;
+                  max-width: 1200px;
                   margin: 0 auto;
-                  padding: 40px 20px;
+                  padding: 20px;
+                  min-height: 100vh;
+          }
+
+          aside {
+                  width: 200px;
+                  flex-shrink: 0;
+          }
+
+          nav {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 10px;
+          }
+
+          nav a {
+                  display: block;
+                  padding: 10px 12px;
+                  text-decoration: none;
+                  color: #0066cc;
+                  border-radius: 4px;
+                  border-left: 3px solid transparent;
+                  transition: all 0.2s ease;
+          }
+
+          nav a:hover,
+          nav a.is-active {
+                  background: #f0f0f0;
+                  border-left-color: #0066cc;
+          }
+
+          .brand {
+                  font-size: 1.2rem;
+                  font-weight: 700;
+                  margin-bottom: 20px;
+                  color: #333;
+          }
+
+          .notice {
+                  background: #f5f5f5;
+                  padding: 12px;
+                  border-radius: 4px;
+                  font-size: 0.9rem;
+                  margin-top: 30px;
+                  border-left: 3px solid #0066cc;
+          }
+
+          .notice strong {
+                  color: #0066cc;
+                  font-weight: 600;
+          }
+
+          .notice a {
+                  color: #0066cc;
+                  text-decoration: none;
+          }
+
+          main {
+                  flex: 1;
+                  min-width: 0;
           }
 
           h1 {
@@ -81,67 +142,140 @@
                   border-top: 1px solid #ddd;
           }
 
-          nav {
-                  display: none;
-          }
+          @media (max-width: 768px) {
+                  .wrap {
+                            flex-direction: column;
+                            gap: 0;
+                  }
 
-          aside {
-                  display: none;
+                  aside {
+                            width: 100%;
+                            margin-bottom: 20px;
+                            padding-bottom: 20px;
+                            border-bottom: 1px solid #ddd;
+                  }
+
+                  nav {
+                            flex-direction: row;
+                            flex-wrap: wrap;
+                            gap: 8px;
+                  }
+
+                  nav a {
+                            padding: 8px 12px;
+                            font-size: 0.9rem;
+                  }
           }
         </style>
   </head>
   <body>
       <div class="wrap">
-            <h1>희망은교회</h1>
-          <p class="sub"><b>기독교 대한 성결교회 교단에 속한 교회입니다</b></p>p>
+            <aside>
+                    <div class="brand">희망은교회</div>div>
+                    <nav id="menu">
+                              <a href="./" data-nav="home">홈</a>a>
+                              <a href="#worship" data-nav="worship">교회안내</a>a>
+                              <a href="./bulletin/" data-nav="bulletin">주보</a>a>
+                              <a href="#map" data-nav="map">찾아오는 길</a>a>
+                              <a href="./sermon/" data-nav="sermon">주일설교</a>a>
+                    </nav>nav>
+                    <div class="notice">
+                              <strong>|행사|</strong><br/>
+                            <span>성경암송대회(2/22)</span><br/>
+                            <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42" target="_blank" rel="noreferrer">시편42편</a>a>
+                    </div>div>
+            </aside>
+      
+          <main>
+                  <h1>희망은교회</h1>
+                <p class="sub"><b>기독교 대한 성결교회 교단에 속한 교회입니다</b></p>p>
+                
+                <div class="card">
+                        <b>이번 주 주보 보기</b><br/>
+                        <a href="./bulletin/">주보 페이지로 이동 →</a>a>
+                </div>div>
           
-          <div class="card">
-                <b>이번 주 주보 보기</b><br/>
-                <a href="./bulletin/">주보 페이지로 이동 →</a>a>
-          </div>div>
-      
-          <hr/>
-      
-          <section id="worship">
-                <h2>예배 및 모임 안내</h2>
-                <p><b>주일예배</b>b><br/>주일 오전 11:00 / 본당</p>
-                <p><b>청소년예배</b><br/>주일 오후 13:30 / 본당</p>
-                <p><b>수요예배</b><br/>수요일 오후 7:30</p>
-          </section>section>
-      
-          <hr/>
-      
-          <section id="pastor">
-                <h2>인사말</h2>
-                <p>방문하신 모든 분들을 주님의 이름으로 환영합니다.</p>
-                <p>희망은교회는 말씀과 기도로 함께 성장하는 공동체입니다.</p>
-                <p>2026년은 만민에게 복음을 전파하라는 말씀을 가지고 예수그리스도가 참 생명되심을 전하는 해가 되길 소망합니다.</p>
-                <p>이 복음이 이곳을 잠시 방문한 이들에게, 희망은공동체를 이루고 있는 모든 성도들에게 생명과 새소망으로 들려지길 원합니다.</p>
-                <p>희망은교회의 문은 언제나 열려있습니다.</p>
-                <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
-                          <b>기독교 대한 성결교회 희망은교회</b><br/>
-                  담임목사 이일례<br/><br/>
-                  <b>섬기는 이들</b><br/>
-                  담임목사 이일례, 협동목사 김영인,<br/>전도사 권성호, 반주자 원지애
-                </p>
-          </section>section>
-      
-          <hr/>
-      
-          <section id="map">
-                <h2>찾아오는 길</h2>
-                <p><b>주 소:</b>b> 경기도 부천시 소사구 은성로 62번길 13(3층)</p>
-                <p><b>연락처:</b> 010-7795-2102</p>
-                <p>
-                  <a href="https://map.naver.com/v5/search/경기도%20부천시%20소사구%20은성로%2062번길%2013" target="_blank" rel="noreferrer">
-                            네이버 지도 열기
-                  </a>a>
-                </p>
-          </section>section>
+                <hr/>
+          
+                <section id="worship">
+                        <h2>예배 및 모임 안내</h2>
+                        <p><b>주일예배</b>b><br/>주일 오전 11:00 / 본당</p>
+                        <p><b>청소년예배</b><br/>주일 오후 13:30 / 본당</p>
+                        <p><b>수요예배</b><br/>수요일 오후 7:30</p>
+                </section>section>
+          
+                <hr/>
+          
+                <section id="pastor">
+                        <h2>인사말</h2>
+                        <p>방문하신 모든 분들을 주님의 이름으로 환영합니다.</p>
+                        <p>희망은교회는 말씀과 기도로 함께 성장하는 공동체입니다.</p>
+                        <p>2026년은 만민에게 복음을 전파하라는 말씀을 가지고 예수그리스도가 참 생명되심을 전하는 해가 되길 소망합니다.</p>
+                        <p>이 복음이 이곳을 잠시 방문한 이들에게, 희망은공동체를 이루고 있는 모든 성도들에게 생명과 새소망으로 들려지길 원합니다.</p>
+                        <p>희망은교회의 문은 언제나 열려있습니다.</p>
+                        <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                                    <b>기독교 대한 성결교회 희망은교회</b><br/>
+                          담임목사 이일례<br/><br/>
+                          <b>섬기는 이들</b><br/>
+                          담임목사 이일례, 협동목사 김영인,<br/>전도사 권성호, 반주자 원지애
+                        </p>
+                </section>section>
+          
+                <hr/>
+          
+                <section id="map">
+                        <h2>찾아오는 길</h2>
+                        <p><b>주 소:</b>b> 경기도 부천시 소사구 은성로 62번길 13(3층)</p>
+                        <p><b>연락처:</b> 010-7795-2102</p>
+                        <p>
+                          <a href="https://map.naver.com/v5/search/경기도%20부천시%20소사구%20은성로%2062번길%2013" target="_blank" rel="noreferrer">
+                                      네이버 지도 열기
+                          </a>a>
+                        </p>
+                </section>section>
+          </main>
       </div>div>
+  
+    <script>
+          const menu = document.getElementById("menu");
+          const hashLinks = Array.from(menu.querySelectorAll('a[href^="#"]'));
+
+          function setActiveByHash(hash){
+                  hashLinks.forEach(a => a.classList.remove("is-active"));
+                  const target = hashLinks.find(a => a.getAttribute("href") === hash);
+                  if(target) target.classList.add("is-active");
+          }
+
+          if (location.hash) setActiveByHash(location.hash);
+
+          const sections = hashLinks
+            .map(a => document.querySelector(a.getAttribute("href")))
+            .filter(Boolean);
+
+          if ("IntersectionObserver" in window && sections.length){
+                  const io = new IntersectionObserver((entries) => {
+                            const visible = entries
+                              .filter(e => e.isIntersecting)
+                              .sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+                            if(visible && visible.target && visible.target.id){
+                                        const hash = "#" + visible.target.id;
+                                        setActiveByHash(hash);
+                                        history.replaceState(null, "", hash);
+                            }
+                  }, { root: null, threshold: [0.2, 0.35, 0.5, 0.65] });
+                  sections.forEach(sec => io.observe(sec));
+          }
+
+          hashLinks.forEach(a => {
+                  a.addEventListener("click", () => setActiveByHash(a.getAttribute("href")));
+          });
+    </script>
   </body>
-</html>html></b></p></p></b></b>
-                </p></p></b></b></p></p></b></b></h1>
+</html>html>
+    </script></b></p></p></b></b>
+                        </p></p></b></b></p></p></b></b></h1>
+          </main></span></strong>
+            </aside>
   </body>
     </style></title>
   </head>
