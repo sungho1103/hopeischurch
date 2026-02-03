@@ -4,30 +4,269 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>주보 | 희망은교회</title>
-<link rel="stylesheet" href="/hopeischurch/assets/common.css">
 
+  <!-- 공통 CSS -->
+  <link rel="stylesheet" href="/hopeischurch/assets/common.css">
+
+  <!-- 주보 페이지 전용(스코프) CSS -->
+  <style>
+    /* ===============================
+       Bulletin Page (Scoped)
+       =============================== */
+    body.page-bulletin main{
+      background:#f3f5f9;
+    }
+
+    .page-bulletin .container{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    .page-bulletin .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .page-bulletin .muted{
+      color:#666;
+      font-size:14px;
+      line-height:1.7;
+    }
+
+    .page-bulletin main h1{
+      margin:0;
+      font-size:32px;
+      letter-spacing:-.02em;
+    }
+
+    .page-bulletin .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+
+    .page-bulletin #weekSelect{
+      padding:10px 12px;
+      border:1px solid #e6e6e6;
+      border-radius:12px;
+      background:#fff;
+      font-size:14px;
+      min-width: 220px;
+    }
+
+    .page-bulletin button{
+      padding:10px 12px;
+      border:1px solid #e6e6e6;
+      border-radius:12px;
+      background:#fff;
+      font-size:14px;
+      cursor:pointer;
+    }
+
+    .page-bulletin button:hover{
+      background:#f3f5f9;
+    }
+
+    .page-bulletin .meta{
+      text-align:right;
+    }
+
+    .page-bulletin .badge{
+      display:inline-block;
+      padding:4px 10px;
+      border:1px solid #e6e6e6;
+      border-radius:999px;
+      color:#555;
+      font-size:12px;
+      background:#fff;
+    }
+
+    .page-bulletin hr{
+      margin: 18px 0;
+      border: none;
+      border-top: 1px solid #e6e9ef;
+    }
+
+    /* ----- 카드 공통 ----- */
+    .page-bulletin .b-card{
+      background:#fff;
+      border-radius:16px;
+      padding:16px 16px;
+      box-shadow:0 6px 14px rgba(0,0,0,.06);
+    }
+
+    .page-bulletin .b-card h2,
+    .page-bulletin .b-card h3{
+      margin:0 0 12px;
+      font-size:1.05rem;
+      font-weight:700;
+      color:#222;
+    }
+
+    /* ----- PC: 3단 그리드 ----- */
+    .page-bulletin .b3-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    /* 가운데 컬럼: 위/아래 2단 */
+    .page-bulletin .b-mid{
+      display:grid;
+      grid-template-rows:auto auto;
+      gap:16px;
+    }
+
+    /* 예배순서(좌) */
+    .page-bulletin .order-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+    }
+
+    .page-bulletin .order-table th,
+    .page-bulletin .order-table td{
+      padding:10px 8px;
+      border-bottom:1px solid #eceff3;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    .page-bulletin .order-table th{
+      color:#555;
+      font-weight:600;
+      font-size:12px;
+      background:#fafafa;
+      border-bottom:1px solid #eceff3;
+    }
+
+    .page-bulletin .order-table tr:last-child td{
+      border-bottom:none;
+    }
+
+    /* 외울말씀(가운데 위 강조) */
+    .page-bulletin .b-verse{
+      background:#f7f9ff;
+      border-left:5px solid #4a6cf7;
+    }
+
+    .page-bulletin .verse{
+      margin:0 0 8px;
+      font-size:16px;
+      line-height:1.75;
+      color:#222;
+    }
+
+    /* 예배위원(가운데 아래) */
+    .page-bulletin .committee{
+      list-style:none;
+      margin:0;
+      padding:0;
+    }
+
+    .page-bulletin .committee li{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 0;
+      border-bottom:1px solid #eceff3;
+      font-size:14px;
+    }
+
+    .page-bulletin .committee li:last-child{
+      border-bottom:none;
+    }
+
+    .page-bulletin .k{
+      font-weight:600;
+      color:#111;
+      flex-shrink:0;
+      min-width: 84px;
+    }
+
+    .page-bulletin .v{
+      color:#444;
+      text-align:right;
+      flex:1;
+    }
+
+    /* 교회소식(우) */
+    .page-bulletin .news{
+      list-style:none;
+      margin:0;
+      padding:0;
+    }
+
+    .page-bulletin .news li{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:10px 0;
+      border-bottom:1px solid #eceff3;
+      font-size:14px;
+    }
+
+    .page-bulletin .news li:last-child{
+      border-bottom:none;
+    }
+
+    .page-bulletin .tag{
+      display:inline-block;
+      padding:3px 10px;
+      border:1px solid #e6e6e6;
+      border-radius:999px;
+      font-size:12px;
+      color:#555;
+      background:#fff;
+      flex-shrink:0;
+    }
+
+    .page-bulletin .txt{
+      color:#333;
+      line-height:1.6;
+    }
+
+    /* 모바일: 1단 */
+    @media (max-width: 980px){
+      .page-bulletin .b3-grid{
+        grid-template-columns: 1fr;
+      }
+      .page-bulletin .meta{
+        text-align:left;
+      }
+      .page-bulletin #weekSelect{
+        min-width: 180px;
+      }
+    }
+  </style>
 </head>
-<body>
+
+<body class="page-bulletin">
   <div class="wrap">
     <aside>
-  <div class="brand">희망은교회</div>
+      <div class="brand">희망은교회</div>
 
- <nav id="menu">
-  <a href="/hopeischurch/" data-nav="home">홈</a>
-  <a href="/hopeischurch/#worship" data-nav="worship">교회안내</a>
-  <a href="/hopeischurch/bulletin/" data-nav="bulletin">주보</a>
-  <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
-  <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
-</nav>
+      <nav id="menu">
+        <a href="/hopeischurch/" data-nav="home">홈</a>
+        <a href="/hopeischurch/#worship" data-nav="worship">교회안내</a>
+        <a href="/hopeischurch/bulletin/" data-nav="bulletin">주보</a>
+        <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
+        <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
+      </nav>
 
-
-  <div class="notice">
-    <strong>행사</strong>
-    <span>성경암송대회(2/22)</span>
-    <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42" target="_blank">시편42편</a>
-  </div>
-</aside>
-
+      <div class="notice">
+        <strong>행사</strong>
+        <span>성경암송대회(2/22)</span>
+        <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42" target="_blank" rel="noreferrer">시편42편</a>
+      </div>
+    </aside>
 
     <main>
       <div class="container">
@@ -37,30 +276,49 @@
             <div class="controls" style="margin-top:10px;">
               <label class="muted" for="weekSelect">주차 선택</label>
               <select id="weekSelect"></select>
-              <button id="prevBtn">이전 주</button>
-              <button id="nextBtn">다음 주</button>
+              <button id="prevBtn" type="button">이전 주</button>
+              <button id="nextBtn" type="button">다음 주</button>
             </div>
           </div>
           <div class="meta">
             <div><span class="badge" id="issueText">—</span></div>
-            <div id="dateText" style="margin-top:8px;">—</div>
+            <div class="muted" id="dateText" style="margin-top:8px;">—</div>
           </div>
         </div>
 
         <hr/>
 
-        <div class="columns" id="bulletinBody">
-          <section class="block">
-            <h2>불러오는 중…</h2>
-            <div class="muted">주보 데이터를 가져오고 있습니다.</div>
-          </section>
+        <div id="bulletinBody">
+          <div class="b3-grid">
+            <section class="b-card">
+              <h2>예배순서</h2>
+              <div class="muted">불러오는 중…</div>
+            </section>
+
+            <section class="b-mid">
+              <div class="b-card b-verse">
+                <h2>외울말씀</h2>
+                <div class="muted">불러오는 중…</div>
+              </div>
+
+              <div class="b-card">
+                <h2>예배위원</h2>
+                <div class="muted">불러오는 중…</div>
+              </div>
+            </section>
+
+            <section class="b-card">
+              <h2>교회소식</h2>
+              <div class="muted">불러오는 중…</div>
+            </section>
+          </div>
         </div>
       </div>
     </main>
   </div>
 
 <script>
-  // ✅ 당신의 Apps Script 웹앱 URL
+  // ✅ Apps Script 웹앱 URL (기존 그대로)
   const API_BASE = "https://script.google.com/macros/s/AKfycbywALVBKpOx6icnde7WdZAGPT8GK-OFIS2-Fm1YLO09NNDpLXLjisWUP3J9zKIizbBt/exec";
 
   const qs = new URLSearchParams(location.search);
@@ -86,7 +344,6 @@
   }
 
   function formatWeekLabel(w){
-    // 표시: 2026.02.01 (26-05호) 주일예배
     const date = w.date || w.week_id || "";
     const issue = w.issue ? `(${w.issue}호)` : "";
     const title = w.title ? ` ${w.title}` : "";
@@ -94,7 +351,7 @@
   }
 
   async function fetchJSON(url){
-    const res = await fetch(url);
+    const res = await fetch(url, { cache:"no-store" });
     if(!res.ok) throw new Error("fetch failed");
     return await res.json();
   }
@@ -102,6 +359,7 @@
   async function loadWeeks(){
     const data = await fetchJSON(API_BASE); // { weeks: [...] }
     const weeks = data.weeks || [];
+
     if(!weeks.length){
       weekSelect.innerHTML = `<option value="">주차 데이터가 없습니다</option>`;
       return { weeks: [], selected: "" };
@@ -113,7 +371,7 @@
 
     const selected = (weekParam && weeks.some(w => w.week_id === weekParam))
       ? weekParam
-      : weeks[0].week_id; // 최신이 위로 오도록 API에서 정렬됨
+      : weeks[0].week_id;
 
     weekSelect.value = selected;
 
@@ -127,13 +385,11 @@
   function hookPrevNext(weeks, selected){
     const idx = weeks.findIndex(w => w.week_id === selected);
 
-    // weeks[0]이 최신, idx+1이 더 과거(이전 주)
     prevBtn.onclick = () => {
       if(idx < 0 || idx >= weeks.length - 1) return;
       setWeekInUrl(weeks[idx + 1].week_id);
     };
 
-    // idx-1이 더 최신(다음 주)
     nextBtn.onclick = () => {
       if(idx <= 0) return;
       setWeekInUrl(weeks[idx - 1].week_id);
@@ -150,64 +406,77 @@
     const order = (data.worship_order || []);
     const memory = data.memory_verse;
 
+    const orderHtml = order.length ? `
+      <table class="order-table">
+        <thead>
+          <tr><th style="width:70px;">순서</th><th>내용</th><th style="width:90px;">담당</th></tr>
+        </thead>
+        <tbody>
+          ${order.map(r => `
+            <tr>
+              <td>${escapeHtml(r.step || "")}</td>
+              <td>${escapeHtml(r.content || "")}</td>
+              <td>${escapeHtml(r.person || "")}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    ` : `<div class="muted">예배순서가 없습니다.</div>`;
+
+    const verseHtml = (memory?.reference || memory?.text) ? `
+      <p class="verse">
+        <b>${escapeHtml(memory.reference || "")}</b><br/>
+        ${escapeHtml(memory.text || "")}
+      </p>
+    ` : `<div class="muted">등록된 외울 말씀이 없습니다.</div>`;
+
+    const committeeHtml = committee.length ? `
+      <ul class="committee">
+        ${committee.map(r => `
+          <li><span class="k">${escapeHtml(r.role)}</span><span class="v">${escapeHtml(r.name)}</span></li>
+        `).join("")}
+      </ul>
+    ` : `<div class="muted">예배위원 정보가 없습니다.</div>`;
+
+    const newsHtml = news.length ? `
+      <ul class="news">
+        ${news.map(t => `
+          <li>
+            <span class="tag">소식</span>
+            <div class="txt">${escapeHtml(t)}</div>
+          </li>
+        `).join("")}
+      </ul>
+    ` : `<div class="muted">등록된 소식이 없습니다.</div>`;
+
     const body = document.getElementById("bulletinBody");
     body.innerHTML = `
-      <section class="block">
-        <h2>희망은 소식</h2>
-        ${news.length ? `<ul>${news.map(t=>`<li>${escapeHtml(t)}</li>`).join("")}</ul>`
-                     : `<div class="muted">등록된 소식이 없습니다.</div>`}
-      </section>
-<br/>
-      <section class="block">
-        <h2>외울 말씀</h2>
-        ${memory?.reference || memory?.text
-          ? `<div class="muted"><b>${escapeHtml(memory.reference || "")}</b><br/>${escapeHtml(memory.text || "")}</div>`
-          : `<div class="muted">등록된 외울 말씀이 없습니다.</div>`}
-      </section>
+      <div class="b3-grid">
+        <!-- 왼쪽: 예배순서 -->
+        <section class="b-card">
+          <h2>예배순서</h2>
+          ${orderHtml}
+        </section>
 
-      <section class="block">
-        <h2>예배순서</h2>
-        ${order.length ? `
-          <table>
-            <thead><tr><th>순서</th><th>내용</th><th>담당</th></tr></thead>
-            <tbody>
-              ${order.map(r => `
-                <tr>
-                  <td>${escapeHtml(r.step || "")}</td>
-                  <td>${escapeHtml(r.content || "")}</td>
-                  <td>${escapeHtml(r.person || "")}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        ` : `<div class="muted">예배순서가 없습니다.</div>`}
-      </section>
+        <!-- 가운데: 위=외울말씀 / 아래=예배위원 -->
+        <section class="b-mid">
+          <section class="b-card b-verse">
+            <h2>외울말씀</h2>
+            ${verseHtml}
+          </section>
 
-      <section class="block">
-        <h2>예배위원</h2>
-        ${committee.length ? `
-          <table>
-            <thead><tr><th>구분</th><th>담당</th></tr></thead>
-            <tbody>
-              ${committee.map(r => `
-                <tr>
-                  <td>${escapeHtml(r.role)}</td>
-                  <td>${escapeHtml(r.name)}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table><br/><br/>
-        ` : `<div class="muted">예배위원 정보가 없습니다.</div>`}
-      </section>
+          <section class="b-card">
+            <h2>예배위원</h2>
+            ${committeeHtml}
+          </section>
+        </section>
 
-      <section class="block">
-        <h2>교회 안내</h2>
-        <div class="muted">
-          주소: 경기도 부천시 소사구 은성로 62번길 13 (3층)<br/>
-          예배: 주일 11:00, 청소년 13:30 / 수요 19:30 / <br/> 
-          문의: 010-7795-2102
-        </div>
-      </section>
+        <!-- 오른쪽: 교회소식 -->
+        <section class="b-card">
+          <h2>교회소식</h2>
+          ${newsHtml}
+        </section>
+      </div>
     `;
   }
 
@@ -224,12 +493,17 @@
   main().catch(err => {
     console.error(err);
     document.getElementById("bulletinBody").innerHTML = `
-      <section class="block">
-        <h2>주보 불러오기 실패</h2>
-        <div class="muted">
-          Apps Script 웹앱 공개 설정(링크가 있는 모든 사용자)과 URL을 확인해주세요.
-        </div>
-      </section>
+      <div class="b3-grid">
+        <section class="b-card">
+          <h2>주보 불러오기 실패</h2>
+          <div class="muted">
+            Apps Script 웹앱 공개 설정(링크가 있는 모든 사용자)과 URL을 확인해주세요.
+          </div>
+          <div class="muted" style="margin-top:10px;">
+            오류: ${escapeHtml(err?.message || String(err))}
+          </div>
+        </section>
+      </div>
     `;
   });
 </script>
