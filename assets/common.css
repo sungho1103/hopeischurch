@@ -1,6 +1,6 @@
 /* ==================================================
-   Hope Is Church - Common CSS
-   메인 / 서브페이지 공통 레이아웃 + 메뉴
+   Hope Is Church - Common CSS (FINAL)
+   메인 / 모든 서브페이지 공통 레이아웃 & 메뉴
 ================================================== */
 
 /* ---------- Reset ---------- */
@@ -28,10 +28,12 @@ body{
   min-height:100vh;
 }
 
+/* ---------- Sidebar ---------- */
 aside{
   width:200px;
   flex-shrink:0;
   text-align:left;
+  padding-left:12px;   /* ✅ 왼쪽 기준선 (절대 기준) */
 }
 
 main{
@@ -44,6 +46,7 @@ main{
   font-size:1.2rem;
   font-weight:700;
   margin-bottom:20px;
+  padding-left:0;      /* aside 기준선 그대로 */
   text-align:left;
 }
 
@@ -52,13 +55,14 @@ main{
   display:flex;
   flex-direction:column;
   gap:10px;
-  align-items:flex-start; /* 좌측 정렬 고정 */
+  align-items:flex-start;
+  padding-left:0;
 }
 
 #menu a{
   display:block;
   width:100%;
-  padding:10px 12px;
+  padding:10px 0;      /* ✅ 좌우 padding 제거 */
   text-decoration:none;
   color:#111;
   border-radius:10px;
@@ -98,7 +102,7 @@ main{
   text-decoration:underline;
 }
 
-/* ---------- Common Typography ---------- */
+/* ---------- Typography ---------- */
 h1{
   font-size:2rem;
   margin-bottom:10px;
@@ -154,17 +158,16 @@ hr{
     margin-bottom:20px;
     padding-bottom:20px;
     border-bottom:1px solid #ddd;
+    padding-left:12px;   /* 모바일에서도 동일 기준 */
   }
 
   #menu{
-    flex-direction:row;
-    flex-wrap:wrap;
-    gap:4px;              /* ✅ 메뉴 간격 줄임 */
+    flex-direction:column;
+    gap:4px;             /* ✅ 메뉴 간격 살짝 축소 */
   }
 
   #menu a{
-    width:auto;
-    padding:6px 10px;     /* ✅ 모바일용 컴팩트 */
+    padding:6px 0;       /* 모바일용 컴팩트 */
     font-size:.95rem;
   }
 }
