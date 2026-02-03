@@ -407,6 +407,28 @@
     const memory = data.memory_verse;
   // ✅ 월간 예배위원(같은 달 최대 4주)
   const monthly = data.committee_month || [];
+const committeeHtml = monthly.length ? `
+  <table class="roster-table">
+    <thead>
+      <tr>
+        <th>날짜</th>
+        <th>기도</th>
+        <th>찬양</th>
+        <th>헌금위원</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${monthly.map(r => `
+        <tr>
+          <td>${escapeHtml(r.date || r.week_id || "")}</td>
+          <td>${escapeHtml(r.pray || "")}</td>
+          <td>${escapeHtml(r.praise || "")}</td>
+          <td>${escapeHtml(r.offering || "")}</td>
+        </tr>
+      `).join("")}
+    </tbody>
+  </table>
+` : `<div class="muted">월간 예배위원 정보가 없습니다.</div>`;
 
     const orderHtml = order.length ? `
       <table class="order-table">
@@ -468,9 +490,10 @@
           </section>
 
           <section class="b-card">
-            <h2>예배위원</h2>
-            ${committeeHtml}
-          </section>
+  <h2>예배위원</h2>
+  ${committeeHtml}
+</section>
+
         </section>
 
         <!-- 오른쪽: 교회소식 -->
