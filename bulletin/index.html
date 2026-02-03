@@ -405,6 +405,8 @@
     const committee = (data.committee || []).filter(r => r.role && r.name);
     const order = (data.worship_order || []);
     const memory = data.memory_verse;
+  // ✅ 월간 예배위원(같은 달 최대 4주)
+  const monthly = data.committee_month || [];
 
     const orderHtml = order.length ? `
       <table class="order-table">
