@@ -12,10 +12,8 @@
   <style>
     /* ===============================
        Bulletin Page (Scoped)
-       =============================== */
-    body.page-bulletin main{
-      background:#f3f5f9;
-    }
+    =============================== */
+    body.page-bulletin main{ background:#f3f5f9; }
 
     .page-bulletin .container{
       max-width: 1100px;
@@ -69,13 +67,9 @@
       cursor:pointer;
     }
 
-    .page-bulletin button:hover{
-      background:#f3f5f9;
-    }
+    .page-bulletin button:hover{ background:#f3f5f9; }
 
-    .page-bulletin .meta{
-      text-align:right;
-    }
+    .page-bulletin .meta{ text-align:right; }
 
     .page-bulletin .badge{
       display:inline-block;
@@ -89,8 +83,8 @@
 
     .page-bulletin hr{
       margin: 18px 0;
-      border: none;
-      border-top: 1px solid #e6e9ef;
+      border:none;
+      border-top:1px solid #e6e9ef;
     }
 
     /* ----- 카드 공통 ----- */
@@ -101,8 +95,7 @@
       box-shadow:0 6px 14px rgba(0,0,0,.06);
     }
 
-    .page-bulletin .b-card h2,
-    .page-bulletin .b-card h3{
+    .page-bulletin .b-card h2{
       margin:0 0 12px;
       font-size:1.05rem;
       font-weight:700;
@@ -124,13 +117,12 @@
       gap:16px;
     }
 
-    /* 예배순서(좌) */
+    /* 예배순서 표 */
     .page-bulletin .order-table{
       width:100%;
       border-collapse:collapse;
       font-size:14px;
     }
-
     .page-bulletin .order-table th,
     .page-bulletin .order-table td{
       padding:10px 8px;
@@ -138,7 +130,6 @@
       text-align:left;
       vertical-align:top;
     }
-
     .page-bulletin .order-table th{
       color:#555;
       font-weight:600;
@@ -146,64 +137,22 @@
       background:#fafafa;
       border-bottom:1px solid #eceff3;
     }
+    .page-bulletin .order-table tr:last-child td{ border-bottom:none; }
 
-    .page-bulletin .order-table tr:last-child td{
-      border-bottom:none;
-    }
-
-    /* 외울말씀(가운데 위 강조) */
-    .page-bulletin .b-verse{
-      background:#f7f9ff;
-      border-left:5px solid #4a6cf7;
-    }
-
+    /* 외울말씀 */
     .page-bulletin .verse{
-      margin:0 0 8px;
-      font-size:16px;
+      margin:0;
+      font-size:15px;
       line-height:1.75;
       color:#222;
     }
 
-    /* 예배위원(가운데 아래) */
-    .page-bulletin .committee{
-      list-style:none;
-      margin:0;
-      padding:0;
-    }
-
-    .page-bulletin .committee li{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      padding:10px 0;
-      border-bottom:1px solid #eceff3;
-      font-size:14px;
-    }
-
-    .page-bulletin .committee li:last-child{
-      border-bottom:none;
-    }
-
-    .page-bulletin .k{
-      font-weight:600;
-      color:#111;
-      flex-shrink:0;
-      min-width: 84px;
-    }
-
-    .page-bulletin .v{
-      color:#444;
-      text-align:right;
-      flex:1;
-    }
-
-    /* 교회소식(우) */
+    /* 교회소식 */
     .page-bulletin .news{
       list-style:none;
       margin:0;
       padding:0;
     }
-
     .page-bulletin .news li{
       display:flex;
       gap:10px;
@@ -212,10 +161,7 @@
       border-bottom:1px solid #eceff3;
       font-size:14px;
     }
-
-    .page-bulletin .news li:last-child{
-      border-bottom:none;
-    }
+    .page-bulletin .news li:last-child{ border-bottom:none; }
 
     .page-bulletin .tag{
       display:inline-block;
@@ -227,41 +173,35 @@
       background:#fff;
       flex-shrink:0;
     }
-
     .page-bulletin .txt{
       color:#333;
       line-height:1.6;
     }
 
+    /* ✅ 월간 예배위원 표 */
+    .page-bulletin .roster-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+    }
+    .page-bulletin .roster-table th,
+    .page-bulletin .roster-table td{
+      border:1px solid #e6e6e6;
+      padding:10px 8px;
+      text-align:center;
+      vertical-align:middle;
+    }
+    .page-bulletin .roster-table th{
+      font-weight:700;
+      background:#fafafa;
+    }
+
     /* 모바일: 1단 */
     @media (max-width: 980px){
-      .page-bulletin .b3-grid{
-        grid-template-columns: 1fr;
-      }
-      .page-bulletin .meta{
-        text-align:left;
-      }
-      .page-bulletin #weekSelect{
-        min-width: 180px;
-      }
+      .page-bulletin .b3-grid{ grid-template-columns: 1fr; }
+      .page-bulletin .meta{ text-align:left; }
+      .page-bulletin #weekSelect{ min-width: 180px; }
     }
-    .page-bulletin .roster-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
-}
-.page-bulletin .roster-table th,
-.page-bulletin .roster-table td{
-  border:1px solid #e6e6e6;
-  padding:10px 8px;
-  text-align:center;
-  vertical-align:middle;
-}
-.page-bulletin .roster-table th{
-  font-weight:700;
-  background:#fafafa;
-}
-
   </style>
 </head>
 
@@ -313,15 +253,15 @@
             </section>
 
             <section class="b-mid">
-              <div class="b-card b-verse">
+              <section class="b-card">
                 <h2>외울말씀</h2>
                 <div class="muted">불러오는 중…</div>
-              </div>
+              </section>
 
-              <div class="b-card">
+              <section class="b-card">
                 <h2>예배위원</h2>
                 <div class="muted">불러오는 중…</div>
-              </div>
+              </section>
             </section>
 
             <section class="b-card">
@@ -335,7 +275,7 @@
   </div>
 
 <script>
-  // ✅ Apps Script 웹앱 URL (기존 그대로)
+  // ✅ Apps Script 웹앱 URL
   const API_BASE = "https://script.google.com/macros/s/AKfycbywALVBKpOx6icnde7WdZAGPT8GK-OFIS2-Fm1YLO09NNDpLXLjisWUP3J9zKIizbBt/exec";
 
   const qs = new URLSearchParams(location.search);
@@ -369,7 +309,7 @@
 
   async function fetchJSON(url){
     const res = await fetch(url, { cache:"no-store" });
-    if(!res.ok) throw new Error("fetch failed");
+    if(!res.ok) throw new Error(`fetch failed: ${res.status}`);
     return await res.json();
   }
 
@@ -419,38 +359,43 @@
     document.getElementById("dateText").textContent = meta.date || data.week_id || "";
 
     const news = (data.news || []).map(r => r.text).filter(Boolean);
-    const committee = (data.committee || []).filter(r => r.role && r.name);
     const order = (data.worship_order || []);
     const memory = data.memory_verse;
-  // ✅ 월간 예배위원(같은 달 최대 4주)
-  const monthly = data.committee_month || [];
-const committeeHtml = monthly.length ? `
-  <table class="roster-table">
-    <thead>
-      <tr>
-        <th>날짜</th>
-        <th>기도</th>
-        <th>찬양</th>
-        <th>헌금위원</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${monthly.map(r => `
-        <tr>
-          <td>${escapeHtml(r.date || r.week_id || "")}</td>
-          <td>${escapeHtml(r.pray || "")}</td>
-          <td>${escapeHtml(r.praise || "")}</td>
-          <td>${escapeHtml(r.offering || "")}</td>
-        </tr>
-      `).join("")}
-    </tbody>
-  </table>
-` : `<div class="muted">월간 예배위원 정보가 없습니다.</div>`;
+
+    // ✅ 월간 예배위원(같은 달 최대 4주)
+    const monthly = data.committee_month || [];
+
+    const committeeMonthHtml = monthly.length ? `
+      <table class="roster-table">
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th>기도</th>
+            <th>찬양</th>
+            <th>헌금위원</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${monthly.map(r => `
+            <tr>
+              <td>${escapeHtml(r.date || r.week_id || "")}</td>
+              <td>${escapeHtml(r.pray || "")}</td>
+              <td>${escapeHtml(r.praise || "")}</td>
+              <td>${escapeHtml(r.offering || "")}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    ` : `<div class="muted">월간 예배위원 정보가 없습니다.</div>`;
 
     const orderHtml = order.length ? `
       <table class="order-table">
         <thead>
-          <tr><th style="width:70px;">순서</th><th>내용</th><th style="width:90px;">담당</th></tr>
+          <tr>
+            <th style="width:70px;">순서</th>
+            <th>내용</th>
+            <th style="width:90px;">담당</th>
+          </tr>
         </thead>
         <tbody>
           ${order.map(r => `
@@ -471,14 +416,6 @@ const committeeHtml = monthly.length ? `
       </p>
     ` : `<div class="muted">등록된 외울 말씀이 없습니다.</div>`;
 
-    const committeeHtml = committee.length ? `
-      <ul class="committee">
-        ${committee.map(r => `
-          <li><span class="k">${escapeHtml(r.role)}</span><span class="v">${escapeHtml(r.name)}</span></li>
-        `).join("")}
-      </ul>
-    ` : `<div class="muted">예배위원 정보가 없습니다.</div>`;
-
     const newsHtml = news.length ? `
       <ul class="news">
         ${news.map(t => `
@@ -490,30 +427,25 @@ const committeeHtml = monthly.length ? `
       </ul>
     ` : `<div class="muted">등록된 소식이 없습니다.</div>`;
 
-    const body = document.getElementById("bulletinBody");
-    body.innerHTML = `
+    document.getElementById("bulletinBody").innerHTML = `
       <div class="b3-grid">
-        <!-- 왼쪽: 예배순서 -->
         <section class="b-card">
           <h2>예배순서</h2>
           ${orderHtml}
         </section>
 
-        <!-- 가운데: 위=외울말씀 / 아래=예배위원 -->
         <section class="b-mid">
-          <section class="b-card b-verse">
+          <section class="b-card">
             <h2>외울말씀</h2>
             ${verseHtml}
           </section>
 
           <section class="b-card">
-  <h2>예배위원</h2>
-  ${committeeHtml}
-</section>
-
+            <h2>예배위원</h2>
+            ${committeeMonthHtml}
+          </section>
         </section>
 
-        <!-- 오른쪽: 교회소식 -->
         <section class="b-card">
           <h2>교회소식</h2>
           ${newsHtml}
@@ -538,11 +470,11 @@ const committeeHtml = monthly.length ? `
       <div class="b3-grid">
         <section class="b-card">
           <h2>주보 불러오기 실패</h2>
-          <div class="muted">
-            Apps Script 웹앱 공개 설정(링크가 있는 모든 사용자)과 URL을 확인해주세요.
-          </div>
           <div class="muted" style="margin-top:10px;">
             오류: ${escapeHtml(err?.message || String(err))}
+          </div>
+          <div class="muted" style="margin-top:10px;">
+            API: ${escapeHtml(API_BASE)}
           </div>
         </section>
       </div>
