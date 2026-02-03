@@ -1,125 +1,24 @@
 /* ==================================================
-   📰 Bulletin (주보) Common Styles
-   희망은교회 주보 페이지 공통 디자인
+   Hope Is Church - Common CSS
+   메인 / 서브페이지 공통 레이아웃 + 메뉴
 ================================================== */
 
-/* 페이지 전체 기본 배경 */
-.bulletin-wrap {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 20px 16px 40px;
-  background: #f3f5f9;
+/* ---------- Reset ---------- */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
 }
 
-/* --------------------------------------------------
-   카드형 섹션 공통
--------------------------------------------------- */
-.bulletin-section {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 20px 22px;
-  margin-bottom: 18px;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+/* ---------- Base ---------- */
+body{
+  font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+  line-height:1.6;
+  color:#111;
+  background:#fff;
 }
 
-/* 카드 안 제목 */
-.bulletin-section h3 {
-  margin: 0 0 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
-  letter-spacing: -0.02em;
-}
-
-/* 카드 본문 텍스트 */
-.bulletin-section p {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.75;
-  color: #444;
-}
-
-/* 줄 간격용 문단 */
-.bulletin-section p + p {
-  margin-top: 10px;
-}
-
-/* --------------------------------------------------
-   강조 카드 (말씀 / 설교 / 기도제목)
--------------------------------------------------- */
-.bulletin-highlight {
-  background: #f7f9ff;
-  border-left: 5px solid #4a6cf7;
-}
-
-/* --------------------------------------------------
-   정보형 리스트 (공지, 일정 등)
--------------------------------------------------- */
-.bulletin-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.bulletin-list li {
-  padding: 10px 0;
-  border-bottom: 1px solid #eaecef;
-  font-size: 0.95rem;
-  color: #333;
-}
-
-.bulletin-list li:last-child {
-  border-bottom: none;
-}
-
-/* --------------------------------------------------
-   텍스트 강조
--------------------------------------------------- */
-.bulletin-strong {
-  font-weight: 600;
-  color: #111;
-}
-
-.bulletin-muted {
-  color: #777;
-  font-size: 0.9rem;
-}
-
-/* --------------------------------------------------
-   구분선
--------------------------------------------------- */
-.bulletin-divider {
-  height: 1px;
-  background: #e6e9ef;
-  margin: 18px 0;
-}
-
-/* --------------------------------------------------
-   모바일 대응
--------------------------------------------------- */
-@media (max-width: 480px) {
-  .bulletin-wrap {
-    padding: 16px 14px 32px;
-  }
-
-  .bulletin-section {
-    padding: 18px 16px;
-    border-radius: 14px;
-  }
-
-  .bulletin-section h3 {
-    font-size: 1rem;
-  }
-
-  .bulletin-section p,
-  .bulletin-list li {
-    font-size: 0.9rem;
-  }
-}
-/* ==============================
-   Common Layout + Side Menu
-============================== */
-
+/* ---------- Layout ---------- */
 .wrap{
   display:flex;
   gap:20px;
@@ -132,26 +31,39 @@
 aside{
   width:200px;
   flex-shrink:0;
+  text-align:left;
 }
 
+main{
+  flex:1;
+  min-width:0;
+}
+
+/* ---------- Brand ---------- */
 .brand{
   font-size:1.2rem;
   font-weight:700;
   margin-bottom:20px;
+  text-align:left;
 }
 
+/* ---------- Menu ---------- */
 #menu{
   display:flex;
   flex-direction:column;
   gap:10px;
+  align-items:flex-start; /* 좌측 정렬 고정 */
 }
 
 #menu a{
   display:block;
+  width:100%;
   padding:10px 12px;
   text-decoration:none;
   color:#111;
   border-radius:10px;
+  text-align:left;
+  transition:background .15s ease, color .15s ease;
 }
 
 #menu a:hover{
@@ -163,6 +75,7 @@ aside{
   color:#fff;
 }
 
+/* ---------- Notice ---------- */
 .notice{
   margin-top:30px;
   background:#f5f5f5;
@@ -172,26 +85,86 @@ aside{
   border-left:3px solid #333;
 }
 
-main{
-  flex:1;
-  min-width:0;
+.notice strong{
+  font-weight:600;
 }
 
+.notice a{
+  color:inherit;
+  text-decoration:none;
+}
+
+.notice a:hover{
+  text-decoration:underline;
+}
+
+/* ---------- Common Typography ---------- */
+h1{
+  font-size:2rem;
+  margin-bottom:10px;
+  font-weight:700;
+}
+
+h2{
+  font-size:1.5rem;
+  margin:30px 0 20px;
+  font-weight:700;
+}
+
+p{
+  margin:10px 0;
+}
+
+/* ---------- Card ---------- */
+.card{
+  border:1px solid #ddd;
+  padding:20px;
+  margin:20px 0;
+  border-radius:10px;
+  background:#fafafa;
+}
+
+.card a{
+  color:inherit;
+  text-decoration:none;
+}
+
+.card a:hover{
+  text-decoration:underline;
+}
+
+/* ---------- Divider ---------- */
+hr{
+  margin:30px 0;
+  border:none;
+  border-top:1px solid #ddd;
+}
+
+/* ==================================================
+   Mobile
+================================================== */
 @media (max-width:768px){
-  .wrap{ flex-direction:column; gap:0; }
+  .wrap{
+    flex-direction:column;
+    gap:0;
+  }
+
   aside{
     width:100%;
     margin-bottom:20px;
     padding-bottom:20px;
     border-bottom:1px solid #ddd;
   }
+
   #menu{
     flex-direction:row;
     flex-wrap:wrap;
-    gap:8px;
+    gap:4px;              /* ✅ 메뉴 간격 줄임 */
   }
+
   #menu a{
-    padding:8px 12px;
+    width:auto;
+    padding:6px 10px;     /* ✅ 모바일용 컴팩트 */
     font-size:.95rem;
   }
 }
