@@ -171,3 +171,20 @@ hr{
     font-size:.95rem;
   }
 }
+/* =========================
+   공통 카드 박스 (round)
+========================= */
+.box{
+  border:1px solid #e6e6e6;
+  border-radius:16px;
+  padding:20px 20px;
+  background:#fff; /* 배경색 없음 느낌 */
+}
+
+/* 모바일에서 살짝 여유 줄이기 */
+@media (max-width:768px){
+  .box{
+    padding:16px 16px;
+    border-radius:14px;
+  }
+}
