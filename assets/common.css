@@ -1,140 +1,118 @@
-:root{ --side:220px; --max:900px; }
+/* ==================================================
+   📰 Bulletin (주보) Common Styles
+   희망은교회 주보 페이지 공통 디자인
+================================================== */
 
-/* ===== 기본 ===== */
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,"Noto Sans KR",Arial;
-  color:#111;
+/* 페이지 전체 기본 배경 */
+.bulletin-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  background: #f3f5f9;
 }
 
-a{ color:inherit; } /* 링크 보라색 방지(원하면 제거 가능) */
-
-.wrap{
-  display:flex;
-  min-height:100vh;
+/* --------------------------------------------------
+   카드형 섹션 공통
+-------------------------------------------------- */
+.bulletin-section {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
 }
 
-aside{
-  width:var(--side);
-  padding:24px 18px;
-  border-right:1px solid #eee;
-  position:sticky;
-  top:0;
-  height:100vh;
-  box-sizing:border-box;
-  background:#fff;
+/* 카드 안 제목 */
+.bulletin-section h3 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  letter-spacing: -0.02em;
 }
 
-.brand{
-  font-weight:800;
-  letter-spacing:-.02em;
-  margin-bottom:12px;
+/* 카드 본문 텍스트 */
+.bulletin-section p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: #444;
 }
 
-nav a{
-  display:block;
-  padding:8px 0;
-  color:#111;
-  text-decoration:none;
-}
-nav a:hover{ text-decoration:underline; }
-
-nav a.is-active{
-  font-weight:800;
-  text-decoration:underline;
-  text-underline-offset:3px;
+/* 줄 간격용 문단 */
+.bulletin-section p + p {
+  margin-top: 10px;
 }
 
-/* 공지바 */
-.notice{
-  margin-top:14px;
-  padding:10px 12px;
-  border:1px solid #eee;
-  border-radius:14px;
-  background:#fafafa;
-  font-size:13px;
-  line-height:1.4;
-  color:#555;
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.notice strong{ color:#333; }
-.notice a{
-  color:#333;
-  text-decoration:underline;
-  text-underline-offset:3px;
+/* --------------------------------------------------
+   강조 카드 (말씀 / 설교 / 기도제목)
+-------------------------------------------------- */
+.bulletin-highlight {
+  background: #f7f9ff;
+  border-left: 5px solid #4a6cf7;
 }
 
-/* ===== 메인 영역 ===== */
-main{ flex:1; }
-
-.container{
-  max-width:var(--max);
-  padding:96px 20px;   /* PC 상단 여백(요청대로 2배) */
-  margin:0 auto;
+/* --------------------------------------------------
+   정보형 리스트 (공지, 일정 등)
+-------------------------------------------------- */
+.bulletin-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-/* 메인 페이지에서 쓰던 스타일들 */
-h1{ font-size:44px; margin:0 0 10px; letter-spacing:-.02em; }
-.sub{ color:#666; margin:0 0 28px; line-height:1.7; }
-hr{ border:0; border-top:1px solid #eee; margin:28px 0; }
-.card{ border:1px solid #eee; border-radius:16px; padding:16px; }
-
-/* ===== 태블릿/모바일 ===== */
-@media (max-width: 900px){
-  .wrap{ display:block; }
-  aside{
-    width:auto;
-    height:auto;
-    border-right:0;
-    border-bottom:1px solid #eee;
-  }
+.bulletin-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eaecef;
+  font-size: 0.95rem;
+  color: #333;
 }
 
-/* 모바일 상단바 */
-@media (max-width: 860px){
-  aside{
-    position:sticky;
-    top:0;
-    z-index:1000;
-    padding:12px 14px 10px;
-  }
+.bulletin-list li:last-child {
+  border-bottom: none;
+}
 
-  .brand{
-    font-size:18px;
-    line-height:1.2;
-    margin-bottom:10px;
+/* --------------------------------------------------
+   텍스트 강조
+-------------------------------------------------- */
+.bulletin-strong {
+  font-weight: 600;
+  color: #111;
+}
+
+.bulletin-muted {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+/* --------------------------------------------------
+   구분선
+-------------------------------------------------- */
+.bulletin-divider {
+  height: 1px;
+  background: #e6e9ef;
+  margin: 18px 0;
+}
+
+/* --------------------------------------------------
+   모바일 대응
+-------------------------------------------------- */
+@media (max-width: 480px) {
+  .bulletin-wrap {
+    padding: 16px 14px 32px;
   }
 
-  nav{
-    display:flex;
-    gap:26px;
-    overflow-x:auto;
-    white-space:nowrap;
-    -webkit-overflow-scrolling:touch;
-    line-height:1.2;
+  .bulletin-section {
+    padding: 18px 16px;
+    border-radius: 14px;
   }
 
-  nav a{
-    padding:0;
-    font-size:16px;
-    font-weight:700;
-    line-height:1.2;
-    display:inline-block;
-    color:#333;
+  .bulletin-section h3 {
+    font-size: 1rem;
   }
 
-  .notice{
-    margin-top:10px;
-    padding:8px 10px;
-    font-size:12.5px;
+  .bulletin-section p,
+  .bulletin-list li {
+    font-size: 0.9rem;
   }
-
-  .container{
-    padding-top:32px !important; /* 모바일 상단 여백(요청대로 2배) */
-  }
-
-  hr{ margin:12px 0; }
 }
