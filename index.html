@@ -1,136 +1,325 @@
 <!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>희망은교회</title>
+  <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width,initial-scale=1" />
+      <title>희망은교회</title>
+    <link rel="stylesheet" href="./assets/common.css">
+    <style>
+          * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+          }
 
+          body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+                  background: #f5f7fa;
+                  color: #333;
+                  line-height: 1.6;
+          }
 
-<link rel="stylesheet" href="/hopeischurch/assets/common.css">
+          .wrap {
+                  display: flex;
+                  min-height: 100vh;
+          }
 
-</head>
-<body>
-  <div class="wrap">
-    <aside>
-      <div class="brand">희망은교회</div>
+          aside {
+                  width: 250px;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  color: white;
+                  padding: 30px 20px;
+                  position: sticky;
+                  top: 0;
+                  height: 100vh;
+                  overflow-y: auto;
+          }
 
-    <nav id="menu">
-  <a href="/hopeischurch/" data-nav="home">홈</a>
-  <a href="/hopeischurch/#worship" data-nav="worship">교회안내</a>
-  <a href="/hopeischurch/bulletin/" data-nav="bulletin">주보</a>
-  <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
-  <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
-</nav>
+          .brand {
+                  font-size: 1.5rem;
+                  font-weight: 700;
+                  margin-bottom: 30px;
+                  letter-spacing: -0.02em;
+          }
 
+          nav {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 12px;
+                  margin-bottom: 30px;
+          }
 
-      <!-- ✅ nav 밖으로 빼서 공지바로 -->
-      <div class="notice">
-        <strong>|행사|</strong>
-        <span>성경암송대회(2/22)</span>
-        <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42" target="_blank" rel="noreferrer">시편42편</a>
-      </div>
-    </aside>
+          nav a {
+                  padding: 12px 16px;
+                  color: rgba(255, 255, 255, 0.9);
+                  text-decoration: none;
+                  border-radius: 8px;
+                  transition: all 0.3s ease;
+                  font-weight: 500;
+          }
 
-    <main>
-      <div class="container">
-        </br></br>
-        <h1>희망은교회</h1>
-        <p class="sub"><b>기독교 대한 성결교회 교단에 속한 교회입니다</b></p>
+          nav a:hover,
+          nav a.is-active {
+                  background: rgba(255, 255, 255, 0.2);
+                  color: white;
+          }
 
-        <div class="card">
-          <b>이번 주 주보 보기</b><br/>
-          <a href="./bulletin/" style="display:inline-block; margin-top:10px;">주보 페이지로 이동 →</a>
-        </div>
+          .notice {
+                  background: rgba(255, 255, 255, 0.1);
+                  padding: 12px;
+                  border-radius: 8px;
+                  font-size: 0.85rem;
+                  line-height: 1.6;
+          }
 
-        <hr/>
+          .notice strong {
+                  display: block;
+                  margin-bottom: 6px;
+                  color: #ffd700;
+          }
 
-        <section id="worship"></br></br>
-          <h2>예배 및 모임 안내</h2>
-          <p><b>주일예배</b><br/>주일 오전 11:00 / 본당</p>
-          <p><b>청소년예배</b><br/>주일 오후 13:30 / 본당</p>
-          <p><b>수요예배</b><br/>수요일 오후 7:30</p>
-        </section>
+          .notice a {
+                  color: #a8dadc;
+                  text-decoration: none;
+                  font-weight: 600;
+          }
 
-        <hr/>
+          main {
+                  flex: 1;
+                  overflow-y: auto;
+          }
 
-        <section id="pastor"></br></br>
-          <h2>인사말</h2>
-          <p class="sub" style="margin:0;">
-            방문하신 모든 분들을 주님의 이름으로 환영합니다. <br/>
-            희망은교회는 말씀과 기도로 함께 성장하는 공동체입니다.<br/>
-            2026년은 만민에게 복음을 전파하라는 말씀을 가지고<br/>
-            예수그리스도가 참 생명되심을 전하는 해가 되길 소망합니다.<br/>
-            이 복음이 이곳을 잠시 방문한 이들에게 <br/>
-            희망은공동체를 이루고 있는 모든 성도들에게<br/>
-            생명과 새소망으로 들려지길 원합니다. <br/>
-            희망은교회의 문은 언제나 열려있습니다. <br/><br/>
-            ----</br>
-            기독교 대한 성결교회 희망은교회<br/>
-            담임목사 이일례 <br/><br/>
+          .container {
+                  max-width: 900px;
+                  margin: 0 auto;
+                  padding: 60px 40px;
+          }
 
-            |<b>섬기는 이들</b>|  <br/>
-            담임목사 이일례, 협동목사 김영인, </br>전도사 권성호, 반주자 원지애
-          </p>
-        </section>
+          h1 {
+                  font-size: 2.5rem;
+                  margin-bottom: 12px;
+                  color: #2c3e50;
+                  font-weight: 700;
+          }
 
-        <hr/>
+          h2 {
+                  font-size: 1.8rem;
+                  margin-top: 40px;
+                  margin-bottom: 24px;
+                  color: #2c3e50;
+                  font-weight: 700;
+                  border-bottom: 3px solid #667eea;
+                  padding-bottom: 12px;
+                  display: inline-block;
+          }
 
-        <section id="map"></br>
-          <h2>찾아오는 길</h2>
-          <p>주   소: 경기도 부천시 소사구 은성로 62번길 13(3층)</br>
-          연락처: 010-7795-2102</br>
-          
-            <a href="https://map.naver.com/v5/search/경기도%20부천시%20소사구%20은성로%2062번길%2013"
-               target="_blank" rel="noreferrer">네이버 지도 열기</a>
-          </p>
-        </section>
-      </div>
-    </main>
-  </div>
+          .sub {
+                  font-size: 1.1rem;
+                  color: #666;
+                  margin-bottom: 30px;
+          }
 
-  <script>
-    // ✅ 현재 섹션(#worship/#pastor/#map) 자동 강조
-    // - 외부 링크(./bulletin/ ./sermon/)는 스크롤 강조 대상에서 제외
-    const menu = document.getElementById("menu");
-    const hashLinks = Array.from(menu.querySelectorAll('a[href^="#"]'));
+          .card {
+                  background: white;
+                  border-left: 5px solid #667eea;
+                  padding: 24px;
+                  border-radius: 10px;
+                  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+                  margin: 30px 0;
+          }
 
-    function setActiveByHash(hash){
-      hashLinks.forEach(a => a.classList.remove("is-active"));
-      const target = hashLinks.find(a => a.getAttribute("href") === hash);
-      if(target) target.classList.add("is-active");
-    }
+          .card b {
+                  font-size: 1.1rem;
+                  color: #2c3e50;
+          }
 
-    // 처음 로드 시: 해시가 있으면 그걸 강조
-    if (location.hash) setActiveByHash(location.hash);
+          .card a {
+                  color: #667eea;
+                  text-decoration: none;
+                  font-weight: 600;
+                  transition: color 0.3s ease;
+          }
 
-    // IntersectionObserver로 스크롤 위치에 맞춰 강조
-    const sections = hashLinks
-      .map(a => document.querySelector(a.getAttribute("href")))
-      .filter(Boolean);
+          .card a:hover {
+                  color: #764ba2;
+          }
 
-    if ("IntersectionObserver" in window && sections.length){
-      const io = new IntersectionObserver((entries) => {
-        // 화면에 들어온 섹션 중 가장 많이 보이는 것 선택
-        const visible = entries
-          .filter(e => e.isIntersecting)
-          .sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+          section {
+                  margin: 40px 0;
+          }
 
-        if(visible && visible.target && visible.target.id){
-          const hash = "#" + visible.target.id;
-          setActiveByHash(hash);
+          section p {
+                  margin: 12px 0;
+                  line-height: 1.8;
+                  color: #444;
+          }
 
-          // 주소창 해시 동기화(원치 않으면 아래 2줄 지워도 됨)
-          history.replaceState(null, "", hash);
-        }
-      }, { root: null, threshold: [0.2, 0.35, 0.5, 0.65] });
+          section b {
+                  font-weight: 600;
+                  color: #2c3e50;
+          }
 
-      sections.forEach(sec => io.observe(sec));
-    }
+          hr {
+                  margin: 40px 0;
+                  border: none;
+                  height: 2px;
+                  background: linear-gradient(90deg, #667eea 0%, transparent 100%);
+          }
 
-    // 해시 클릭 시 즉시 강조
-    hashLinks.forEach(a => {
-      a.addEventListener("click", () => setActiveByHash(a.getAttribute("href")));
-    });
-  </script>
-</body>
-</html>
+          @media (max-width: 768px) {
+                  .wrap {
+                            flex-direction: column;
+                  }
+
+                  aside {
+                            width: 100%;
+                            height: auto;
+                            padding: 20px;
+                            position: relative;
+                  }
+
+                  .brand {
+                            font-size: 1.3rem;
+                  }
+
+                  nav {
+                            flex-direction: row;
+                            flex-wrap: wrap;
+                            gap: 8px;
+                  }
+
+                  nav a {
+                            padding: 8px 12px;
+                            font-size: 0.9rem;
+                  }
+
+                  .container {
+                            padding: 30px 20px;
+                  }
+
+                  h1 {
+                            font-size: 2rem;
+                  }
+
+                  h2 {
+                            font-size: 1.4rem;
+                  }
+
+                  .card {
+                            padding: 16px;
+                  }
+          }
+        </style>
+  </head>
+  <body>
+      <div class="wrap">
+            <aside>
+                    <div class="brand">희망은교회</div>div>
+                    <nav id="menu">
+                              <a href="./" data-nav="home">홈</a>a>
+                              <a href="#worship" data-nav="worship">교회안내</a>a>
+                              <a href="./bulletin/" data-nav="bulletin">주보</a>a>
+                              <a href="#map" data-nav="map">찾아오는 길</a>a>
+                              <a href="./sermon/" data-nav="sermon">주일설교</a>a>
+                    </nav>nav>
+                    <div class="notice">
+                              <strong>|행사|</strong>
+                            <span>성경암송대회(2/22)</span>
+                            <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42" target="_blank" rel="noreferrer">시편42편</a>a>
+                    </div>div>
+            </aside>
+          <main>
+                  <div class="container">
+                            <h1>희망은교회</h1>
+                          <p class="sub"><b>기독교 대한 성결교회 교단에 속한 교회입니다</b></p>p>
+                          
+                          <div class="card">
+                                    <b>이번 주 주보 보기</b><br/>
+                                    <a href="./bulletin/" style="display:inline-block; margin-top:10px;">주보 페이지로 이동 →</a>a>
+                          </div>div>
+                  
+                          <hr/>
+                  
+                          <section id="worship">
+                                    <h2>예배 및 모임 안내</h2>
+                                    <p><b>주일예배</b>b><br/>주일 오전 11:00 / 본당</p>
+                                    <p><b>청소년예배</b><br/>주일 오후 13:30 / 본당</p>
+                                    <p><b>수요예배</b><br/>수요일 오후 7:30</p>
+                          </section>section>
+                  
+                          <hr/>
+                  
+                          <section id="pastor">
+                                    <h2>인사말</h2>
+                                    <p>방문하신 모든 분들을 주님의 이름으로 환영합니다.</p>
+                                    <p>희망은교회는 말씀과 기도로 함께 성장하는 공동체입니다.</p>
+                                    <p>2026년은 만민에게 복음을 전파하라는 말씀을 가지고 예수그리스도가 참 생명되심을 전하는 해가 되길 소망합니다.</p>
+                                    <p>이 복음이 이곳을 잠시 방문한 이들에게, 희망은공동체를 이루고 있는 모든 성도들에게 생명과 새소망으로 들려지길 원합니다.</p>
+                                    <p>희망은교회의 문은 언제나 열려있습니다.</p>
+                                    <p style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+                                                  <b>기독교 대한 성결교회 희망은교회</b><br/>
+                                      담임목사 이일례<br/><br/>
+                                      <b>섬기는 이들</b><br/>
+                                      담임목사 이일례, 협동목사 김영인,<br/>전도사 권성호, 반주자 원지애
+                                    </p>
+                          </section>section>
+                  
+                          <hr/>
+                  
+                          <section id="map">
+                                    <h2>찾아오는 길</h2>
+                                    <p><b>주 소:</b>b> 경기도 부천시 소사구 은성로 62번길 13(3층)</p>
+                                    <p><b>연락처:</b> 010-7795-2102</p>
+                                    <p>
+                                      <a href="https://map.naver.com/v5/search/경기도%20부천시%20소사구%20은성로%2062번길%2013" target="_blank" rel="noreferrer">
+                                                    📍 네이버 지도 열기
+                                      </a>a>
+                                    </p>
+                          </section>section>
+                  </div>div>
+          </main>
+      </div>div>
+  
+    <script>
+          const menu = document.getElementById("menu");
+          const hashLinks = Array.from(menu.querySelectorAll('a[href^="#"]'));
+
+          function setActiveByHash(hash){
+                  hashLinks.forEach(a => a.classList.remove("is-active"));
+                  const target = hashLinks.find(a => a.getAttribute("href") === hash);
+                  if(target) target.classList.add("is-active");
+          }
+
+          if (location.hash) setActiveByHash(location.hash);
+
+          const sections = hashLinks
+            .map(a => document.querySelector(a.getAttribute("href")))
+            .filter(Boolean);
+
+          if ("IntersectionObserver" in window && sections.length){
+                  const io = new IntersectionObserver((entries) => {
+                            const visible = entries
+                              .filter(e => e.isIntersecting)
+                              .sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+                            if(visible && visible.target && visible.target.id){
+                                        const hash = "#" + visible.target.id;
+                                        setActiveByHash(hash);
+                                        history.replaceState(null, "", hash);
+                            }
+                  }, { root: null, threshold: [0.2, 0.35, 0.5, 0.65] });
+                  sections.forEach(sec => io.observe(sec));
+          }
+
+          hashLinks.forEach(a => {
+                  a.addEventListener("click", () => setActiveByHash(a.getAttribute("href")));
+          });
+    </script>
+  </body>
+</html>html>
+    </script></b></p></p></b></b>
+                                    </p></p></b></b></p></p></b></b></h1>
+          </main></span></strong>
+            </aside>
+  </body>
+    </style></title>
+  </head>
