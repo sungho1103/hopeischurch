@@ -155,3 +155,18 @@ h2{
   color:#666;
   font-size:0.95rem;
 }
+/* ===============================
+   Global Header Fixed (Safe)
+   =============================== */
+.site-header{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+/* 헤더 높이만큼 본문을 아래로 밀어 겹침 방지 */
+body{
+  padding-top: var(--header-h, 64px);
+}
