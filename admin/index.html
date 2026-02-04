@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>관리자 | 희망은교회</title>
+
+  <link rel="stylesheet" href="/hopeischurch/assets/common.css?v=20260203-01">
+
+  <style>
+    /* ===============================
+       Admin Page (Scoped)
+    =============================== */
+    body.page-admin main{ background:#f5f6fa; }
+
+    .page-admin .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:20px 16px 48px;
+    }
+
+    .page-admin .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .page-admin main h1{
+      margin:0;
+      font-size:32px;
+      letter-spacing:-.02em;
+    }
+
+    .page-admin .muted{
+      color:#666;
+      font-size:14px;
+      line-height:1.7;
+    }
+
+    .page-admin .grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:16px;
+    }
+
+    .page-admin .card{
+      background:#fff;
+      border-radius:16px;
+      padding:16px;
+      box-shadow:0 6px 14px rgba(0,0,0,.06);
+      min-height:120px;
+    }
+
+    .page-admin .card h2{
+      font-size:1.05rem;
+      margin:0 0 10px;
+      font-weight:700;
+    }
+
+    .page-admin .stat{
+      font-size:28px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .page-admin .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 12px;
+      border-radius:999px;
+      border:1px solid #e6e6e6;
+      font-size:12px;
+      background:#fff;
+      color:#555;
+    }
+
+    .page-admin .section{
+      margin-top:24px;
+      display:grid;
+      grid-template-columns:1.2fr 1fr;
+      gap:16px;
+    }
+
+    .page-admin .panel{
+      background:#fff;
+      border-radius:16px;
+      padding:18px;
+      box-shadow:0 6px 14px rgba(0,0,0,.06);
+    }
+
+    .page-admin .panel h3{
+      margin:0 0 12px;
+      font-size:1rem;
+    }
+
+    .page-admin .list{
+      list-style:none;
+      padding:0;
+      margin:0;
+      display:grid;
+      gap:10px;
+    }
+
+    .page-admin .list li{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid #eceff3;
+      font-size:14px;
+      background:#fafbff;
+    }
+
+    .page-admin .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .page-admin .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid #e6e6e6;
+      background:#fff;
+      font-size:14px;
+      cursor:pointer;
+    }
+
+    .page-admin .btn:hover{ background:#f3f5f9; }
+
+    .page-admin .highlight{
+      border:1px dashed #cbd3e1;
+      background:#f8f9ff;
+    }
+
+    @media (max-width: 980px){
+      .page-admin .grid{ grid-template-columns:1fr; }
+      .page-admin .section{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+
+<body class="page-admin">
+  <div class="wrap">
+    <aside>
+      <div class="brand">희망은교회</div>
+
+      <nav id="menu">
+        <a href="/hopeischurch/" data-nav="home">홈</a>
+        <a href="/hopeischurch/#worship" data-nav="worship">교회안내</a>
+        <a href="/hopeischurch/bulletin/" data-nav="bulletin">주보</a>
+        <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
+        <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
+        <a href="/hopeischurch/admin/" data-nav="admin">관리자</a>
+      </nav>
+
+      <div class="notice">
+        <strong>|안내|</strong><br />
+        관리자 페이지는 교회 내부 운영용입니다.<br />
+        변경 사항은 담당자 승인 후 반영하세요.
+      </div>
+    </aside>
+
+    <main>
+      <div class="container">
+        <div class="topbar">
+          <div>
+            <h1>관리자 대시보드</h1>
+            <div class="muted">주보, 설교문, 공지 업데이트 현황을 한눈에 확인하세요.</div>
+          </div>
+          <div class="pill">마지막 동기화: 2026-02-03 09:00</div>
+        </div>
+
+        <div class="grid">
+          <section class="card">
+            <h2>이번 주 주보</h2>
+            <div class="stat">2월 2주차</div>
+            <div class="muted">최종 수정: 2/3 오전 8:20</div>
+          </section>
+          <section class="card">
+            <h2>설교문 업로드</h2>
+            <div class="stat">4건</div>
+            <div class="muted">최근 업로드: 2/2 (주일)</div>
+          </section>
+          <section class="card">
+            <h2>다음 행사</h2>
+            <div class="stat">성경암송대회</div>
+            <div class="muted">2/22 토요일 오후 2시</div>
+          </section>
+        </div>
+
+        <div class="section">
+          <section class="panel">
+            <h3>콘텐츠 관리</h3>
+            <ul class="list">
+              <li>
+                <span>주보 업로드 및 주차 선택</span>
+                <span class="pill">업데이트 필요</span>
+              </li>
+              <li>
+                <span>설교문 텍스트 파일 업로드</span>
+                <span class="pill">정상</span>
+              </li>
+              <li>
+                <span>교회 소식/행사 공지 수정</span>
+                <span class="pill">진행 중</span>
+              </li>
+            </ul>
+            <div class="actions">
+              <button class="btn" type="button">주보 데이터 열기</button>
+              <button class="btn" type="button">설교문 업로드 안내</button>
+              <button class="btn" type="button">공지 편집 바로가기</button>
+            </div>
+          </section>
+
+          <section class="panel highlight">
+            <h3>이번 주 체크리스트</h3>
+            <ul class="list">
+              <li>
+                <span>예배 순서/위원 확인</span>
+                <span>화요일</span>
+              </li>
+              <li>
+                <span>주보 최종 교정</span>
+                <span>금요일</span>
+              </li>
+              <li>
+                <span>설교문 업로드</span>
+                <span>주일 오후</span>
+              </li>
+            </ul>
+            <div class="muted" style="margin-top:12px;">
+              체크리스트는 주간 회의 후 업데이트하세요.
+            </div>
+          </section>
+        </div>
+
+        <div class="section">
+          <section class="panel">
+            <h3>관리자 메모</h3>
+            <p class="muted">
+              주보 입력 후 주일예배 전까지 모든 항목을 재확인해주세요.
+              특별 행사 공지는 목회자 승인 후 공개합니다.
+            </p>
+            <div class="actions">
+              <button class="btn" type="button">메모 수정</button>
+              <button class="btn" type="button">공지 미리보기</button>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h3>담당자 연락처</h3>
+            <ul class="list">
+              <li>
+                <span>주보 담당</span>
+                <span>010-0000-0000</span>
+              </li>
+              <li>
+                <span>설교문 담당</span>
+                <span>010-0000-0000</span>
+              </li>
+              <li>
+                <span>홈페이지 담당</span>
+                <span>010-0000-0000</span>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
