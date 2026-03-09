@@ -221,21 +221,27 @@
     prevBtn.onclick = () => { if(idx < 0 || idx >= weeks.length - 1) return; setWeekInUrl(weeks[idx + 1].week_id); };
     nextBtn.onclick = () => { if(idx <= 0) return; setWeekInUrl(weeks[idx - 1].week_id); };
   }
-  function renderBulletin(data){
+  function renderBulletin(data, monthCommittees){
     const week = data.week || {};
     document.getElementById("issueText").textContent = week.issue ? "주보 "+week.issue+"호" : "주보";
     document.getElementById("dateText").textContent = week.date || week.week_id || "";
     const news = (data.news || []).map(r => r.text).filter(Boolean);
     const order = (data.worship_order || []);
     const memory = (data.memory_verse || [])[0] || null;
-    const committee = data.committee || [];
-    const committeeByRole = {};
-    committee.forEach(r => { committeeByRole[r.role] = r.name || ""; });
-    const weekId = committee.length ? (committee[0].week_id || "") : "";
-    const committeeHtml = committee.length
-      ? "<table class='roster-table'><thead><tr><th>날짜</th><th>기도</th><th>찬양</th><th>헌금위원</th></tr></thead><tbody><tr><td>"+escapeHtml(weekId)+"</td><td>"+escapeHtml(committeeByRole["기도"]||"")+"</td><td>"+escapeHtml(committeeByRole["찬양"]||"")+"</td><td>"+escapeHtml(committeeByRole["헌금위원"]||"")+"</td></tr></tbody></table>"
+
+    // 예배위원: 월간 전체 주차 표시 (날짜 오름차순)
+    const rows = (monthCommittees || []).sort((a,b) => String(a.week_id).localeCompare(String(b.week_id)));
+    const committeeHtml = rows.length
+      ? "<table class='roster-table'><thead><tr><th>날짜</th><th>기도</th><th>찬양</th><th>헌금위원</th></tr></thead><tbody>"
+        + rows.map(r => "<tr"+(r.week_id === week.week_id ? " style='background:#fffbe6;font-weight:600;'" : "")+">"
+            +"<td>"+escapeHtml(r.week_id||"")+"</td>"
+            +"<td>"+escapeHtml(r.pray||"")+"</td>"
+            +"<td>"+escapeHtml(r.praise||"")+"</td>"
+            +"<td>"+escapeHtml(r.offering||"")+"</td>"
+          +"</tr>").join("")
+        +"</tbody></table>"
       : "<div class='muted'>예배위원 정보가 없습니다.</div>";
-    
+
     const orderHtml = order.length
       ? "<table class='order-table'><thead><tr><th style='width:70px;'>순서</th><th>내용</th><th style='width:90px;'>담당</th></tr></thead><tbody>"+order.map(r => "<tr><td>"+escapeHtml(r.step||"")+"</td><td>"+escapeHtml(r.content||"")+"</td><td>"+escapeHtml(r.person||"")+"</td></tr>").join("")+"</tbody></table>"
       : "<div class='muted'>예배순서가 없습니다.</div>";
@@ -251,8 +257,30 @@
     const { weeks, selected } = await loadWeeks();
     if(!weeks.length) return;
     hookPrevNext(weeks, selected);
+
+    // 현재 주차 데이터 로드
     const data = await fetchJSON(DATA_BASE+"/"+encodeURIComponent(selected)+".json");
-    renderBulletin(data);
+
+    // 같은 달(YYYY-MM)의 모든 주차 찾기
+    const selMonth = selected.slice(0,7); // "2026-03"
+    const sameMonthWeeks = weeks.filter(w => w.week_id.slice(0,7) === selMonth);
+
+    // 병렬로 같은 달 모든 주차 데이터 fetch → committee 취합
+    const monthDataArr = await Promise.all(
+      sameMonthWeeks.map(w => fetchJSON(DATA_BASE+"/"+encodeURIComponent(w.week_id)+".json").catch(()=>null))
+    );
+
+    // 각 주차의 committee를 role별로 합쳐서 한 행으로 만들기
+    const monthCommittees = monthDataArr
+      .filter(Boolean)
+      .map(d => {
+        const wid = (d.week && d.week.week_id) || "";
+        const byRole = {};
+        (d.committee||[]).forEach(r => { byRole[r.role] = r.name||""; });
+        return { week_id: wid, pray: byRole["기도"]||"", praise: byRole["찬양"]||"", offering: byRole["헌금위원"]||"" };
+      });
+
+    renderBulletin(data, monthCommittees);
   }
   main().catch(err => {
     console.error(err);
