@@ -258,27 +258,25 @@
     if(!weeks.length) return;
     hookPrevNext(weeks, selected);
 
-    // 현재 주차 데이터 로드
-    const data = await fetchJSON(DATA_BASE+"/"+encodeURIComponent(selected)+".json");
+    // 현재 주차 데이터 + committee.json 병렬 로드
+    const [data, allCommittee] = await Promise.all([
+      fetchJSON(DATA_BASE+"/"+encodeURIComponent(selected)+".json"),
+      fetchJSON(DATA_BASE+"/committee.json").catch(()=>[])
+    ]);
 
-    // 같은 달(YYYY-MM)의 모든 주차 찾기
-    const selMonth = selected.slice(0,7); // "2026-03"
-    const sameMonthWeeks = weeks.filter(w => w.week_id.slice(0,7) === selMonth);
+    // committee.json에서 해당 월(YYYY-MM)의 데이터만 필터링
+    const selMonth = selected.slice(0,7);
+    const monthRaws = allCommittee.filter(r => r.week_id && r.week_id.slice(0,7) === selMonth);
 
-    // 병렬로 같은 달 모든 주차 데이터 fetch → committee 취합
-    const monthDataArr = await Promise.all(
-      sameMonthWeeks.map(w => fetchJSON(DATA_BASE+"/"+encodeURIComponent(w.week_id)+".json").catch(()=>null))
-    );
-
-    // 각 주차의 committee를 role별로 합쳐서 한 행으로 만들기
-    const monthCommittees = monthDataArr
-      .filter(Boolean)
-      .map(d => {
-        const wid = (d.week && d.week.week_id) || "";
-        const byRole = {};
-        (d.committee||[]).forEach(r => { byRole[r.role] = r.name||""; });
-        return { week_id: wid, pray: byRole["기도"]||"", praise: byRole["찬양"]||"", offering: byRole["헌금위원"]||"" };
-      });
+    // week_id별로 그룹핑 → 한 행으로
+    const byWeek = {};
+    monthRaws.forEach(r => {
+      if(!byWeek[r.week_id]) byWeek[r.week_id] = { week_id: r.week_id, pray:"", praise:"", offering:"" };
+      if(r.role === "기도") byWeek[r.week_id].pray = r.name||"";
+      if(r.role === "찬양") byWeek[r.week_id].praise = r.name||"";
+      if(r.role === "헌금위원") byWeek[r.week_id].offering = r.name||"";
+    });
+    const monthCommittees = Object.values(byWeek).sort((a,b) => a.week_id.localeCompare(b.week_id));
 
     renderBulletin(data, monthCommittees);
   }
