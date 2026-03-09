@@ -13,7 +13,7 @@ async function main() {
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     const payload = await res.json();
 
-  const { weeks, data } = payload;
+  const { weeks, data, allCommittee } = payload;
     if (!weeks || !data) throw new Error("Invalid response: missing weeks or data");
 
   const outDir = join(__dirname, "..", "bulletin", "data");
@@ -23,6 +23,13 @@ async function main() {
   const indexPath = join(outDir, "index.json");
     writeFileSync(indexPath, JSON.stringify(weeks, null, 2), "utf8");
     console.log(`Written: bulletin/data/index.json (${weeks.length} weeks)`);
+
+  // committee.json - 예배위원 전체 (weeks와 무관하게 모든 데이터)
+  if (allCommittee) {
+    const committeePath = join(outDir, "committee.json");
+    writeFileSync(committeePath, JSON.stringify(allCommittee, null, 2), "utf8");
+    console.log(`Written: bulletin/data/committee.json (${allCommittee.length} rows)`);
+  }
 
   // 주차별 JSON 파일
   for (const [weekId, weekData] of Object.entries(data)) {
