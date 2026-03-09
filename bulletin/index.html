@@ -229,9 +229,13 @@
     const order = (data.worship_order || []);
     const memory = (data.memory_verse || [])[0] || null;
     const committee = data.committee || [];
+    const committeeByRole = {};
+    committee.forEach(r => { committeeByRole[r.role] = r.name || ""; });
+    const weekId = committee.length ? (committee[0].week_id || "") : "";
     const committeeHtml = committee.length
-      ? "<table class='roster-table'><thead><tr><th>날짜</th><th>기도</th><th>찬양</th><th>헌금위원</th></tr></thead><tbody>"+committee.map(r => "<tr><td>"+escapeHtml(r.date||r.week_id||"")+"</td><td>"+escapeHtml(r.pray||"")+"</td><td>"+escapeHtml(r.praise||"")+"</td><td>"+escapeHtml(r.offering||"")+"</td></tr>").join("")+"</tbody></table>"
+      ? "<table class='roster-table'><thead><tr><th>날짜</th><th>기도</th><th>찬양</th><th>헌금위원</th></tr></thead><tbody><tr><td>"+escapeHtml(weekId)+"</td><td>"+escapeHtml(committeeByRole["기도"]||"")+"</td><td>"+escapeHtml(committeeByRole["찬양"]||"")+"</td><td>"+escapeHtml(committeeByRole["헌금위원"]||"")+"</td></tr></tbody></table>"
       : "<div class='muted'>예배위원 정보가 없습니다.</div>";
+    
     const orderHtml = order.length
       ? "<table class='order-table'><thead><tr><th style='width:70px;'>순서</th><th>내용</th><th style='width:90px;'>담당</th></tr></thead><tbody>"+order.map(r => "<tr><td>"+escapeHtml(r.step||"")+"</td><td>"+escapeHtml(r.content||"")+"</td><td>"+escapeHtml(r.person||"")+"</td></tr>").join("")+"</tbody></table>"
       : "<div class='muted'>예배순서가 없습니다.</div>";
