@@ -52,7 +52,8 @@ main{
   font-size:1.2rem;
   font-weight:700;
   margin-bottom:20px;
-  padding-left:12px;
+  padding-left:0;
+  text-align:center;
 }
 
 nav{
@@ -65,6 +66,7 @@ nav a{
   display:block;
   padding:10px 12px;
   border-radius:10px;
+  text-align:center;
 }
 
 nav a:hover{
