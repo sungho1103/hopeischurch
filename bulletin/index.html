@@ -143,11 +143,7 @@
       <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
       <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
     </nav>
-    <div class="notice">
-      <strong>행사</strong>
-      <span>성경암송대회(2/22)</span>
-      <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42" target="_blank" rel="noreferrer">시편42편</a>
-    </div>
+    <div class="notice" id="siteNotice"></div>
   </aside>
   <main>
     <div class="container">
@@ -181,6 +177,16 @@
   </main>
 </div>
 <script>
+  // 공지사항 동적 로드
+  fetch('/hopeischurch/data/notice.json',{cache:'no-store'})
+    .then(r=>r.json()).then(n=>{
+      const el=document.getElementById('siteNotice'); if(!el) return;
+      let h=`<strong>${escapeHtml(n.title)}</strong>`;
+      if(n.text) h+=`<br>${escapeHtml(n.text)}`;
+      if(n.link_url) h+=`<br><a href="${escapeHtml(n.link_url)}" target="_blank" rel="noreferrer">${escapeHtml(n.link_text||n.link_url)}</a>`;
+      el.innerHTML=h;
+    }).catch(()=>{});
+
   const DATA_BASE = "/hopeischurch/bulletin/data";
   const qs = new URLSearchParams(location.search);
   const weekParam = qs.get("week");

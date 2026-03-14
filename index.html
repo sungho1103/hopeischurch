@@ -210,11 +210,7 @@
         <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
         <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
       </nav>
-      <div class="notice">
-        <strong>|행사|</strong><br>
-        성경암송대회(2/22)<br>
-        <a href="https://goodtvbible.goodtv.co.kr/onbibleread/0/19/42" target="_blank" rel="noreferrer">시편42편</a>
-      </div>
+      <div class="notice" id="siteNotice"></div>
     </aside>
 
     <main>
@@ -333,6 +329,19 @@
   </div>
 
   <script>
+    // 공지사항 동적 로드
+    (function(){
+      function _e(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+      fetch('/hopeischurch/data/notice.json',{cache:'no-store'})
+        .then(r=>r.json()).then(n=>{
+          const el=document.getElementById('siteNotice'); if(!el) return;
+          let h=`<strong>${_e(n.title)}</strong>`;
+          if(n.text) h+=`<br>${_e(n.text)}`;
+          if(n.link_url) h+=`<br><a href="${_e(n.link_url)}" target="_blank" rel="noreferrer">${_e(n.link_text||n.link_url)}</a>`;
+          el.innerHTML=h;
+        }).catch(()=>{});
+    })();
+
     const menu = document.getElementById("menu");
     if (menu) {
       const hashLinks = Array.from(menu.querySelectorAll('a[href*="#"]'));

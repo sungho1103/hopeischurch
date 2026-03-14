@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>관리자 | 희망은교회</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif; font-size: 14px; background: #f5f5f5; color: #111; line-height: 1.6; }
+    a { color: inherit; }
+
+    /* ── Login ── */
+    #loginScreen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; background: #f5f5f5;
+    }
+    .login-card {
+      background: #fff; border: 1px solid #e0e0e0; border-radius: 12px;
+      padding: 40px 36px; width: 320px; text-align: center;
+    }
+    .login-card h1 { font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
+    .login-card p  { font-size: .85rem; color: #888; margin-bottom: 28px; }
+    .login-card input {
+      width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 14px; margin-bottom: 12px; outline: none;
+    }
+    .login-card input:focus { border-color: #333; }
+    .login-card button {
+      width: 100%; padding: 11px; background: #111; color: #fff;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .login-card button:hover { background: #333; }
+
+    /* ── Admin shell ── */
+    #adminApp { display: none; min-height: 100vh; }
+    .admin-header {
+      background: #111; color: #fff; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 52px; position: sticky; top: 0; z-index: 100;
+    }
+    .admin-brand { font-weight: 700; font-size: .95rem; }
+    .header-btns { display: flex; gap: 8px; }
+    .header-btns button {
+      padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer;
+      background: transparent; color: #ccc; border: 1px solid #444;
+    }
+    .header-btns button:hover { background: #222; color: #fff; }
+
+    /* ── Tab bar ── */
+    .tab-bar {
+      background: #fff; border-bottom: 1px solid #e0e0e0;
+      display: flex; padding: 0 24px; gap: 0;
+    }
+    .tab-btn {
+      padding: 14px 20px; border: none; background: transparent;
+      font-size: 13px; font-weight: 600; color: #888; cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .tab-btn:hover { color: #333; }
+    .tab-btn.active { color: #111; border-bottom-color: #111; }
+
+    /* ── Body ── */
+    .admin-body { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    /* ── Section headings ── */
+    .tab-pane h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
+
+    /* ── Forms ── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; letter-spacing: .02em; text-transform: uppercase; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 13px; font-family: inherit; outline: none; background: #fff;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: #555; }
+    .form-group textarea { resize: vertical; }
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+    /* ── Buttons ── */
+    .btn-save {
+      margin-top: 20px; padding: 11px 28px; background: #111; color: #fff;
+      border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-save:hover { background: #333; }
+    .btn-add {
+      margin-top: 10px; padding: 7px 16px; background: #fff; color: #333;
+      border: 1px solid #ccc; border-radius: 6px; font-size: 12px; cursor: pointer;
+    }
+    .btn-add:hover { background: #f5f5f5; }
+    .btn-del {
+      padding: 4px 10px; background: #fff; color: #c00;
+      border: 1px solid #e0c0c0; border-radius: 4px; font-size: 11px; cursor: pointer;
+    }
+    .btn-del:hover { background: #fff5f5; }
+    .btn-icon {
+      padding: 4px 8px; background: #fff; color: #666;
+      border: 1px solid #ddd; border-radius: 4px; font-size: 12px; cursor: pointer;
+    }
+    .btn-icon:hover { background: #f5f5f5; }
+
+    /* ── Card ── */
+    .card {
+      background: #fff; border: 1px solid #e4e4e4; border-radius: 12px;
+      padding: 20px 20px; margin-bottom: 20px;
+    }
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .card-title { font-size: .9rem; font-weight: 700; }
+
+    /* ── Tables ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th {
+      background: #fafafa; padding: 8px 10px; text-align: left;
+      font-weight: 600; font-size: 11px; color: #666; border-bottom: 1px solid #e4e4e4;
+      text-transform: uppercase; letter-spacing: .03em;
+    }
+    .data-table td { padding: 7px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table input {
+      width: 100%; padding: 5px 8px; border: 1px solid #e0e0e0; border-radius: 5px;
+      font-size: 12px; font-family: inherit; outline: none;
+    }
+    .data-table input:focus { border-color: #666; }
+
+    /* ── Committee ── */
+    .committee-top { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
+    .committee-top input {
+      padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 13px; width: 160px; outline: none;
+    }
+    .committee-top input:focus { border-color: #555; }
+    .committee-top button {
+      padding: 8px 16px; background: #111; color: #fff;
+      border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .committee-top button:hover { background: #333; }
+
+    /* ── Bulletin ── */
+    .bulletin-top { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+    .bulletin-top select {
+      flex: 1; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 13px; outline: none; background: #fff;
+    }
+    .bulletin-top button {
+      padding: 9px 16px; background: #111; color: #fff;
+      border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+      white-space: nowrap;
+    }
+    .bulletin-top button:hover { background: #333; }
+    details { margin-bottom: 16px; }
+    details > summary {
+      cursor: pointer; font-size: .9rem; font-weight: 700; padding: 12px 16px;
+      background: #fafafa; border: 1px solid #e4e4e4; border-radius: 8px;
+      user-select: none; list-style: none;
+    }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::before { content: "▶ "; font-size: 10px; color: #888; }
+    details[open] > summary { border-radius: 8px 8px 0 0; border-bottom: none; }
+    details[open] > summary::before { content: "▼ "; }
+    .detail-body {
+      border: 1px solid #e4e4e4; border-top: none;
+      border-radius: 0 0 8px 8px; padding: 16px;
+      background: #fff;
+    }
+
+    /* ── News rows ── */
+    .news-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .news-row input {
+      flex: 1; padding: 7px 10px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: 13px; font-family: inherit; outline: none;
+    }
+    .news-row input:focus { border-color: #555; }
+
+    /* ── Modal ── */
+    .modal-wrap {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-wrap.open { display: flex; }
+    .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.4); }
+    .modal-box {
+      position: relative; background: #fff; border-radius: 12px;
+      padding: 28px; width: 420px; max-width: 90vw; z-index: 1;
+    }
+    .modal-box h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .modal-box p  { font-size: .85rem; color: #666; margin-bottom: 18px; line-height: 1.6; }
+    .modal-box input {
+      width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 13px; margin-bottom: 14px; outline: none; font-family: inherit;
+    }
+    .modal-box input:focus { border-color: #555; }
+    .modal-btns { display: flex; gap: 8px; }
+    .modal-btns button {
+      flex: 1; padding: 10px; border-radius: 8px; font-size: 13px;
+      font-weight: 600; cursor: pointer; border: none;
+    }
+    .modal-btns .btn-primary { background: #111; color: #fff; }
+    .modal-btns .btn-primary:hover { background: #333; }
+    .modal-btns .btn-cancel { background: #f0f0f0; color: #333; }
+    .modal-btns .btn-cancel:hover { background: #e0e0e0; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; padding: 10px 18px;
+      border-radius: 8px; font-size: 13px; font-weight: 600;
+      background: #111; color: #fff; opacity: 0; pointer-events: none;
+      transition: opacity .2s; z-index: 999;
+    }
+    .toast.show { opacity: 1; }
+    .toast.err  { background: #c00; }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .modal-box { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>희망은교회</h1>
+    <p>관리자 페이지</p>
+    <form id="loginForm">
+      <input id="pwInput" type="password" placeholder="비밀번호" autocomplete="current-password" autofocus>
+      <button type="submit">로그인</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════ ADMIN APP ═══════════════ -->
+<div id="adminApp">
+  <header class="admin-header">
+    <span class="admin-brand">희망은교회 관리자</span>
+    <div class="header-btns">
+      <button onclick="openTokenModal()">🔑 GitHub 토큰</button>
+      <button onclick="logout()">로그아웃</button>
+    </div>
+  </header>
+
+  <div class="tab-bar">
+    <button class="tab-btn" data-tab="notice"    onclick="switchTab('notice')">공지사항</button>
+    <button class="tab-btn" data-tab="committee" onclick="switchTab('committee')">예배위원</button>
+    <button class="tab-btn" data-tab="bulletin"  onclick="switchTab('bulletin')">주보</button>
+  </div>
+
+  <div class="admin-body">
+
+    <!-- ── 공지사항 ── -->
+    <div id="tab-notice" class="tab-pane">
+      <h2>공지사항</h2>
+      <div class="card">
+        <div class="form-group">
+          <label>제목</label>
+          <input id="noticeTitle" type="text" placeholder="|행사|">
+        </div>
+        <div class="form-group">
+          <label>내용</label>
+          <textarea id="noticeText" rows="3" placeholder="행사 내용을 입력하세요"></textarea>
+        </div>
+        <div class="form-group">
+          <label>링크 URL (선택)</label>
+          <input id="noticeLinkUrl" type="text" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>링크 텍스트 (선택)</label>
+          <input id="noticeLinkText" type="text" placeholder="시편42편">
+        </div>
+        <button class="btn-save" onclick="saveNotice()">저장</button>
+      </div>
+    </div>
+
+    <!-- ── 예배위원 ── -->
+    <div id="tab-committee" class="tab-pane" style="display:none">
+      <h2>예배위원</h2>
+      <div class="card">
+        <div class="committee-top">
+          <input id="newWeekId" type="text" placeholder="새 주차 YYYY-MM-DD">
+          <button onclick="addCommitteeWeek()">+ 주차 추가</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:120px">날짜</th>
+                <th>기도</th>
+                <th>찬양</th>
+                <th>헌금위원</th>
+                <th style="width:50px"></th>
+              </tr>
+            </thead>
+            <tbody id="committeeTableBody"></tbody>
+          </table>
+        </div>
+        <button class="btn-save" onclick="saveCommittee()">저장</button>
+      </div>
+    </div>
+
+    <!-- ── 주보 ── -->
+    <div id="tab-bulletin" class="tab-pane" style="display:none">
+      <h2>주보</h2>
+      <div class="bulletin-top">
+        <select id="bulletinWeekSelect" onchange="loadBulletinWeek(this.value)">
+          <option value="">— 주차 선택 —</option>
+        </select>
+        <button onclick="newBulletinWeek()">새 주차 추가</button>
+      </div>
+
+      <div id="bulletinForm" style="display:none">
+        <!-- 기본 정보 -->
+        <details open>
+          <summary>기본 정보</summary>
+          <div class="detail-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>week_id</label>
+                <input id="bWeekId" type="text" placeholder="2026-03-15">
+              </div>
+              <div class="form-group">
+                <label>날짜 표시</label>
+                <input id="bDate" type="text" placeholder="2026.03.15">
+              </div>
+              <div class="form-group">
+                <label>호수</label>
+                <input id="bIssue" type="text" placeholder="26-11">
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- 예배순서 -->
+        <details open>
+          <summary>예배순서</summary>
+          <div class="detail-body">
+            <div style="overflow-x:auto">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width:130px">순서</th>
+                    <th>내용</th>
+                    <th style="width:130px">담당</th>
+                    <th style="width:36px"></th>
+                  </tr>
+                </thead>
+                <tbody id="orderTableBody"></tbody>
+              </table>
+            </div>
+            <button class="btn-add" onclick="addOrderRow()">+ 행 추가</button>
+          </div>
+        </details>
+
+        <!-- 외울말씀 -->
+        <details open>
+          <summary>외울말씀</summary>
+          <div class="detail-body">
+            <div class="form-group">
+              <label>성경구절</label>
+              <input id="bVerseRef" type="text" placeholder="요 3:16">
+            </div>
+            <div class="form-group">
+              <label>본문</label>
+              <textarea id="bVerseText" rows="5" placeholder="말씀 본문을 입력하세요"></textarea>
+            </div>
+          </div>
+        </details>
+
+        <!-- 교회소식 -->
+        <details open>
+          <summary>교회소식</summary>
+          <div class="detail-body">
+            <div id="newsContainer"></div>
+            <button class="btn-add" onclick="addNewsItem()">+ 소식 추가</button>
+          </div>
+        </details>
+
+        <button class="btn-save" onclick="saveBulletin()">저장</button>
+      </div>
+    </div>
+
+  </div><!-- /admin-body -->
+</div><!-- /adminApp -->
+
+<!-- ═══════════════ GitHub TOKEN MODAL ═══════════════ -->
+<div id="tokenModal" class="modal-wrap">
+  <div class="modal-overlay" onclick="closeTokenModal()"></div>
+  <div class="modal-box">
+    <h3>GitHub 토큰 설정</h3>
+    <p>
+      GitHub → Settings → Developer settings → Personal access tokens에서<br>
+      <b>repo</b> 권한의 토큰을 발급하세요.<br>
+      토큰은 이 기기의 localStorage에만 저장됩니다.
+    </p>
+    <input id="tokenInput" type="password" placeholder="ghp_...">
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="saveToken()">저장</button>
+      <button class="btn-cancel"  onclick="closeTokenModal()">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div id="toast" class="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════
+   상수
+════════════════════════════════════════════ */
+const PASSWORD  = 'hopeischurch';
+const REPO      = 'sungho1103/hopeischurch';
+const BRANCH    = 'main';
+const API       = `https://api.github.com/repos/${REPO}/contents`;
+
+/* ════════════════════════════════════════════
+   유틸
+════════════════════════════════════════════ */
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function b64e(str) { return btoa(unescape(encodeURIComponent(str))); }
+function b64d(str) { return decodeURIComponent(escape(atob(str.replace(/\n/g,'')))); }
+function token()   { return localStorage.getItem('gh_token') || ''; }
+
+/* ════════════════════════════════════════════
+   GitHub API
+════════════════════════════════════════════ */
+async function ghGet(path) {
+  const r = await fetch(`${API}/${path}?ref=${BRANCH}&_=${Date.now()}`, {
+    headers: { Authorization: `token ${token()}`, Accept: 'application/vnd.github.v3+json' }
+  });
+  if (!r.ok) throw new Error(`${r.status} /${path}`);
+  const d = await r.json();
+  return { text: b64d(d.content), sha: d.sha };
+}
+
+async function ghSave(path, text, sha, msg) {
+  const body = { message: msg, content: b64e(text), branch: BRANCH };
+  if (sha) body.sha = sha;
+  const r = await fetch(`${API}/${path}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `token ${token()}`,
+      Accept: 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) {
+    const e = await r.json().catch(() => ({}));
+    throw new Error(e.message || `${r.status}`);
+  }
+  return await r.json();
+}
+
+/* ════════════════════════════════════════════
+   Toast
+════════════════════════════════════════════ */
+function toast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type === 'err' ? ' err' : '');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => { t.className = 'toast'; }, 2800);
+}
+
+/* ════════════════════════════════════════════
+   인증
+════════════════════════════════════════════ */
+function isLoggedIn() { return sessionStorage.getItem('admin') === '1'; }
+
+function login(pw) {
+  if (pw === PASSWORD) {
+    sessionStorage.setItem('admin', '1');
+    showAdmin();
+  } else {
+    toast('비밀번호가 틀렸습니다', 'err');
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('admin');
+  location.reload();
+}
+
+function showAdmin() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminApp').style.display = '';
+  switchTab('notice');
+}
+
+/* ════════════════════════════════════════════
+   탭 전환
+════════════════════════════════════════════ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === tab)
+  );
+  document.querySelectorAll('.tab-pane').forEach(p =>
+    p.style.display = (p.id === `tab-${tab}`) ? '' : 'none'
+  );
+  if (tab === 'notice')    loadNotice();
+  if (tab === 'committee') loadCommittee();
+  if (tab === 'bulletin')  loadBulletinIndex();
+}
+
+/* ════════════════════════════════════════════
+   GitHub 토큰 모달
+════════════════════════════════════════════ */
+function openTokenModal() {
+  document.getElementById('tokenInput').value = localStorage.getItem('gh_token') || '';
+  document.getElementById('tokenModal').classList.add('open');
+}
+function closeTokenModal() {
+  document.getElementById('tokenModal').classList.remove('open');
+}
+function saveToken() {
+  const v = document.getElementById('tokenInput').value.trim();
+  if (!v) { toast('토큰을 입력하세요', 'err'); return; }
+  localStorage.setItem('gh_token', v);
+  closeTokenModal();
+  toast('토큰 저장됨');
+}
+
+/* ════════════════════════════════════════════
+   공지사항
+════════════════════════════════════════════ */
+let _noticeSha = null;
+
+async function loadNotice() {
+  try {
+    const { text, sha } = await ghGet('data/notice.json');
+    _noticeSha = sha;
+    const n = JSON.parse(text);
+    document.getElementById('noticeTitle').value   = n.title    || '';
+    document.getElementById('noticeText').value    = n.text     || '';
+    document.getElementById('noticeLinkUrl').value = n.link_url || '';
+    document.getElementById('noticeLinkText').value= n.link_text|| '';
+  } catch(e) {
+    _noticeSha = null; // 파일 없음 → 새로 만들기
+  }
+}
+
+async function saveNotice() {
+  const n = {
+    title:     document.getElementById('noticeTitle').value.trim(),
+    text:      document.getElementById('noticeText').value.trim(),
+    link_url:  document.getElementById('noticeLinkUrl').value.trim(),
+    link_text: document.getElementById('noticeLinkText').value.trim(),
+  };
+  try {
+    const res = await ghSave('data/notice.json', JSON.stringify(n, null, 2), _noticeSha, 'content: 공지사항 업데이트');
+    _noticeSha = res.content.sha;
+    toast('공지사항 저장됨 ✓');
+  } catch(e) {
+    toast('저장 실패: ' + e.message, 'err');
+  }
+}
+
+/* ════════════════════════════════════════════
+   예배위원
+════════════════════════════════════════════ */
+let _committeeSha  = null;
+let _committeeData = [];
+
+async function loadCommittee() {
+  try {
+    const { text, sha } = await ghGet('bulletin/data/committee.json');
+    _committeeSha  = sha;
+    _committeeData = JSON.parse(text);
+    renderCommitteeTable();
+  } catch(e) {
+    toast('예배위원 로드 실패: ' + e.message, 'err');
+  }
+}
+
+function renderCommitteeTable() {
+  // week_id별 그룹핑
+  const byWeek = {};
+  _committeeData.forEach(r => {
+    if (!byWeek[r.week_id]) byWeek[r.week_id] = { pray: '', praise: '', offering: '' };
+    if (r.role === '기도')   byWeek[r.week_id].pray     = r.name;
+    if (r.role === '찬양')   byWeek[r.week_id].praise   = r.name;
+    if (r.role === '헌금위원') byWeek[r.week_id].offering = r.name;
+  });
+  const weeks = Object.keys(byWeek).sort();
+  document.getElementById('committeeTableBody').innerHTML = weeks.map(w => `
+    <tr>
+      <td><input class="c-week" readonly value="${esc(w)}" style="width:110px;background:#fafafa;color:#888;"></td>
+      <td><input class="c-input" data-week="${esc(w)}" data-role="기도"   value="${esc(byWeek[w].pray)}"></td>
+      <td><input class="c-input" data-week="${esc(w)}" data-role="찬양"   value="${esc(byWeek[w].praise)}"></td>
+      <td><input class="c-input" data-week="${esc(w)}" data-role="헌금위원" value="${esc(byWeek[w].offering)}"></td>
+      <td><button class="btn-del" onclick="deleteCommitteeWeek('${esc(w)}')">삭제</button></td>
+    </tr>
+  `).join('');
+}
+
+function deleteCommitteeWeek(weekId) {
+  _committeeData = _committeeData.filter(r => r.week_id !== weekId);
+  renderCommitteeTable();
+}
+
+function addCommitteeWeek() {
+  const w = document.getElementById('newWeekId').value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(w)) { toast('날짜 형식: YYYY-MM-DD', 'err'); return; }
+  if (_committeeData.some(r => r.week_id === w)) { toast('이미 있는 주차입니다', 'err'); return; }
+  _committeeData.push({ week_id: w, role: '기도', name: '' });
+  _committeeData.push({ week_id: w, role: '찬양', name: '' });
+  _committeeData.push({ week_id: w, role: '헌금위원', name: '' });
+  _committeeData.sort((a, b) => a.week_id.localeCompare(b.week_id));
+  renderCommitteeTable();
+  document.getElementById('newWeekId').value = '';
+}
+
+async function saveCommittee() {
+  // 화면 입력값 수집
+  const newData = [];
+  document.querySelectorAll('.c-input').forEach(inp => {
+    const name = inp.value.trim();
+    if (name) newData.push({ week_id: inp.dataset.week, role: inp.dataset.role, name });
+  });
+  try {
+    const res = await ghSave('bulletin/data/committee.json', JSON.stringify(newData, null, 2), _committeeSha, 'content: 예배위원 업데이트');
+    _committeeSha  = res.content.sha;
+    _committeeData = newData;
+    toast('예배위원 저장됨 ✓');
+  } catch(e) {
+    toast('저장 실패: ' + e.message, 'err');
+  }
+}
+
+/* ════════════════════════════════════════════
+   주보
+════════════════════════════════════════════ */
+let _bulletinIndexSha = null;
+let _bulletinIndex    = [];
+let _currentBulletinSha = null;
+
+async function loadBulletinIndex() {
+  try {
+    const { text, sha } = await ghGet('bulletin/data/index.json');
+    _bulletinIndexSha = sha;
+    _bulletinIndex    = JSON.parse(text);
+    const sel = document.getElementById('bulletinWeekSelect');
+    sel.innerHTML = '<option value="">— 주차 선택 —</option>' +
+      _bulletinIndex.map(w =>
+        `<option value="${esc(w.week_id)}">${esc(w.date || w.week_id)} (${esc(w.issue || '')})</option>`
+      ).join('');
+  } catch(e) {
+    toast('주보 목록 로드 실패: ' + e.message, 'err');
+  }
+}
+
+async function loadBulletinWeek(weekId) {
+  if (!weekId) { document.getElementById('bulletinForm').style.display = 'none'; return; }
+  try {
+    const { text, sha } = await ghGet(`bulletin/data/${weekId}.json`);
+    _currentBulletinSha = sha;
+    fillBulletinForm(JSON.parse(text));
+    document.getElementById('bulletinForm').style.display = '';
+  } catch(e) {
+    toast('주보 로드 실패: ' + e.message, 'err');
+  }
+}
+
+function newBulletinWeek() {
+  const weekId = prompt('새 주차 날짜 (YYYY-MM-DD):');
+  if (!weekId) return;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(weekId)) { toast('날짜 형식: YYYY-MM-DD', 'err'); return; }
+  _currentBulletinSha = null;
+  fillBulletinForm({
+    week: { week_id: weekId, date: weekId.replace(/-/g, '.'), issue: '', title: '주일예배' },
+    worship_order: [], memory_verse: [], news: []
+  });
+  document.getElementById('bulletinWeekSelect').value = '';
+  document.getElementById('bulletinForm').style.display = '';
+}
+
+function fillBulletinForm(data) {
+  const w = data.week || {};
+  document.getElementById('bWeekId').value   = w.week_id || '';
+  document.getElementById('bDate').value     = w.date    || '';
+  document.getElementById('bIssue').value    = w.issue   || '';
+  renderOrderRows(data.worship_order || []);
+  const mv = (data.memory_verse || [])[0] || {};
+  document.getElementById('bVerseRef').value  = mv.reference || '';
+  document.getElementById('bVerseText').value = mv.text      || '';
+  renderNewsItems(data.news || []);
+}
+
+function renderOrderRows(order) {
+  document.getElementById('orderTableBody').innerHTML = order.map(r => `
+    <tr>
+      <td><input class="o-step"    value="${esc(r.step    || '')}"></td>
+      <td><input class="o-content" value="${esc(r.content || '')}"></td>
+      <td><input class="o-person"  value="${esc(r.person  || '')}"></td>
+      <td><button class="btn-icon" onclick="this.closest('tr').remove()">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function addOrderRow() {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="o-step"    value=""></td>
+    <td><input class="o-content" value=""></td>
+    <td><input class="o-person"  value=""></td>
+    <td><button class="btn-icon" onclick="this.closest('tr').remove()">✕</button></td>
+  `;
+  document.getElementById('orderTableBody').appendChild(tr);
+}
+
+function renderNewsItems(news) {
+  document.getElementById('newsContainer').innerHTML = news.map(n => `
+    <div class="news-row">
+      <input class="n-text" value="${esc(n.text || '')}">
+      <button class="btn-icon" onclick="this.parentElement.remove()">✕</button>
+    </div>
+  `).join('');
+}
+
+function addNewsItem() {
+  const div = document.createElement('div');
+  div.className = 'news-row';
+  div.innerHTML = `<input class="n-text" value=""><button class="btn-icon" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('newsContainer').appendChild(div);
+}
+
+async function saveBulletin() {
+  const weekId = document.getElementById('bWeekId').value.trim();
+  if (!weekId) { toast('week_id를 입력하세요', 'err'); return; }
+
+  const worship_order = [];
+  document.querySelectorAll('#orderTableBody tr').forEach((tr, i) => {
+    const step    = tr.querySelector('.o-step').value.trim();
+    const content = tr.querySelector('.o-content').value.trim();
+    const person  = tr.querySelector('.o-person').value.trim();
+    if (step || content || person)
+      worship_order.push({ week_id: weekId, order: i + 1, step, content, person });
+  });
+
+  const verseRef  = document.getElementById('bVerseRef').value.trim();
+  const verseText = document.getElementById('bVerseText').value.trim();
+  const memory_verse = (verseRef || verseText)
+    ? [{ week_id: weekId, reference: verseRef, text: verseText }] : [];
+
+  const news = [];
+  document.querySelectorAll('#newsContainer .n-text').forEach((inp, i) => {
+    const t = inp.value.trim();
+    if (t) news.push({ week_id: weekId, order: i + 1, text: t });
+  });
+
+  const date  = document.getElementById('bDate').value.trim();
+  const issue = document.getElementById('bIssue').value.trim();
+  const data  = { week: { week_id: weekId, date, issue, title: '주일예배' }, worship_order, memory_verse, news };
+
+  try {
+    const res = await ghSave(`bulletin/data/${weekId}.json`, JSON.stringify(data, null, 2), _currentBulletinSha, `content: 주보 ${weekId} ${_currentBulletinSha ? '업데이트' : '추가'}`);
+    _currentBulletinSha = res.content.sha;
+
+    // 새 주차면 index.json도 업데이트
+    if (!_bulletinIndex.find(w => w.week_id === weekId)) {
+      _bulletinIndex = [{ week_id: weekId, date, issue, title: '주일예배' }, ..._bulletinIndex]
+        .sort((a, b) => b.week_id.localeCompare(a.week_id));
+      const idxRes = await ghSave('bulletin/data/index.json', JSON.stringify(_bulletinIndex, null, 2), _bulletinIndexSha, `content: 주보 목록 업데이트 (${weekId})`);
+      _bulletinIndexSha = idxRes.content.sha;
+      await loadBulletinIndex();
+    }
+    toast(`주보 ${weekId} 저장됨 ✓`);
+  } catch(e) {
+    toast('저장 실패: ' + e.message, 'err');
+  }
+}
+
+/* ════════════════════════════════════════════
+   초기화
+════════════════════════════════════════════ */
+window.onload = function() {
+  if (isLoggedIn()) {
+    showAdmin();
+  }
+  document.getElementById('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    login(document.getElementById('pwInput').value);
+  });
+};
+</script>
+</body>
+</html>
