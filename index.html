@@ -4,32 +4,194 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>희망은교회</title>
-
-  <!-- 공통 CSS 쓰고 있다면 이 줄을 살리고(혹은 추가) -->
-  <!-- <link rel="stylesheet" href="/hopeischurch/assets/common.css?v=20260203-01"> -->
-<link rel="stylesheet" href="/hopeischurch/assets/common.css?v=20260203-01">
+  <link rel="stylesheet" href="/hopeischurch/assets/common.css?v=20260203-01">
   <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;line-height:1.6}
-    .wrap{display:flex;gap:20px;max-width:1200px;margin:0 auto;padding:20px;min-height:100vh}
-    aside{width:200px;flex-shrink:0}
-    .brand{font-size:1.2rem;font-weight:700;margin-bottom:20px}
-    nav{display:flex;flex-direction:column;gap:10px}
-    nav a{display:block;padding:10px 12px;text-decoration:none}
-    .notice{background:#f5f5f5;padding:12px;border-radius:4px;font-size:.9rem;margin-top:30px;border-left:3px solid #333}
-    main{flex:1;min-width:0}
-    h1{font-size:2rem;margin-bottom:10px;font-weight:700}
-    h2{font-size:1.5rem;margin:30px 0 20px;font-weight:700}
-    .sub{margin-bottom:20px}
-    .card{border:1px solid #ddd;padding:20px;margin:20px 0;border-radius:4px;background:#fafafa}
-    section{margin:30px 0}
-    section p{margin:10px 0}
-    hr{margin:30px 0;border:none;border-top:1px solid #ddd}
-    @media (max-width:768px){
-      .wrap{flex-direction:column}
-      aside{width:100%;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #ddd}
-      nav{flex-direction:row;flex-wrap:wrap;gap:8px}
-      nav a{padding:8px 12px;font-size:.9rem}
+    /* common.css fixed-header padding 비활성화 (헤더 없음) */
+    body { padding-top: 0; }
+
+    /* ================================================
+       Hero
+    ================================================ */
+    .hero {
+      padding: 56px 0 48px;
+      border-bottom: 1px solid #e4e4e4;
+      margin-bottom: 60px;
+    }
+    .hero-eyebrow {
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      line-height: 1.15;
+      color: #111;
+      margin-bottom: 14px;
+    }
+    .hero-desc {
+      font-size: .98rem;
+      color: #555;
+      line-height: 1.8;
+      max-width: 480px;
+      margin-bottom: 32px;
+    }
+    .hero-btns {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ================================================
+       Buttons
+    ================================================ */
+    .btn {
+      display: inline-block;
+      padding: 11px 22px;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn:hover { opacity: .72; text-decoration: none; }
+    .btn-solid   { background: #111; color: #fff; border: 2px solid #111; }
+    .btn-outline { background: transparent; color: #111; border: 2px solid #333; }
+
+    /* ================================================
+       Section 공통
+    ================================================ */
+    .section { margin-bottom: 60px; }
+
+    .section-label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      color: #111;
+      margin-bottom: 24px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #ebebeb;
+      margin: 0 0 60px;
+    }
+
+    /* ================================================
+       예배 카드 그리드
+    ================================================ */
+    .worship-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .worship-card {
+      border: 1px solid #e4e4e4;
+      border-radius: 14px;
+      padding: 22px 20px;
+      background: #fafafa;
+    }
+    .worship-card-title {
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      color: #888;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .worship-card-time {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      color: #111;
+      margin-bottom: 4px;
+    }
+    .worship-card-loc { font-size: .83rem; color: #aaa; }
+
+    /* ================================================
+       인사말
+    ================================================ */
+    .greeting-body {
+      border-left: 3px solid #222;
+      padding-left: 20px;
+      margin-bottom: 28px;
+    }
+    .greeting-body p {
+      font-size: .97rem;
+      line-height: 1.9;
+      color: #333;
+      margin-bottom: 16px;
+    }
+    .greeting-body p:last-child { margin-bottom: 0; }
+
+    .greeting-sign {
+      padding-top: 20px;
+      border-top: 1px solid #e8e8e8;
+      font-size: .88rem;
+      color: #666;
+      line-height: 1.8;
+    }
+    .greeting-sign strong {
+      display: block;
+      margin-top: 2px;
+      font-size: .95rem;
+      color: #111;
+    }
+
+    /* ================================================
+       섬기는 이들
+    ================================================ */
+    .minister-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-width: 360px;
+    }
+    .minister-item {
+      display: flex;
+      gap: 20px;
+      align-items: baseline;
+      padding: 11px 0;
+      border-bottom: 1px solid #f2f2f2;
+      font-size: .94rem;
+    }
+    .minister-item:last-child { border-bottom: none; }
+    .minister-role { min-width: 76px; font-size: .83rem; color: #999; }
+    .minister-name { font-weight: 600; color: #111; }
+
+    /* ================================================
+       찾아오는 길
+    ================================================ */
+    .map-address {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #111;
+      margin-bottom: 6px;
+    }
+    .map-phone {
+      font-size: .9rem;
+      color: #777;
+      margin-bottom: 22px;
+    }
+
+    /* ================================================
+       반응형
+    ================================================ */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.2rem; }
+      .worship-grid { grid-template-columns: 1fr; gap: 10px; }
     }
   </style>
 </head>
@@ -38,7 +200,6 @@
   <div class="wrap">
     <aside>
       <div class="brand">희망은교회</div>
-
       <nav id="menu">
         <a href="/hopeischurch/" data-nav="home">홈</a>
         <a href="/hopeischurch/#worship" data-nav="worship">교회안내</a>
@@ -46,7 +207,6 @@
         <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
         <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
       </nav>
-
       <div class="notice">
         <strong>|행사|</strong><br>
         성경암송대회(2/22)<br>
@@ -55,92 +215,135 @@
     </aside>
 
     <main>
-      <h1>희망은교회</h1>
-      <p class="sub"><b>기독교 대한 성결교회 교단에 속한 교회입니다</b></p>
 
-      <div class="card">
-        <b>이번 주 주보 보기</b><br>
-        <a href="/hopeischurch/bulletin/">주보 페이지로 이동</a>
-      </div>
-
-      <hr>
-
-      <section id="worship">
-        <h2>예배 및 모임 안내</h2>
-        <p><b>주일예배</b><br>주일 오전 11:00 / 본당</p>
-        <p><b>청소년예배</b><br>주일 오후 13:30 / 본당</p>
-        <p><b>수요예배</b><br>수요일 오후 7:30</p>
-      </section>
-
-<hr>
-
-<section id="pastor"  class="box">
-  <h2>인사말</h2>
-
-  <div class="card">
-    <p>
-      방문하신 모든 분들을 주님의 이름으로 진심으로 환영합니다.
-    </p>
-
-    <p>
-      희망은교회는 하나님의 말씀과 기도를 중심으로  
-      함께 예배하고, 함께 성장하며, 함께 걸어가는 공동체입니다.
-    </p>
-
-    <p>
-      2026년은 “만민에게 복음을 전파하라”는 주님의 명령을 마음에 새기며,  
-      예수 그리스도께서 참 생명 되심을 이 땅 가운데 증언하는 한 해가 되기를 소망합니다.
-    </p>
-
-    <p>
-      이 복음이 이곳을 잠시 방문한 모든 분들께,  
-      그리고 희망은교회 공동체 안에 있는 모든 성도들께  
-      위로와 회복, 그리고 새로운 소망으로 전해지기를 기도합니다.
-    </p>
-
-    <p>
-      희망은교회의 문은 언제나 열려 있습니다.  
-      언제든 편안한 마음으로 찾아와 함께 예배하시기를 바랍니다.
-    </p>
-
-    <p>
-      기독교 대한 성결교회 희망은교회<br>
-      담임목사 이일례</b><br>
-    </p>
-
-    <p><br>
-      <b>| 섬기는 이들 |</b><br><br>
-      담임목사 이일례, 협동목사 김영인<br>
-      전도사 권성호, 반주자 원지애
-    </p>
-  </div>
-</section>
-<h></h>
-      <section id="map">
-        <h2>찾아오는 길</h2>
-        <p><b>주소:</b> 경기도 부천시 소사구 은성로 62번길 13(3층)</p>
-        <p><b>연락처:</b> 010-7795-2102</p>
-        <p>
-          <a href="https://map.naver.com/v5/search/경기도%20부천시%20소사구%20은성로%2062번길%2013" target="_blank" rel="noreferrer">
-            네이버 지도 열기
-          </a>
+      <!-- ① Hero -->
+      <section class="hero">
+        <div class="hero-eyebrow">기독교 대한 성결교회</div>
+        <h1>희망은교회</h1>
+        <p class="hero-desc">
+          하나님의 말씀과 기도를 중심으로<br>
+          함께 예배하고, 함께 성장하며, 함께 걸어가는 공동체입니다.
         </p>
+        <div class="hero-btns">
+          <a class="btn btn-solid"   href="/hopeischurch/bulletin/">이번 주 주보 보기</a>
+          <a class="btn btn-outline" href="/hopeischurch/sermon/">주일 설교 보기</a>
+        </div>
       </section>
+
+      <!-- ② 예배 및 모임 안내 -->
+      <section class="section" id="worship">
+        <span class="section-label">Worship</span>
+        <h2 class="section-title">예배 및 모임 안내</h2>
+        <div class="worship-grid">
+          <div class="worship-card">
+            <div class="worship-card-title">주일예배</div>
+            <div class="worship-card-time">11:00 AM</div>
+            <div class="worship-card-loc">주일 · 본당</div>
+          </div>
+          <div class="worship-card">
+            <div class="worship-card-title">청소년예배</div>
+            <div class="worship-card-time">1:30 PM</div>
+            <div class="worship-card-loc">주일 · 본당</div>
+          </div>
+          <div class="worship-card">
+            <div class="worship-card-title">수요예배</div>
+            <div class="worship-card-time">7:30 PM</div>
+            <div class="worship-card-loc">수요일</div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ③ 인사말 -->
+      <section class="section" id="pastor">
+        <span class="section-label">Greeting</span>
+        <h2 class="section-title">인사말</h2>
+        <div class="greeting-body">
+          <p>방문하신 모든 분들을 주님의 이름으로 진심으로 환영합니다.</p>
+          <p>
+            희망은교회는 하나님의 말씀과 기도를 중심으로<br>
+            함께 예배하고, 함께 성장하며, 함께 걸어가는 공동체입니다.
+          </p>
+          <p>
+            2026년은 "만민에게 복음을 전파하라"는 주님의 명령을 마음에 새기며,<br>
+            예수 그리스도께서 참 생명 되심을 이 땅 가운데 증언하는 한 해가 되기를 소망합니다.
+          </p>
+          <p>
+            이 복음이 이곳을 잠시 방문한 모든 분들께,<br>
+            그리고 희망은교회 공동체 안에 있는 모든 성도들께<br>
+            위로와 회복, 그리고 새로운 소망으로 전해지기를 기도합니다.
+          </p>
+          <p>
+            희망은교회의 문은 언제나 열려 있습니다.<br>
+            언제든 편안한 마음으로 찾아와 함께 예배하시기를 바랍니다.
+          </p>
+        </div>
+        <div class="greeting-sign">
+          기독교 대한 성결교회 희망은교회
+          <strong>담임목사 이일례</strong>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ④ 섬기는 이들 -->
+      <section class="section">
+        <span class="section-label">Staff</span>
+        <h2 class="section-title">섬기는 이들</h2>
+        <ul class="minister-list">
+          <li class="minister-item">
+            <span class="minister-role">담임목사</span>
+            <span class="minister-name">이일례</span>
+          </li>
+          <li class="minister-item">
+            <span class="minister-role">협동목사</span>
+            <span class="minister-name">김영인</span>
+          </li>
+          <li class="minister-item">
+            <span class="minister-role">전도사</span>
+            <span class="minister-name">권성호</span>
+          </li>
+          <li class="minister-item">
+            <span class="minister-role">반주자</span>
+            <span class="minister-name">원지애</span>
+          </li>
+        </ul>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ⑤ 찾아오는 길 -->
+      <section class="section" id="map">
+        <span class="section-label">Location</span>
+        <h2 class="section-title">찾아오는 길</h2>
+        <p class="map-address">경기도 부천시 소사구 은성로 62번길 13 (3층)</p>
+        <p class="map-phone">010-7795-2102</p>
+        <a class="btn btn-outline"
+           href="https://map.naver.com/v5/search/경기도%20부천시%20소사구%20은성로%2062번길%2013"
+           target="_blank" rel="noreferrer">
+          네이버 지도 열기 →
+        </a>
+      </section>
+
     </main>
   </div>
 
   <script>
-    // 메뉴 active 처리(에러 방지 버전)
     const menu = document.getElementById("menu");
-    if(menu){
-      const hashLinks = Array.from(menu.querySelectorAll('a[href^="#"]'));
-      function setActiveByHash(hash){
+    if (menu) {
+      const hashLinks = Array.from(menu.querySelectorAll('a[href*="#"]'));
+      function setActiveByHash(hash) {
         hashLinks.forEach(a => a.classList.remove("is-active"));
-        const t = hashLinks.find(a => a.getAttribute("href") === hash);
-        if(t) t.classList.add("is-active");
+        const t = hashLinks.find(a => a.getAttribute("href").endsWith(hash));
+        if (t) t.classList.add("is-active");
       }
-      if(location.hash) setActiveByHash(location.hash);
-      hashLinks.forEach(a => a.addEventListener("click", () => setActiveByHash(a.getAttribute("href"))));
+      if (location.hash) setActiveByHash(location.hash);
+      hashLinks.forEach(a =>
+        a.addEventListener("click", () =>
+          setActiveByHash("#" + a.getAttribute("href").split("#")[1])
+        )
+      );
     }
   </script>
 </body>
