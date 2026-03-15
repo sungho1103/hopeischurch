@@ -245,6 +245,7 @@
     <button class="tab-btn" data-tab="notice"    onclick="switchTab('notice')">공지사항</button>
     <button class="tab-btn" data-tab="committee" onclick="switchTab('committee')">예배위원</button>
     <button class="tab-btn" data-tab="bulletin"  onclick="switchTab('bulletin')">주보</button>
+    <button class="tab-btn" data-tab="sermon"    onclick="switchTab('sermon')">설교</button>
   </div>
 
   <div class="admin-body">
@@ -364,6 +365,45 @@
         </details>
 
         <button class="btn-save" onclick="saveBulletin()">저장</button>
+      </div>
+    </div>
+
+    <!-- ── 설교 ── -->
+    <div id="tab-sermon" class="tab-pane" style="display:none">
+      <h2>설교</h2>
+      <div class="bulletin-top">
+        <select id="sermonFileSelect" onchange="loadSermon(this.value)">
+          <option value="">— 설교 선택 —</option>
+        </select>
+        <button onclick="newSermon()">새 설교 추가</button>
+      </div>
+
+      <div id="sermonForm" style="display:none">
+        <div class="card">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>날짜 (YYYY-MM-DD)</label>
+              <input id="sDate" type="text" placeholder="2026-03-15">
+            </div>
+            <div class="form-group">
+              <label>제목</label>
+              <input id="sTitle" type="text" placeholder="설교 제목">
+            </div>
+            <div class="form-group">
+              <label>본문</label>
+              <input id="sRef" type="text" placeholder="요 3:16">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>설교자</label>
+            <input id="sPreacher" type="text" placeholder="이일례목사">
+          </div>
+          <div class="form-group">
+            <label>설교 내용</label>
+            <textarea id="sBody" rows="16" placeholder="설교 본문을 입력하세요"></textarea>
+          </div>
+          <button class="btn-save" onclick="saveSermon()">저장</button>
+        </div>
       </div>
     </div>
 
@@ -502,6 +542,7 @@ function switchTab(tab) {
   if (tab === 'notice')    loadNotice();
   if (tab === 'committee') loadCommittee();
   if (tab === 'bulletin')  loadBulletinIndex();
+  if (tab === 'sermon')    loadSermonIndex();
 }
 
 /* ════════════════════════════════════════════
@@ -812,6 +853,115 @@ async function saveBulletin() {
       await loadBulletinIndex();
     }
     toast(`주보 ${weekId} 저장됨 ✓`);
+  } catch(e) {
+    toast('저장 실패: ' + e.message, 'err');
+  }
+}
+
+/* ════════════════════════════════════════════
+   설교
+════════════════════════════════════════════ */
+let _sermonIndexSha = null;
+let _sermonFiles    = [];
+let _currentSermonFile = null;
+let _currentSermonSha  = null;
+
+async function loadSermonIndex() {
+  try {
+    const { text, sha } = await ghGet('sermon/texts/index.json');
+    _sermonIndexSha = sha;
+    _sermonFiles = (JSON.parse(text).files || [])
+      .filter(f => /\.txt$/i.test(f))
+      .sort((a, b) => b.localeCompare(a));
+    const sel = document.getElementById('sermonFileSelect');
+    sel.innerHTML = '<option value="">— 설교 선택 —</option>' +
+      _sermonFiles.map(f =>
+        `<option value="${esc(f)}">${esc(f.replace(/\.txt$/i, ''))}</option>`
+      ).join('');
+    if (_sermonFiles.length > 0) {
+      sel.value = _sermonFiles[0];
+      loadSermon(_sermonFiles[0]);
+    }
+  } catch(e) {
+    toast('설교 목록 로드 실패: ' + e.message, 'err');
+  }
+}
+
+async function loadSermon(filename) {
+  if (!filename) { document.getElementById('sermonForm').style.display = 'none'; return; }
+  try {
+    const { text, sha } = await ghGet(`sermon/texts/${filename}`);
+    _currentSermonFile = filename;
+    _currentSermonSha  = sha;
+    fillSermonForm(filename, text);
+    document.getElementById('sermonForm').style.display = '';
+  } catch(e) {
+    toast('설교 로드 실패: ' + e.message, 'err');
+  }
+}
+
+function fillSermonForm(filename, txt) {
+  const lines = txt.replace(/\r\n/g, '\n').split('\n');
+  const meta = {};
+  let i = 0;
+  for (; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line === '') { i++; break; }
+    const m = line.match(/^([^:]+)\s*:\s*(.*)$/);
+    if (m) meta[m[1].trim()] = m[2].trim();
+  }
+  const body = lines.slice(i).join('\n').trim();
+  document.getElementById('sDate').value     = meta['날짜'] || meta['date'] || filename.replace(/\.txt$/i, '');
+  document.getElementById('sTitle').value    = meta['제목'] || meta['title'] || '';
+  document.getElementById('sRef').value      = meta['본문'] || meta['text'] || '';
+  document.getElementById('sPreacher').value = meta['설교자'] || meta['preacher'] || '';
+  document.getElementById('sBody').value     = body;
+}
+
+function newSermon() {
+  _currentSermonFile = null;
+  _currentSermonSha  = null;
+  document.getElementById('sermonFileSelect').value = '';
+  document.getElementById('sDate').value     = '';
+  document.getElementById('sTitle').value    = '';
+  document.getElementById('sRef').value      = '';
+  document.getElementById('sPreacher').value = '';
+  document.getElementById('sBody').value     = '';
+  document.getElementById('sermonForm').style.display = '';
+  document.getElementById('sDate').focus();
+}
+
+async function saveSermon() {
+  const date     = document.getElementById('sDate').value.trim();
+  const title    = document.getElementById('sTitle').value.trim();
+  const ref      = document.getElementById('sRef').value.trim();
+  const preacher = document.getElementById('sPreacher').value.trim();
+  const body     = document.getElementById('sBody').value.trim();
+  if (!date) { toast('날짜를 입력하세요', 'err'); return; }
+
+  const filename = date.replace(/\./g, '-').replace(/[^\d-]/g, '') + '.txt';
+  const content = `제목: ${title}\n본문: ${ref}\n설교자: ${preacher}\n날짜: ${date}\n\n${body}`;
+
+  try {
+    const filePath = `sermon/texts/${filename}`;
+    _currentSermonSha = await ghGetSha(filePath);
+    const isNew = !_currentSermonSha;
+    const res = await ghSave(filePath, content, _currentSermonSha, `content: 설교 ${date} ${isNew ? '추가' : '업데이트'}`);
+    _currentSermonSha  = res.content.sha;
+    _currentSermonFile = filename;
+
+    // 새 파일이면 index.json 업데이트
+    if (isNew) {
+      _sermonIndexSha = await ghGetSha('sermon/texts/index.json');
+      if (!_sermonFiles.includes(filename)) {
+        _sermonFiles = [filename, ..._sermonFiles].sort((a, b) => b.localeCompare(a));
+      }
+      const idxRes = await ghSave('sermon/texts/index.json', JSON.stringify({ files: _sermonFiles }, null, 2), _sermonIndexSha, `content: 설교 목록 업데이트 (${filename})`);
+      _sermonIndexSha = idxRes.content.sha;
+      await loadSermonIndex();
+      document.getElementById('sermonFileSelect').value = filename;
+    }
+    toast(`설교 ${date} 저장됨 ✓`);
   } catch(e) {
     toast('저장 실패: ' + e.message, 'err');
   }
