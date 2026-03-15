@@ -253,22 +253,9 @@
     <div id="tab-notice" class="tab-pane">
       <h2>공지사항</h2>
       <div class="card">
-        <div class="form-group">
-          <label>제목</label>
-          <input id="noticeTitle" type="text" placeholder="|행사|">
-        </div>
-        <div class="form-group">
-          <label>내용</label>
-          <textarea id="noticeText" rows="3" placeholder="행사 내용을 입력하세요"></textarea>
-        </div>
-        <div class="form-group">
-          <label>링크 URL (선택)</label>
-          <input id="noticeLinkUrl" type="text" placeholder="https://...">
-        </div>
-        <div class="form-group">
-          <label>링크 텍스트 (선택)</label>
-          <input id="noticeLinkText" type="text" placeholder="시편42편">
-        </div>
+        <div style="font-size:12px;color:#888;margin-bottom:14px;">여러 항목을 추가할 수 있습니다. 위에서 아래 순서로 표시됩니다.</div>
+        <div id="noticeItems"></div>
+        <button class="btn-add" onclick="addNoticeItem()">+ 항목 추가</button>
         <button class="btn-save" onclick="saveNotice()">저장</button>
       </div>
     </div>
@@ -545,25 +532,51 @@ async function loadNotice() {
     const { text, sha } = await ghGet('data/notice.json');
     _noticeSha = sha;
     const n = JSON.parse(text);
-    document.getElementById('noticeTitle').value   = n.title    || '';
-    document.getElementById('noticeText').value    = n.text     || '';
-    document.getElementById('noticeLinkUrl').value = n.link_url || '';
-    document.getElementById('noticeLinkText').value= n.link_text|| '';
+    renderNoticeItems(n.items || []);
   } catch(e) {
-    _noticeSha = null; // 파일 없음 → 새로 만들기
+    _noticeSha = null;
+    renderNoticeItems([]);
   }
 }
 
+function renderNoticeItems(items) {
+  document.getElementById('noticeItems').innerHTML = items.map(item => `
+    <div class="notice-row">
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+        <input class="ni-text"      placeholder="공지 내용"       value="${esc(item.text     || '')}">
+        <input class="ni-link-url"  placeholder="링크 URL (선택)" value="${esc(item.link_url || '')}">
+        <input class="ni-link-text" placeholder="링크 텍스트"     value="${esc(item.link_text|| '')}">
+      </div>
+      <button class="btn-icon" style="align-self:flex-start;margin-top:2px;" onclick="this.closest('.notice-row').remove()">✕</button>
+    </div>
+  `).join('');
+}
+
+function addNoticeItem() {
+  const div = document.createElement('div');
+  div.className = 'notice-row';
+  div.innerHTML = `
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+      <input class="ni-text"      placeholder="공지 내용">
+      <input class="ni-link-url"  placeholder="링크 URL (선택)">
+      <input class="ni-link-text" placeholder="링크 텍스트">
+    </div>
+    <button class="btn-icon" style="align-self:flex-start;margin-top:2px;" onclick="this.closest('.notice-row').remove()">✕</button>
+  `;
+  document.getElementById('noticeItems').appendChild(div);
+}
+
 async function saveNotice() {
-  const n = {
-    title:     document.getElementById('noticeTitle').value.trim(),
-    text:      document.getElementById('noticeText').value.trim(),
-    link_url:  document.getElementById('noticeLinkUrl').value.trim(),
-    link_text: document.getElementById('noticeLinkText').value.trim(),
-  };
+  const items = [];
+  document.querySelectorAll('#noticeItems .notice-row').forEach(row => {
+    const text     = row.querySelector('.ni-text').value.trim();
+    const link_url = row.querySelector('.ni-link-url').value.trim();
+    const link_text= row.querySelector('.ni-link-text').value.trim();
+    if (text) items.push({ text, ...(link_url && { link_url, link_text }) });
+  });
   try {
     _noticeSha = await ghGetSha('data/notice.json');
-    const res = await ghSave('data/notice.json', JSON.stringify(n, null, 2), _noticeSha, 'content: 공지사항 업데이트');
+    const res = await ghSave('data/notice.json', JSON.stringify({ items }, null, 2), _noticeSha, 'content: 공지사항 업데이트');
     _noticeSha = res.content.sha;
     toast('공지사항 저장됨 ✓');
   } catch(e) {

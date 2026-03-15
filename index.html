@@ -335,10 +335,12 @@
       fetch('/hopeischurch/data/notice.json',{cache:'no-store'})
         .then(r=>r.json()).then(n=>{
           const el=document.getElementById('siteNotice'); if(!el) return;
-          let h=`<strong>${_e(n.title)}</strong>`;
-          if(n.text) h+=`<br>${_e(n.text)}`;
-          if(n.link_url) h+=`<br><a href="${_e(n.link_url)}" target="_blank" rel="noreferrer">${_e(n.link_text||n.link_url)}</a>`;
-          el.innerHTML=h;
+          const items=n.items||[]; if(!items.length) return;
+          el.innerHTML=items.map(item=>{
+            let line=_e(item.text||'');
+            if(item.link_url) line+=` <a href="${_e(item.link_url)}" target="_blank" rel="noreferrer">${_e(item.link_text||item.link_url)}</a>`;
+            return line;
+          }).join('<br>');
         }).catch(()=>{});
     })();
 
