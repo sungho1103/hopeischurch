@@ -266,7 +266,7 @@
       <h2>예배위원</h2>
       <div class="card">
         <div class="committee-top">
-          <input id="newWeekId" type="text" placeholder="새 주차 YYYY-MM-DD">
+          <input id="newWeekId" type="date">
           <button onclick="addCommitteeWeek()">+ 주차 추가</button>
         </div>
         <div style="overflow-x:auto">
@@ -294,6 +294,7 @@
         <select id="bulletinWeekSelect" onchange="loadBulletinWeek(this.value)">
           <option value="">— 주차 선택 —</option>
         </select>
+        <input id="newBulletinDate" type="date" style="padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;background:#fff;">
         <button onclick="newBulletinWeek()">새 주차 추가</button>
       </div>
 
@@ -304,8 +305,8 @@
           <div class="detail-body">
             <div class="form-grid">
               <div class="form-group">
-                <label>week_id</label>
-                <input id="bWeekId" type="text" placeholder="2026-03-15">
+                <label>날짜</label>
+                <input id="bWeekId" type="date">
               </div>
               <div class="form-group">
                 <label>날짜 표시</label>
@@ -382,8 +383,8 @@
         <div class="card">
           <div class="form-grid">
             <div class="form-group">
-              <label>날짜 (YYYY-MM-DD)</label>
-              <input id="sDate" type="text" placeholder="2026-03-15">
+              <label>날짜</label>
+              <input id="sDate" type="date">
             </div>
             <div class="form-group">
               <label>제목</label>
@@ -449,6 +450,10 @@ function esc(s) {
 function b64e(str) { return btoa(unescape(encodeURIComponent(str))); }
 function b64d(str) { return decodeURIComponent(escape(atob(str.replace(/\n/g,'')))); }
 function token()   { return localStorage.getItem('gh_token') || ''; }
+function normalizeDate(s) {
+  const m = String(s).match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  return m ? `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}` : s;
+}
 
 /* ════════════════════════════════════════════
    GitHub API
@@ -733,9 +738,9 @@ async function loadBulletinWeek(weekId) {
 }
 
 async function newBulletinWeek() {
-  const weekId = prompt('새 주차 날짜 (YYYY-MM-DD):');
-  if (!weekId) return;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(weekId)) { toast('날짜 형식: YYYY-MM-DD', 'err'); return; }
+  const weekId = document.getElementById('newBulletinDate').value;
+  if (!weekId) { toast('날짜를 먼저 선택하세요', 'err'); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(weekId)) { toast('날짜 형식 오류', 'err'); return; }
 
   _currentBulletinSha = null;
 
@@ -762,7 +767,7 @@ async function newBulletinWeek() {
 function fillBulletinForm(data) {
   const w = data.week || {};
   document.getElementById('bWeekId').value   = w.week_id || '';
-  document.getElementById('bDate').value     = w.date    || '';
+  document.getElementById('bDate').value     = w.date    || (w.week_id ? w.week_id.replace(/-/g, '.') : '');
   document.getElementById('bIssue').value    = w.issue   || '';
   renderOrderRows(data.worship_order || []);
   const mv = (data.memory_verse || [])[0] || {};
@@ -833,7 +838,7 @@ async function saveBulletin() {
     if (t) news.push({ week_id: weekId, order: i + 1, text: t });
   });
 
-  const date  = document.getElementById('bDate').value.trim();
+  const date  = document.getElementById('bDate').value.trim() || weekId.replace(/-/g, '.');
   const issue = document.getElementById('bIssue').value.trim();
   const data  = { week: { week_id: weekId, date, issue, title: '주일예배' }, worship_order, memory_verse, news };
 
@@ -911,7 +916,8 @@ function fillSermonForm(filename, txt) {
     if (m) meta[m[1].trim()] = m[2].trim();
   }
   const body = lines.slice(i).join('\n').trim();
-  document.getElementById('sDate').value     = meta['날짜'] || meta['date'] || filename.replace(/\.txt$/i, '');
+  const rawDate = meta['날짜'] || meta['date'] || filename.replace(/\.txt$/i, '');
+  document.getElementById('sDate').value     = normalizeDate(rawDate);
   document.getElementById('sTitle').value    = meta['제목'] || meta['title'] || '';
   document.getElementById('sRef').value      = meta['본문'] || meta['text'] || '';
   document.getElementById('sPreacher').value = meta['설교자'] || meta['preacher'] || '';
