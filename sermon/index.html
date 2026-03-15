@@ -134,6 +134,11 @@
               <option>불러오는 중…</option>
             </select>
 
+            <!-- 주차별 사진 -->
+            <div id="sermonImg" style="display:none;margin-top:14px;">
+              <img id="sermonImgEl" src="" alt="" style="width:100%;border-radius:10px;display:block;object-fit:cover;">
+            </div>
+
           </section>
 
           <section class="panel" id="viewer">
@@ -247,10 +252,16 @@
 
     const { meta, body } = parseSermonTxt(txt);
 
-    const title = meta["제목"] || meta["title"] || formatTitleFromFilename(filename);
-    const date  = meta["날짜"] || meta["date"] || formatTitleFromFilename(filename);
-    const ref   = meta["본문"] || meta["text"] || "";
-    const who   = meta["설교자"] || meta["preacher"] || "";
+    const title  = meta["제목"] || meta["title"] || formatTitleFromFilename(filename);
+    const date   = meta["날짜"] || meta["date"] || formatTitleFromFilename(filename);
+    const ref    = meta["본문"] || meta["text"] || "";
+    const who    = meta["설교자"] || meta["preacher"] || "";
+    const imgSrc = meta["이미지"] || meta["image"] || "";
+
+    const imgDiv = document.getElementById("sermonImg");
+    const imgEl  = document.getElementById("sermonImgEl");
+    if (imgSrc) { imgEl.src = imgSrc; imgDiv.style.display = ""; }
+    else        { imgDiv.style.display = "none"; imgEl.src = ""; }
 
     viewerEl.innerHTML = `
       <div class="muted" style="margin-bottom:6px;">${escapeHtml(date)}</div>

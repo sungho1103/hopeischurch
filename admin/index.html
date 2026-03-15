@@ -399,6 +399,24 @@
             <label>설교자</label>
             <input id="sPreacher" type="text" placeholder="이일례목사">
           </div>
+
+          <!-- 이미지 -->
+          <div class="form-group">
+            <label>사진</label>
+            <!-- URL 직접 입력 -->
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <input id="sImageUrl" type="text" placeholder="이미지 URL 직접 입력 (선택)" style="flex:1;" oninput="showSermonImgPreview(this.value.trim())">
+              <button type="button" class="btn-icon" onclick="document.getElementById('sImageUrl').value='';showSermonImgPreview('');" title="지우기">✕</button>
+            </div>
+            <!-- 파일 업로드 -->
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input id="sImageFile" type="file" accept="image/*" style="flex:1;font-size:12px;">
+              <button type="button" class="btn-add" style="margin-top:0;white-space:nowrap;" onclick="uploadSermonImage()">GitHub에 업로드</button>
+            </div>
+            <!-- 미리보기 -->
+            <div id="sImagePreview" style="margin-top:10px;"></div>
+          </div>
+
           <div class="form-group">
             <label>설교 내용</label>
             <textarea id="sBody" rows="16" placeholder="설교 본문을 입력하세요"></textarea>
@@ -932,6 +950,9 @@ function fillSermonForm(filename, txt) {
   document.getElementById('sRef').value      = meta['본문'] || meta['text'] || '';
   document.getElementById('sPreacher').value = meta['설교자'] || meta['preacher'] || '';
   document.getElementById('sBody').value     = body;
+  const imgUrl = meta['이미지'] || meta['image'] || '';
+  document.getElementById('sImageUrl').value = imgUrl;
+  showSermonImgPreview(imgUrl);
 }
 
 function newSermon() {
@@ -943,6 +964,9 @@ function newSermon() {
   document.getElementById('sRef').value      = '';
   document.getElementById('sPreacher').value = '';
   document.getElementById('sBody').value     = '';
+  document.getElementById('sImageUrl').value = '';
+  document.getElementById('sImageFile').value = '';
+  showSermonImgPreview('');
   document.getElementById('sermonForm').style.display = '';
   document.getElementById('sDate').focus();
 }
@@ -955,8 +979,9 @@ async function saveSermon() {
   const body     = document.getElementById('sBody').value.trim();
   if (!date) { toast('날짜를 입력하세요', 'err'); return; }
 
+  const imageUrl = document.getElementById('sImageUrl').value.trim();
   const filename = date.replace(/\./g, '-').replace(/[^\d-]/g, '') + '.txt';
-  const content = `제목: ${title}\n본문: ${ref}\n설교자: ${preacher}\n날짜: ${date}\n\n${body}`;
+  const content = `제목: ${title}\n본문: ${ref}\n설교자: ${preacher}\n날짜: ${date}${imageUrl ? '\n이미지: '+imageUrl : ''}\n\n${body}`;
 
   try {
     const filePath = `sermon/texts/${filename}`;
@@ -981,6 +1006,55 @@ async function saveSermon() {
   } catch(e) {
     toast('저장 실패: ' + e.message, 'err');
   }
+}
+
+/* ════════════════════════════════════════════
+   설교 이미지
+════════════════════════════════════════════ */
+function showSermonImgPreview(src) {
+  const box = document.getElementById('sImagePreview');
+  if (src) {
+    box.innerHTML = `<img src="${esc(src)}" alt="미리보기" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid #e4e4e4;">`;
+  } else {
+    box.innerHTML = '';
+  }
+}
+
+async function uploadSermonImage() {
+  const fileInput = document.getElementById('sImageFile');
+  const file = fileInput.files[0];
+  if (!file) { toast('파일을 선택하세요', 'err'); return; }
+  const date = document.getElementById('sDate').value;
+  if (!date) { toast('날짜를 먼저 선택하세요', 'err'); return; }
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  const imgFilename = `${date}.${ext}`;
+  const imgPath = `sermon/images/${imgFilename}`;
+
+  toast('업로드 중…');
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const base64 = e.target.result.split(',')[1];
+    try {
+      const sha = await ghGetSha(imgPath);
+      const body = { message: `content: 설교 이미지 ${imgFilename}`, content: base64, branch: BRANCH };
+      if (sha) body.sha = sha;
+      const r = await fetch(`${API}/${imgPath}`, {
+        method: 'PUT',
+        headers: { ...authHeaders(true), 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!r.ok) { const err = await r.json().catch(()=>({})); throw new Error(err.message || r.status); }
+      const publicUrl = `/hopeischurch/sermon/images/${imgFilename}`;
+      document.getElementById('sImageUrl').value = publicUrl;
+      showSermonImgPreview(publicUrl);
+      fileInput.value = '';
+      toast('이미지 업로드됨 ✓');
+    } catch(e) {
+      toast('업로드 실패: ' + e.message, 'err');
+    }
+  };
+  reader.readAsDataURL(file);
 }
 
 /* ════════════════════════════════════════════
