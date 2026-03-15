@@ -94,7 +94,7 @@
     ================================================ */
     .worship-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 14px;
     }
     .worship-card {
@@ -248,6 +248,11 @@
             <div class="worship-card-title">수요예배</div>
             <div class="worship-card-time">7:30 PM</div>
             <div class="worship-card-loc">수요일</div>
+          </div>
+          <div class="worship-card">
+            <div class="worship-card-title">월삭예배</div>
+            <div class="worship-card-time">6:00 AM</div>
+            <div class="worship-card-loc">매월 첫째주 토요일</div>
           </div>
         </div>
       </section>
