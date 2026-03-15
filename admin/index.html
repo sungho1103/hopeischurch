@@ -594,7 +594,7 @@ function makeNoticeRow(text='', link_url='', link_text='') {
       <button class="btn-icon" onclick="noticeMove(this,1)"  title="아래로">▼</button>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
-      <input class="ni-text"      placeholder="공지 내용"       value="${esc(text)}">
+      <textarea class="ni-text" rows="3" placeholder="공지 내용 (엔터로 줄바꿈)">${esc(text)}</textarea>
       <input class="ni-link-url"  placeholder="링크 URL (선택)" value="${esc(link_url)}">
       <input class="ni-link-text" placeholder="링크 텍스트"     value="${esc(link_text)}">
     </div>

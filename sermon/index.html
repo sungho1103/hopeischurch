@@ -151,7 +151,7 @@
       const el=document.getElementById('siteNotice'); if(!el) return;
       const items=n.items||[]; if(!items.length) return;
       el.innerHTML=items.map(item=>{
-        let line=escapeHtml(item.text||'');
+        let line=escapeHtml(item.text||'').replace(/\n/g,'<br>');
         if(item.link_url) line+=` <a href="${escapeHtml(item.link_url)}" target="_blank" rel="noreferrer">${escapeHtml(item.link_text||item.link_url)}</a>`;
         return line;
       }).join('<br>');
