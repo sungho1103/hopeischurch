@@ -344,8 +344,8 @@
           el.innerHTML=items.map(item=>{
             let line=_e(item.text||'').replace(/\n/g,'<br>');
             if(item.link_url) line+=` <a href="${_e(item.link_url)}" target="_blank" rel="noreferrer">${_e(item.link_text||item.link_url)}</a>`;
-            return line;
-          }).join('<br>');
+            return `<div class="notice-item">${line}</div>`;
+          }).join('');
         }).catch(()=>{});
     })();
 

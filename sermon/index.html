@@ -153,8 +153,8 @@
       el.innerHTML=items.map(item=>{
         let line=escapeHtml(item.text||'').replace(/\n/g,'<br>');
         if(item.link_url) line+=` <a href="${escapeHtml(item.link_url)}" target="_blank" rel="noreferrer">${escapeHtml(item.link_text||item.link_url)}</a>`;
-        return line;
-      }).join('<br>');
+        return `<div class="notice-item">${line}</div>`;
+      }).join('');
     }).catch(()=>{});
 
   // ✅ 안정적: GitHub API 대신 "우리 사이트"의 정적 파일을 읽음
