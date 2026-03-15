@@ -585,31 +585,41 @@ async function loadNotice() {
   }
 }
 
-function renderNoticeItems(items) {
-  document.getElementById('noticeItems').innerHTML = items.map(item => `
-    <div class="notice-row">
-      <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
-        <input class="ni-text"      placeholder="공지 내용"       value="${esc(item.text     || '')}">
-        <input class="ni-link-url"  placeholder="링크 URL (선택)" value="${esc(item.link_url || '')}">
-        <input class="ni-link-text" placeholder="링크 텍스트"     value="${esc(item.link_text|| '')}">
-      </div>
-      <button class="btn-icon" style="align-self:flex-start;margin-top:2px;" onclick="this.closest('.notice-row').remove()">✕</button>
-    </div>
-  `).join('');
-}
-
-function addNoticeItem() {
+function makeNoticeRow(text='', link_url='', link_text='') {
   const div = document.createElement('div');
   div.className = 'notice-row';
   div.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:4px;margin-right:6px;">
+      <button class="btn-icon" onclick="noticeMove(this,-1)" title="위로">▲</button>
+      <button class="btn-icon" onclick="noticeMove(this,1)"  title="아래로">▼</button>
+    </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
-      <input class="ni-text"      placeholder="공지 내용">
-      <input class="ni-link-url"  placeholder="링크 URL (선택)">
-      <input class="ni-link-text" placeholder="링크 텍스트">
+      <input class="ni-text"      placeholder="공지 내용"       value="${esc(text)}">
+      <input class="ni-link-url"  placeholder="링크 URL (선택)" value="${esc(link_url)}">
+      <input class="ni-link-text" placeholder="링크 텍스트"     value="${esc(link_text)}">
     </div>
     <button class="btn-icon" style="align-self:flex-start;margin-top:2px;" onclick="this.closest('.notice-row').remove()">✕</button>
   `;
-  document.getElementById('noticeItems').appendChild(div);
+  return div;
+}
+
+function noticeMove(btn, dir) {
+  const row = btn.closest('.notice-row');
+  const container = document.getElementById('noticeItems');
+  if (dir === -1 && row.previousElementSibling)
+    container.insertBefore(row, row.previousElementSibling);
+  else if (dir === 1 && row.nextElementSibling)
+    container.insertBefore(row.nextElementSibling, row);
+}
+
+function renderNoticeItems(items) {
+  const container = document.getElementById('noticeItems');
+  container.innerHTML = '';
+  items.forEach(item => container.appendChild(makeNoticeRow(item.text, item.link_url, item.link_text)));
+}
+
+function addNoticeItem() {
+  document.getElementById('noticeItems').appendChild(makeNoticeRow());
 }
 
 async function saveNotice() {
