@@ -444,7 +444,11 @@ async function ghGet(path) {
 }
 
 async function ghGetSha(path) {
-  try { return (await ghGet(path)).sha; } catch(e) { return null; }
+  try { return (await ghGet(path)).sha; }
+  catch(e) {
+    if (/^404/.test(e.message)) return null; // 파일 없음 → 새로 생성
+    throw e; // 401·403 등은 그대로 전파
+  }
 }
 
 async function ghSave(path, text, sha, msg) {
