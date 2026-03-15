@@ -339,9 +339,9 @@
           </div>
         </details>
 
-        <!-- 외울말씀 -->
+        <!-- 성경본문 -->
         <details open>
-          <summary>외울말씀</summary>
+          <summary>성경본문</summary>
           <div class="detail-body">
             <div class="form-group">
               <label>성경구절</label>
@@ -691,14 +691,28 @@ async function loadBulletinWeek(weekId) {
   }
 }
 
-function newBulletinWeek() {
+async function newBulletinWeek() {
   const weekId = prompt('새 주차 날짜 (YYYY-MM-DD):');
   if (!weekId) return;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(weekId)) { toast('날짜 형식: YYYY-MM-DD', 'err'); return; }
+
   _currentBulletinSha = null;
+
+  // 직전 주 데이터를 템플릿으로 로드
+  let prev = { worship_order: [], memory_verse: [], news: [] };
+  if (_bulletinIndex.length > 0) {
+    try {
+      const { text } = await ghGet(`bulletin/data/${_bulletinIndex[0].week_id}.json`);
+      prev = JSON.parse(text);
+      toast('직전 주 내용을 템플릿으로 불러왔습니다');
+    } catch(e) { /* 없으면 빈 템플릿 */ }
+  }
+
   fillBulletinForm({
     week: { week_id: weekId, date: weekId.replace(/-/g, '.'), issue: '', title: '주일예배' },
-    worship_order: [], memory_verse: [], news: []
+    worship_order: prev.worship_order || [],
+    memory_verse:  prev.memory_verse  || [],
+    news:          prev.news          || []
   });
   document.getElementById('bulletinWeekSelect').value = '';
   document.getElementById('bulletinForm').style.display = '';

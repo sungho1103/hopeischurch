@@ -167,7 +167,7 @@
         <div class="b3-grid">
           <section class="b-card"><h2>예배순서</h2><div class="muted">불러오는 중…</div></section>
           <section class="b-mid">
-            <section class="b-card"><h2>외울말씀</h2><div class="muted">불러오는 중…</div></section>
+            <section class="b-card"><h2>성경본문</h2><div class="muted">불러오는 중…</div></section>
             <section class="b-card"><h2>예배위원</h2><div class="muted">불러오는 중…</div></section>
           </section>
           <section class="b-card"><h2>교회소식</h2><div class="muted">불러오는 중…</div></section>
@@ -261,7 +261,7 @@
     const newsHtml = news.length
       ? "<ul class='news'>"+news.map(t => "<li><span class='tag'>소식</span><div class='txt'>"+escapeHtml(t)+"</div></li>").join("")+"</ul>"
       : "<div class='muted'>등록된 소식이 없습니다.</div>";
-    document.getElementById("bulletinBody").innerHTML = "<div class='b3-grid'><section class='b-card'><h2>예배순서</h2>"+orderHtml+"</section><section class='b-mid'><section class='b-card'><h2>외울말씀</h2>"+verseHtml+"</section><section class='b-card'><h2>예배위원</h2>"+committeeHtml+"</section></section><section class='b-card'><h2>교회소식</h2>"+newsHtml+"</section></div>";
+    document.getElementById("bulletinBody").innerHTML = "<div class='b3-grid'><section class='b-card'><h2>예배순서</h2>"+orderHtml+"</section><section class='b-mid'><section class='b-card'><h2>성경본문</h2>"+verseHtml+"</section><section class='b-card'><h2>예배위원</h2>"+committeeHtml+"</section></section><section class='b-card'><h2>교회소식</h2>"+newsHtml+"</section></div>";
   }
   async function main(){
     const { weeks, selected } = await loadWeeks();
