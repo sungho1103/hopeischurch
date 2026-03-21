@@ -130,6 +130,17 @@
     }
     .page-sermon .comment-author{ font-weight:600; color:#666; }
     .page-sermon .comment-body{ font-size:0.88rem; color:#333; line-height:1.6; }
+    .page-sermon .c-del{
+      float:right;
+      background:none;
+      border:none;
+      color:#ccc;
+      font-size:0.9rem;
+      cursor:pointer;
+      padding:0 2px;
+      line-height:1;
+    }
+    .page-sermon .c-del:hover{ color:#d44; }
     .page-sermon .comment-form{ display:flex; flex-direction:column; gap:8px; }
     .page-sermon .comment-row{ display:flex; gap:8px; }
     .page-sermon .c-input{
@@ -141,7 +152,8 @@
       outline:none;
     }
     .page-sermon .c-input:focus{ border-color:#999; }
-    .page-sermon .c-name{ width:110px; flex-shrink:0; }
+    .page-sermon .c-name{ width:90px; flex-shrink:0; }
+    .page-sermon .c-pw{ width:90px; flex-shrink:0; }
     .page-sermon .c-text{ flex:1; resize:none; height:62px; }
     .page-sermon .c-footer{ display:flex; justify-content:space-between; align-items:center; }
     .page-sermon .c-count{ font-size:0.72rem; color:#bbb; }
@@ -235,6 +247,7 @@
           <div class="comment-form">
             <div class="comment-row">
               <input id="cName" class="c-input c-name" placeholder="이름" maxlength="20">
+              <input id="cPw" class="c-input c-pw" type="password" placeholder="비밀번호" maxlength="20">
               <textarea id="cText" class="c-input c-text" placeholder="100자 이내로 작성해주세요." maxlength="100"></textarea>
             </div>
             <div class="c-footer">
@@ -447,9 +460,6 @@
 </script>
 
 <script type="module">
-// =====================================================
-// ⚠️ Firebase 설정 — Firebase Console에서 복사해 붙여 넣으세요
-// =====================================================
 const FB = {
   apiKey:            "AIzaSyCTS7eCGaNcuo9dKX-nYF-flNUlAC4dopM",
   authDomain:        "hopeischurch-sermon.firebaseapp.com",
@@ -459,21 +469,21 @@ const FB = {
   messagingSenderId: "423981952872",
   appId:             "1:423981952872:web:6c7a337334a42c4bde30dd",
 };
-// =====================================================
 
-import { initializeApp }               from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+// ✏️ 관리자 비밀번호 — 원하는 값으로 변경하세요
+const ADMIN_PW = "hope2026!";
+
+import { initializeApp }                        from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 let db;
-try {
-  db = getDatabase(initializeApp(FB));
-} catch(e) {
-  console.warn("Firebase 미설정 — 댓글 기능 비활성화:", e.message);
-}
+try { db = getDatabase(initializeApp(FB)); }
+catch(e){ console.warn("Firebase 오류:", e.message); }
 
 const wrap    = document.getElementById("commentsWrap");
 const listEl  = document.getElementById("commentList");
 const nameEl  = document.getElementById("cName");
+const pwEl    = document.getElementById("cPw");
 const textEl  = document.getElementById("cText");
 const countEl = document.getElementById("cCount");
 const errorEl = document.getElementById("cError");
@@ -487,9 +497,16 @@ function esc(s){
   return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
+async function sha256(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
 let cache = {};
-let unsub = null;
+let unsub  = null;
 let curFile = "";
+
+function fileKey(f){ return f.replace(/[\.\#\$\[\]\/]/g,"_"); }
 
 function loadComments(file){
   if(!db) return;
@@ -497,8 +514,7 @@ function loadComments(file){
   wrap.style.display = "";
   if(unsub) unsub();
   cache = {};
-  const key = file.replace(/[\.\#\$\[\]\/]/g, "_");
-  unsub = onValue(ref(db, `sermon_comments/${key}`), snap => {
+  unsub = onValue(ref(db, `sermon_comments/${fileKey(file)}`), snap => {
     cache = snap.val() || {};
     render();
   });
@@ -514,27 +530,49 @@ function render(){
     return;
   }
   listEl.innerHTML = items.map(c => {
-    const d = new Date(c.ts);
+    const d  = new Date(c.ts);
     const dt = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
     return `<div class="comment-item">
-      <div class="comment-meta"><span class="comment-author">${esc(c.name)}</span> · ${dt}</div>
+      <div class="comment-meta">
+        <span class="comment-author">${esc(c.name)}</span> · ${dt}
+        <button class="c-del" data-id="${esc(c.id)}" data-hash="${esc(c.pwHash||'')}">×</button>
+      </div>
       <div class="comment-body">${esc(c.text)}</div>
     </div>`;
   }).join("");
+
+  listEl.querySelectorAll(".c-del").forEach(btn => {
+    btn.addEventListener("click", () => handleDelete(btn.dataset.id, btn.dataset.hash));
+  });
 }
 
-function validate(name, text){
+async function handleDelete(id, storedHash){
+  const entered = window.prompt("비밀번호를 입력하세요\n(작성 시 비밀번호 또는 관리자 비밀번호)");
+  if(entered === null) return;
+  const enteredHash = await sha256(entered);
+  const adminHash   = await sha256(ADMIN_PW);
+  if(enteredHash !== storedHash && enteredHash !== adminHash){
+    alert("비밀번호가 맞지 않습니다.");
+    return;
+  }
+  try {
+    await remove(ref(db, `sermon_comments/${fileKey(curFile)}/${id}`));
+  } catch(e){
+    alert("삭제에 실패했습니다.");
+  }
+}
+
+function validate(name, pw, text){
   if(!name.trim()) return "이름을 입력해주세요.";
+  if(!pw.trim())   return "비밀번호를 입력해주세요.";
   if(!text.trim()) return "내용을 입력해주세요.";
   if(text.length > 100) return "100자 이내로 작성해주세요.";
 
   const items = Object.values(cache).sort((a,b) => a.ts - b.ts);
 
-  // 규칙 1: 중복 내용 금지
   if(items.some(c => c.text.trim() === text.trim()))
     return "이미 동일한 내용의 댓글이 있습니다.";
 
-  // 규칙 2: 같은 사람 연속 3번 금지
   const last2 = items.slice(-2);
   if(last2.length === 2 && last2.every(c => c.name.trim() === name.trim()))
     return "같은 분이 연속으로 3번 이상 댓글을 달 수 없습니다.";
@@ -544,17 +582,19 @@ function validate(name, text){
 
 submitEl.addEventListener("click", async () => {
   const name = nameEl.value.trim();
+  const pw   = pwEl.value;
   const text = textEl.value.trim();
-  const err  = validate(name, text);
+  const err  = validate(name, pw, text);
   if(err){ errorEl.textContent = err; return; }
   errorEl.textContent = "";
   submitEl.disabled = true;
   try {
-    const key = curFile.replace(/[\.\#\$\[\]\/]/g, "_");
-    await push(ref(db, `sermon_comments/${key}`), { name, text, ts: Date.now() });
+    const pwHash = await sha256(pw);
+    await push(ref(db, `sermon_comments/${fileKey(curFile)}`), { name, text, ts: Date.now(), pwHash });
     textEl.value = "";
+    pwEl.value   = "";
     countEl.textContent = "0 / 100";
-  } catch(e) {
+  } catch(e){
     errorEl.textContent = "저장에 실패했습니다.";
   } finally {
     submitEl.disabled = false;
