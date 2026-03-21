@@ -17,7 +17,8 @@
        - 이 페이지에서만 적용되도록 .page-sermon로 스코프
     ================================================== */
 
-    body.page-sermon .wrap{ padding-top:10px; }
+    body.page-sermon .wrap{ padding-top:0; }
+    body.page-sermon main{ padding:0; }
 
     @media (max-width:768px){
       body.page-sermon .wrap{ padding-top:0; }
@@ -215,7 +216,7 @@
   // 하단 탭바 + 드로어 active 상태
   (function(){
     const path=location.pathname;
-    document.querySelectorAll('.bottom-nav-item[data-nav], .drawer a[data-nav]').forEach(el=>{
+    document.querySelectorAll('.bottom-nav-item[data-nav], .drawer a[data-nav], #menu a[data-nav]').forEach(el=>{
       const nav=el.dataset.nav;
       if((nav==='bulletin'&&path.includes('/bulletin/'))||(nav==='sermon'&&path.includes('/sermon/')))
         el.classList.add('is-active');

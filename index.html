@@ -6,9 +6,6 @@
   <title>희망은교회</title>
   <link rel="stylesheet" href="/hopeischurch/assets/common.css?v=20260203-01">
   <style>
-    /* common.css fixed-header padding 비활성화 (헤더 없음) */
-    body { padding-top: 0; }
-
     /* ================================================
        Hero
     ================================================ */
@@ -439,7 +436,7 @@
       const isHome=path==='/hopeischurch/'||path.endsWith('/hopeischurch/index.html');
       const isBulletin=path.includes('/bulletin/');
       const isSermon=path.includes('/sermon/');
-      document.querySelectorAll('.bottom-nav-item[data-nav], .drawer a[data-nav]').forEach(el=>{
+      document.querySelectorAll('.bottom-nav-item[data-nav], .drawer a[data-nav], #menu a[data-nav]').forEach(el=>{
         const nav=el.dataset.nav;
         if((nav==='home'&&isHome)||(nav==='bulletin'&&isBulletin)||(nav==='sermon'&&isSermon))
           el.classList.add('is-active');

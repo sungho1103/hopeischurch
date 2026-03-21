@@ -24,59 +24,79 @@ a:hover{
 }
 
 /* =================================================
-   Layout
+   Layout — PC: 상단 고정 가로 네비게이션
 ================================================= */
 .wrap{
   display:flex;
-  gap:20px;
+  flex-direction:column;
+  gap:0;
   max-width:1200px;
   margin:0 auto;
-  padding:20px;
+  padding:0;
   min-height:100vh;
 }
 
 aside{
-  width:200px;
+  width:100%;
   flex-shrink:0;
+  position:sticky;
+  top:0;
+  z-index:200;
+  background:#fff;
+  border-bottom:1px solid #e8e8e8;
+  box-shadow:0 1px 4px rgba(0,0,0,.05);
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  height:56px;
+  gap:8px;
 }
 
 main{
   flex:1;
   min-width:0;
+  padding:20px;
 }
 
 /* =================================================
-   Sidebar
+   Top Nav
 ================================================= */
 .brand{
-  font-size:1.2rem;
+  font-size:1.05rem;
   font-weight:700;
-  margin-bottom:20px;
-  padding-left:12px;
+  margin-bottom:0;
+  padding-left:0;
+  white-space:nowrap;
+  margin-right:16px;
+  color:#111;
 }
 
 nav{
   display:flex;
-  flex-direction:column;
-  gap:10px;
+  flex-direction:row;
+  gap:2px;
 }
 
 nav a{
   display:block;
-  padding:10px 12px;
-  border-radius:10px;
+  padding:7px 13px;
+  border-radius:8px;
+  font-size:.9rem;
+  color:#555;
 }
 
 nav a:hover{
   background:#f3f5f9;
+  text-decoration:none;
+}
+
+nav a.is-active{
+  color:#111;
+  font-weight:600;
 }
 
 .notice{
-  margin-top:30px;
-  margin-left:12px;
-  border-left:3px solid #333;
-  background:#f7f7f7;
-  font-size:0.9rem;
+  display:none;
 }
 .notice-item{
   padding:10px 12px;
@@ -294,19 +314,4 @@ h2{
 .muted{
   color:#666;
   font-size:0.95rem;
-}
-/* ===============================
-   Global Header Fixed (Safe)
-   =============================== */
-.site-header{
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 9999;
-}
-
-/* 헤더 높이만큼 본문을 아래로 밀어 겹침 방지 */
-body{
-  padding-top: var(--header-h, 64px);
 }
