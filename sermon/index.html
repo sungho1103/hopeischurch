@@ -549,16 +549,21 @@ function render(){
 async function handleDelete(id, storedHash){
   const entered = window.prompt("비밀번호를 입력하세요\n(작성 시 비밀번호 또는 관리자 비밀번호)");
   if(entered === null) return;
+
   const enteredHash = await sha256(entered);
   const adminHash   = await sha256(ADMIN_PW);
-  if(enteredHash !== storedHash && enteredHash !== adminHash){
+
+  const isAdmin  = enteredHash === adminHash;
+  const isAuthor = storedHash && enteredHash === storedHash;
+
+  if(!isAdmin && !isAuthor){
     alert("비밀번호가 맞지 않습니다.");
     return;
   }
   try {
     await remove(ref(db, `sermon_comments/${fileKey(curFile)}/${id}`));
   } catch(e){
-    alert("삭제에 실패했습니다.");
+    alert("삭제에 실패했습니다: " + e.message);
   }
 }
 
