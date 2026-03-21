@@ -17,7 +17,7 @@
       background: #f7f7f7;
       border: 1px solid #e8e8e8;
       border-radius: 14px;
-      margin: 0 0 24px;
+      margin: 0 0 40px;
       padding: 12px 16px;
     }
     .pc-notice.has-items { display: flex; }
@@ -30,7 +30,6 @@
       border: 1px solid #e6e6e6;
       border-radius: 10px;
     }
-    @media (max-width: 768px) { .pc-notice { display: none !important; } }
 
     /* ================================================
        Hero
@@ -257,9 +256,6 @@
     <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
     <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
   </nav>
-  <!-- 모바일 공지사항 배너 -->
-  <div class="mobile-notice" id="mobileNotice"></div>
-
   <div class="wrap">
     <aside>
       <div class="brand">희망은교회</div>
@@ -273,9 +269,6 @@
     </aside>
 
     <main>
-
-      <!-- PC 공지사항 배너 -->
-      <div class="pc-notice" id="pcNotice"></div>
 
       <!-- ① Hero -->
       <section class="hero">
@@ -322,6 +315,9 @@
         </div>
         <p class="muted" style="margin-top:16px;">주일예배시 15분전인 10:45am 에 찬양시작합니다.<br>예배 후에는 다같이 애찬(공동식사)을 나눕니다.</p>
       </section>
+
+      <!-- 공지사항 -->
+      <div class="pc-notice" id="pcNotice"></div>
 
       <hr class="divider">
 
@@ -447,16 +443,8 @@
               }).join('');
             }
           }
-          // 모바일 공지 배너
-          const mob=document.getElementById('mobileNotice'); if(!mob) return;
+          // 공지 배너 (PC + 모바일 공통)
           const items=n.items||[]; if(!items.length) return;
-          mob.innerHTML=items.map(item=>{
-            const line=_e(item.text||'').replace(/\n/g,'<br>');
-            if(item.link_url) return `<a class="mobile-notice-item" href="${_e(item.link_url)}" target="_blank" rel="noreferrer" style="flex-shrink:0;cursor:pointer;">${line}</a>`;
-            return `<div class="mobile-notice-item">${line}</div>`;
-          }).join('');
-          mob.classList.add('has-items');
-          // PC 공지 배너
           const pc=document.getElementById('pcNotice'); if(pc&&items.length){
             pc.innerHTML=items.map(item=>{
               const line=_e(item.text||'').replace(/\n/g,'<br>');
