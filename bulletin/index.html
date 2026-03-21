@@ -338,7 +338,7 @@
       : "<div class='muted'>예배위원 정보가 없습니다.</div>";
 
     const orderHtml = order.length
-      ? "<table class='order-table'><thead><tr><th style='width:70px;'>순서</th><th>내용</th><th style='width:90px;'>담당</th></tr></thead><tbody>"+order.map(r => "<tr><td>"+escapeHtml(r.step||"")+"</td><td>"+escapeHtml(r.content||"")+"</td><td>"+escapeHtml(r.person||"")+"</td></tr>").join("")+"</tbody></table>"
+      ? "<table class='order-table'><thead><tr><th style='width:90px;'>순서</th><th>내용</th><th style='width:90px;'>담당</th></tr></thead><tbody>"+order.map(r => "<tr><td>"+escapeHtml(r.step||"")+"</td><td>"+escapeHtml(r.content||"")+"</td><td>"+escapeHtml(r.person||"")+"</td></tr>").join("")+"</tbody></table>"
       : "<div class='muted'>예배순서가 없습니다.</div>";
     const verseHtml = (memory && (memory.reference || memory.text))
       ? "<p class='verse'><b>"+escapeHtml(memory.reference||"")+"</b><br/>"+escapeHtml(memory.text||"")+"</p>"
