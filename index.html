@@ -9,16 +9,25 @@
     /* ================================================
        PC 공지사항 배너
     ================================================ */
+    .worship-notice-wrap {
+      background: #f7f7f7;
+      border: 1px solid #e8e8e8;
+      border-radius: 14px;
+      padding: 24px 20px 16px;
+      margin-bottom: 40px;
+    }
+    .worship-notice-wrap .section { margin-bottom: 0; }
     .pc-notice {
       display: none;
       flex-direction: row;
       flex-wrap: wrap;
       gap: 10px;
-      background: #f7f7f7;
-      border: 1px solid #e8e8e8;
-      border-radius: 14px;
-      margin: 0 0 40px;
-      padding: 12px 16px;
+      background: transparent;
+      border: none;
+      border-top: 1px solid #e0e0e0;
+      border-radius: 0;
+      margin: 16px 0 0;
+      padding: 16px 0 0;
     }
     .pc-notice.has-items { display: flex; }
     .pc-notice-item {
@@ -287,7 +296,8 @@
         </div>
       </section>
 
-      <!-- ② 예배 및 모임 안내 -->
+      <!-- ② 예배 및 모임 안내 + 공지사항 묶음 박스 -->
+      <div class="worship-notice-wrap">
       <section class="section" id="worship">
         <span class="section-label">Worship</span>
         <h2 class="section-title">예배 및 모임 안내</h2>
@@ -318,6 +328,7 @@
 
       <!-- 공지사항 -->
       <div class="pc-notice" id="pcNotice"></div>
+      </div><!-- /.worship-notice-wrap -->
 
       <hr class="divider">
 
