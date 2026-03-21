@@ -450,7 +450,11 @@
           // 모바일 공지 배너
           const mob=document.getElementById('mobileNotice'); if(!mob) return;
           const items=n.items||[]; if(!items.length) return;
-          mob.innerHTML=items.map(item=>`<div class="mobile-notice-item">${_e(item.text||'').replace(/\n/g,'<br>')}</div>`).join('');
+          mob.innerHTML=items.map(item=>{
+            let line=_e(item.text||'').replace(/\n/g,'<br>');
+            if(item.link_url) line+=` <a href="${_e(item.link_url)}" target="_blank" rel="noreferrer" style="color:#2563eb;">${_e(item.link_text||item.link_url)}</a>`;
+            return `<div class="mobile-notice-item">${line}</div>`;
+          }).join('');
           mob.classList.add('has-items');
           // PC 공지 배너
           const pc=document.getElementById('pcNotice'); if(pc&&items.length){
