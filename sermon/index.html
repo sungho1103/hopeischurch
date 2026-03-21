@@ -248,10 +248,10 @@
             <div class="comment-row">
               <input id="cName" class="c-input c-name" placeholder="이름" maxlength="20">
               <input id="cPw" class="c-input c-pw" type="password" placeholder="비밀번호" maxlength="20">
-              <textarea id="cText" class="c-input c-text" placeholder="100자 이내로 작성해주세요." maxlength="100"></textarea>
+              <textarea id="cText" class="c-input c-text" placeholder="200자 이내로 작성해주세요." maxlength="200"></textarea>
             </div>
             <div class="c-footer">
-              <span id="cCount" class="c-count">0 / 100</span>
+              <span id="cCount" class="c-count">0 / 200</span>
               <button id="cSubmit" class="c-submit">등록</button>
             </div>
             <div id="cError" class="c-error"></div>
@@ -490,7 +490,7 @@ const errorEl = document.getElementById("cError");
 const submitEl= document.getElementById("cSubmit");
 
 textEl.addEventListener("input", () => {
-  countEl.textContent = `${textEl.value.length} / 100`;
+  countEl.textContent = `${textEl.value.length} / 200`;
 });
 
 function esc(s){
@@ -566,7 +566,7 @@ function validate(name, pw, text){
   if(!name.trim()) return "이름을 입력해주세요.";
   if(!pw.trim())   return "비밀번호를 입력해주세요.";
   if(!text.trim()) return "내용을 입력해주세요.";
-  if(text.length > 100) return "100자 이내로 작성해주세요.";
+  if(text.length > 200) return "200자 이내로 작성해주세요.";
 
   const items = Object.values(cache).sort((a,b) => a.ts - b.ts);
 
@@ -593,7 +593,7 @@ submitEl.addEventListener("click", async () => {
     await push(ref(db, `sermon_comments/${fileKey(curFile)}`), { name, text, ts: Date.now(), pwHash });
     textEl.value = "";
     pwEl.value   = "";
-    countEl.textContent = "0 / 100";
+    countEl.textContent = "0 / 200";
   } catch(e){
     errorEl.textContent = "저장에 실패했습니다.";
   } finally {
