@@ -441,8 +441,8 @@
           const el=document.getElementById('siteNotice'); if(el){
             const items=n.items||[]; if(items.length){
               el.innerHTML=items.map(item=>{
-                let line=_e(item.text||'').replace(/\n/g,'<br>');
-                if(item.link_url) line+=` <a href="${_e(item.link_url)}" target="_blank" rel="noreferrer">${_e(item.link_text||item.link_url)}</a>`;
+                const line=_e(item.text||'').replace(/\n/g,'<br>');
+                if(item.link_url) return `<a class="notice-item" href="${_e(item.link_url)}" target="_blank" rel="noreferrer" style="display:block;cursor:pointer;">${line}</a>`;
                 return `<div class="notice-item">${line}</div>`;
               }).join('');
             }
@@ -451,14 +451,18 @@
           const mob=document.getElementById('mobileNotice'); if(!mob) return;
           const items=n.items||[]; if(!items.length) return;
           mob.innerHTML=items.map(item=>{
-            let line=_e(item.text||'').replace(/\n/g,'<br>');
-            if(item.link_url) line+=` <a href="${_e(item.link_url)}" target="_blank" rel="noreferrer" style="color:#2563eb;">${_e(item.link_text||item.link_url)}</a>`;
+            const line=_e(item.text||'').replace(/\n/g,'<br>');
+            if(item.link_url) return `<a class="mobile-notice-item" href="${_e(item.link_url)}" target="_blank" rel="noreferrer" style="flex-shrink:0;cursor:pointer;">${line}</a>`;
             return `<div class="mobile-notice-item">${line}</div>`;
           }).join('');
           mob.classList.add('has-items');
           // PC 공지 배너
           const pc=document.getElementById('pcNotice'); if(pc&&items.length){
-            pc.innerHTML=items.map(item=>`<div class="pc-notice-item">${_e(item.text||'').replace(/\n/g,'<br>')}</div>`).join('');
+            pc.innerHTML=items.map(item=>{
+              const line=_e(item.text||'').replace(/\n/g,'<br>');
+              if(item.link_url) return `<a class="pc-notice-item" href="${_e(item.link_url)}" target="_blank" rel="noreferrer" style="cursor:pointer;">${line}</a>`;
+              return `<div class="pc-notice-item">${line}</div>`;
+            }).join('');
             pc.classList.add('has-items');
           }
         }).catch(()=>{});
