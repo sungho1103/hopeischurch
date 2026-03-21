@@ -153,7 +153,22 @@
     }
     .page-sermon .c-input:focus{ border-color:#999; }
     .page-sermon .c-name{ width:90px; flex-shrink:0; }
-    .page-sermon .c-pw{ width:90px; flex-shrink:0; }
+    .page-sermon .c-pw{
+      width:90px; flex-shrink:0;
+      letter-spacing:0.12em;
+      -webkit-user-select:none;
+      user-select:none;
+    }
+    @keyframes pw-flicker{
+      0%,100%{ opacity:1; }
+      45%{ opacity:0.82; }
+      50%{ opacity:1; }
+      95%{ opacity:0.88; }
+    }
+    .page-sermon .c-pw.has-value{
+      animation: pw-flicker 1.7s infinite;
+      filter: contrast(1.04);
+    }
     .page-sermon .c-text{ flex:1; resize:none; height:62px; }
     .page-sermon .c-footer{ display:flex; justify-content:space-between; align-items:center; }
     .page-sermon .c-count{ font-size:0.72rem; color:#bbb; }
@@ -247,7 +262,7 @@
           <div class="comment-form">
             <div class="comment-row">
               <input id="cName" class="c-input c-name" placeholder="이름" maxlength="20">
-              <input id="cPw" class="c-input c-pw" type="password" placeholder="비밀번호" maxlength="20">
+              <input id="cPw" class="c-input c-pw" type="text" placeholder="비밀번호" maxlength="20" autocomplete="off" spellcheck="false" autocorrect="off">
               <textarea id="cText" class="c-input c-text" placeholder="200자 이내로 작성해주세요." maxlength="200"></textarea>
             </div>
             <div class="c-footer">
@@ -493,6 +508,34 @@ textEl.addEventListener("input", () => {
   countEl.textContent = `${textEl.value.length} / 200`;
 });
 
+// 비밀번호 커스텀 마스킹: 첫 2글자만 표시, 나머지 •
+let realPw = "";
+
+function updatePwDisplay(){
+  if(realPw.length === 0){
+    pwEl.value = "";
+    pwEl.classList.remove("has-value");
+  } else if(realPw.length <= 2){
+    pwEl.value = realPw;
+    pwEl.classList.add("has-value");
+  } else {
+    pwEl.value = realPw.slice(0,2) + "•".repeat(realPw.length - 2);
+    pwEl.classList.add("has-value");
+  }
+}
+
+pwEl.addEventListener("keydown", e => {
+  if(e.ctrlKey || e.metaKey) { e.preventDefault(); return; }
+  if(e.key.length > 1 && e.key !== "Backspace" && e.key !== "Delete") return;
+  e.preventDefault();
+  if(e.key === "Backspace")     realPw = realPw.slice(0,-1);
+  else if(e.key === "Delete")   realPw = "";
+  else if(realPw.length < 20)  realPw += e.key;
+  updatePwDisplay();
+});
+pwEl.addEventListener("paste",  e => e.preventDefault());
+pwEl.addEventListener("drop",   e => e.preventDefault());
+
 function esc(s){
   return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
@@ -586,7 +629,7 @@ function validate(name, pw, text){
 
 submitEl.addEventListener("click", async () => {
   const name = nameEl.value.trim();
-  const pw   = pwEl.value;
+  const pw   = realPw;
   const text = textEl.value.trim();
   const err  = validate(name, pw, text);
   if(err){ errorEl.textContent = err; return; }
@@ -596,7 +639,8 @@ submitEl.addEventListener("click", async () => {
     const pwHash = await sha256(pw);
     await push(ref(db, `sermon_comments/${fileKey(curFile)}`), { name, text, ts: Date.now(), pwHash });
     textEl.value = "";
-    pwEl.value   = "";
+    realPw = "";
+    updatePwDisplay();
     countEl.textContent = "0 / 200";
   } catch(e){
     errorEl.textContent = "저장에 실패했습니다.";
