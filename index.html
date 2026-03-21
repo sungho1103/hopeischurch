@@ -188,13 +188,49 @@
        반응형
     ================================================ */
     @media (max-width: 768px) {
-      .hero h1 { font-size: 2.2rem; }
-      .worship-grid { grid-template-columns: 1fr; gap: 10px; }
+      /* 본문 좌우 패딩 */
+      main { padding: 0 20px; }
+
+      /* Hero */
+      .hero { padding: 28px 0 24px; margin-bottom: 36px; }
+      .hero h1 { font-size: 2rem; }
+      .hero-desc { font-size: .92rem; margin-bottom: 20px; }
+      .hero-btns { flex-direction: column; gap: 8px; }
+      .btn { display: block; width: 100%; text-align: center; padding: 14px 0; font-size: .95rem; min-height: 48px; }
+
+      /* 예배 카드 2×2 */
+      .worship-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .worship-card { padding: 16px 14px; }
+      .worship-card-time { font-size: 1.15rem; }
+
+      /* 섹션 간격 */
+      .section { margin-bottom: 40px; }
+
+      /* 찾아오는 길 — 지도 버튼 풀너비 */
+      .section .btn-outline { display: block; width: 100%; text-align: center; padding: 14px 0; min-height: 48px; }
     }
   </style>
 </head>
 
 <body>
+  <!-- 모바일 Sticky Header -->
+  <header class="mobile-header">
+    <span class="mobile-brand">희망은교회</span>
+    <button class="hamburger" id="hamburgerBtn" aria-label="메뉴 열기">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <nav class="drawer" id="drawer">
+    <button class="drawer-close" id="drawerClose" aria-label="메뉴 닫기">×</button>
+    <a href="/hopeischurch/" data-nav="home">홈</a>
+    <a href="/hopeischurch/bulletin/" data-nav="bulletin">주보</a>
+    <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
+    <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
+  </nav>
+  <!-- 모바일 공지사항 배너 -->
+  <div class="mobile-notice" id="mobileNotice"></div>
+
   <div class="wrap">
     <aside>
       <div class="brand">희망은교회</div>
@@ -316,7 +352,7 @@
         <span class="section-label">Location</span>
         <h2 class="section-title">찾아오는 길</h2>
         <p class="map-address">경기도 부천시 소사구 은성로 62번길 13 (3층)</p>
-        <p class="map-phone">010-7795-2102</p>
+        <p class="map-phone"><a href="tel:010-7795-2102" style="color:inherit;">010-7795-2102</a></p>
         <a class="btn btn-outline"
            href="https://map.naver.com/v5/search/경기도%20부천시%20소사구%20은성로%2062번길%2013"
            target="_blank" rel="noreferrer">
@@ -332,20 +368,82 @@
     Copyright&copy; 2025-2026 <a href="https://sungho1103.github.io/hopeischurch/" style="color:#aaa;">https://sungho1103.github.io/hopeischurch/</a> All rights reserved. Designed by sungho.
   </footer>
 
+  <!-- 모바일 하단 탭바 -->
+  <nav class="bottom-nav">
+    <a href="/hopeischurch/" class="bottom-nav-item" data-nav="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/>
+      </svg>
+      <span>홈</span>
+    </a>
+    <a href="/hopeischurch/bulletin/" class="bottom-nav-item" data-nav="bulletin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/>
+      </svg>
+      <span>주보</span>
+    </a>
+    <a href="/hopeischurch/sermon/" class="bottom-nav-item" data-nav="sermon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+      </svg>
+      <span>설교</span>
+    </a>
+    <a href="/hopeischurch/#map" class="bottom-nav-item" data-nav="map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+      </svg>
+      <span>위치</span>
+    </a>
+  </nav>
+
   <script>
     // 공지사항 동적 로드
     (function(){
       function _e(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
       fetch('/hopeischurch/data/notice.json',{cache:'no-store'})
         .then(r=>r.json()).then(n=>{
-          const el=document.getElementById('siteNotice'); if(!el) return;
+          const el=document.getElementById('siteNotice'); if(el){
+            const items=n.items||[]; if(items.length){
+              el.innerHTML=items.map(item=>{
+                let line=_e(item.text||'').replace(/\n/g,'<br>');
+                if(item.link_url) line+=` <a href="${_e(item.link_url)}" target="_blank" rel="noreferrer">${_e(item.link_text||item.link_url)}</a>`;
+                return `<div class="notice-item">${line}</div>`;
+              }).join('');
+            }
+          }
+          // 모바일 공지 배너
+          const mob=document.getElementById('mobileNotice'); if(!mob) return;
           const items=n.items||[]; if(!items.length) return;
-          el.innerHTML=items.map(item=>{
-            let line=_e(item.text||'').replace(/\n/g,'<br>');
-            if(item.link_url) line+=` <a href="${_e(item.link_url)}" target="_blank" rel="noreferrer">${_e(item.link_text||item.link_url)}</a>`;
-            return `<div class="notice-item">${line}</div>`;
-          }).join('');
+          mob.innerHTML=items.map(item=>`<div class="mobile-notice-item">${_e(item.text||'').replace(/\n/g,'<br>')}</div>`).join('');
+          mob.classList.add('has-items');
         }).catch(()=>{});
+    })();
+
+    // 모바일 햄버거 메뉴
+    (function(){
+      const btn=document.getElementById('hamburgerBtn');
+      const overlay=document.getElementById('drawerOverlay');
+      const drawer=document.getElementById('drawer');
+      const closeBtn=document.getElementById('drawerClose');
+      if(!btn) return;
+      function open(){ drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+      function close(){ drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow=''; }
+      btn.addEventListener('click',open);
+      closeBtn.addEventListener('click',close);
+      overlay.addEventListener('click',close);
+    })();
+
+    // 하단 탭바 + 드로어 active 상태
+    (function(){
+      const path=location.pathname;
+      const isHome=path==='/hopeischurch/'||path.endsWith('/hopeischurch/index.html');
+      const isBulletin=path.includes('/bulletin/');
+      const isSermon=path.includes('/sermon/');
+      document.querySelectorAll('.bottom-nav-item[data-nav], .drawer a[data-nav]').forEach(el=>{
+        const nav=el.dataset.nav;
+        if((nav==='home'&&isHome)||(nav==='bulletin'&&isBulletin)||(nav==='sermon'&&isSermon))
+          el.classList.add('is-active');
+      });
     })();
 
     const menu = document.getElementById("menu");

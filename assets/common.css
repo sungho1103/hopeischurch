@@ -109,29 +109,161 @@ h2{
   background:transparent; /* 배경색 없음 */
 }
 
+/* =================================================
+   모바일 전용 컴포넌트 — PC에서는 숨김
+================================================= */
+.mobile-header { display:none; }
+.drawer {
+  position:fixed;
+  top:0; right:0; bottom:0;
+  width:72vw; max-width:280px;
+  background:#fff;
+  z-index:400;
+  padding:20px 24px;
+  display:none;
+  flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .25s ease;
+  box-shadow:-4px 0 20px rgba(0,0,0,.12);
+}
+.drawer.open { transform:translateX(0); }
+.drawer-overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  z-index:300;
+  display:none;
+}
+.drawer-overlay.open { display:block; }
+.mobile-notice { display:none; }
+.bottom-nav { display:none; }
+
+/* =================================================
+   @media 768px — 모바일 오버라이드
+================================================= */
 @media (max-width:768px){
-  .wrap{
+  body {
+    padding-top:0;
+    padding-bottom:60px;
+  }
+
+  /* 기존 PC 레이아웃 숨김 */
+  aside { display:none !important; }
+  .wrap { flex-direction:column; gap:0; padding:0; }
+
+  /* ── Sticky Header ── */
+  .mobile-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:sticky;
+    top:0;
+    z-index:200;
+    background:#fff;
+    border-bottom:1px solid #e8e8e8;
+    padding:0 16px;
+    height:52px;
+    box-shadow:0 1px 6px rgba(0,0,0,.06);
+  }
+  .mobile-brand {
+    font-size:1.05rem;
+    font-weight:700;
+    letter-spacing:-.01em;
+    color:#111;
+  }
+  .hamburger {
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:8px;
+    display:flex;
     flex-direction:column;
-    gap:0;
+    justify-content:center;
+    gap:5px;
+  }
+  .hamburger span {
+    display:block;
+    width:22px;
+    height:2px;
+    background:#222;
+    border-radius:2px;
   }
 
-  aside{
-    width:100%;
+  /* ── Drawer ── */
+  .drawer { display:flex; }
+  .drawer-close {
+    align-self:flex-end;
+    background:none;
+    border:none;
+    font-size:1.8rem;
+    line-height:1;
+    cursor:pointer;
+    color:#444;
     margin-bottom:20px;
-    padding-bottom:20px;
-    border-bottom:1px solid #ddd;
+    padding:4px 8px;
+  }
+  .drawer a {
+    font-size:1.15rem;
+    font-weight:700;
+    padding:16px 0;
+    border-bottom:1px solid #f0f0f0;
+    color:#111;
+    text-decoration:none;
+  }
+  .drawer a:last-child { border-bottom:none; }
+  .drawer a.is-active { color:#000; opacity:1; }
+
+  /* ── 공지사항 슬라이드 배너 ── */
+  .mobile-notice {
+    overflow-x:auto;
+    gap:10px;
+    padding:10px 16px;
+    background:#f7f7f7;
+    border-bottom:1px solid #ebebeb;
+    scrollbar-width:none;
+  }
+  .mobile-notice::-webkit-scrollbar { display:none; }
+  .mobile-notice.has-items { display:flex; }
+  .mobile-notice-item {
+    flex-shrink:0;
+    max-width:78vw;
+    background:#fff;
+    border:1px solid #e6e6e6;
+    border-radius:10px;
+    padding:8px 14px;
+    font-size:13px;
+    line-height:1.6;
+    color:#333;
   }
 
-  nav{
-    flex-direction:row;
-    flex-wrap:wrap;
-    gap:8px;
+  /* ── Bottom Navigation Bar ── */
+  .bottom-nav {
+    display:flex;
+    position:fixed;
+    bottom:0; left:0; right:0;
+    height:56px;
+    background:#fff;
+    border-top:1px solid #e8e8e8;
+    z-index:200;
+    box-shadow:0 -1px 8px rgba(0,0,0,.06);
   }
+  .bottom-nav-item {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    color:#bbb;
+    font-size:10px;
+    font-weight:500;
+    text-decoration:none;
+    transition:color .15s;
+  }
+  .bottom-nav-item.is-active { color:#111; }
+  .bottom-nav-item svg { width:22px; height:22px; }
 
-  .box{
-    padding:20px 18px;
-    border-radius:16px;
-  }
+  .box { padding:20px 18px; border-radius:16px; }
 }
 
 /* =================================================

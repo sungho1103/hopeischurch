@@ -17,6 +17,14 @@
        - 이 페이지에서만 적용되도록 .page-sermon로 스코프
     ================================================== */
 
+    body.page-sermon .wrap{ padding-top:10px; }
+
+    @media (max-width:768px){
+      body.page-sermon .wrap{ padding-top:0; }
+      .page-sermon .container{ padding:10px 16px 40px; }
+      .page-sermon pre{ font-size:14px; }
+    }
+
     .page-sermon .sermon-top{
       display:flex;
       justify-content:space-between;
@@ -54,7 +62,7 @@
     .page-sermon .select{
       width:100%;
       padding:10px 12px;
-      border:1px solid #e6e6e6;
+      border:2px solid #999;
       border-radius:12px;
       font-size:14px;
       background:#fff;
@@ -99,6 +107,23 @@
 </head>
 
 <body class="page-sermon">
+  <!-- 모바일 Sticky Header -->
+  <header class="mobile-header">
+    <span class="mobile-brand">희망은교회</span>
+    <button class="hamburger" id="hamburgerBtn" aria-label="메뉴 열기">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <nav class="drawer" id="drawer">
+    <button class="drawer-close" id="drawerClose" aria-label="메뉴 닫기">×</button>
+    <a href="/hopeischurch/" data-nav="home">홈</a>
+    <a href="/hopeischurch/bulletin/" data-nav="bulletin">주보</a>
+    <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
+    <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
+  </nav>
+  <div class="mobile-notice" id="mobileNotice"></div>
+
   <div class="wrap">
     <aside>
       <div class="brand">희망은교회</div>
@@ -135,7 +160,7 @@
             </select>
 
             <!-- 주차별 사진 -->
-            <div id="sermonImg" style="display:none;margin-top:14px;">
+            <div id="sermonImg" style="display:none;margin-top:24px;">
               <img id="sermonImgEl" src="" alt="" style="width:100%;border-radius:10px;display:block;object-fit:cover;">
             </div>
 
@@ -149,17 +174,63 @@
     </main>
   </div>
 
+<!-- 모바일 하단 탭바 -->
+<nav class="bottom-nav">
+  <a href="/hopeischurch/" class="bottom-nav-item" data-nav="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/>
+    </svg>
+    <span>홈</span>
+  </a>
+  <a href="/hopeischurch/bulletin/" class="bottom-nav-item" data-nav="bulletin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/>
+    </svg>
+    <span>주보</span>
+  </a>
+  <a href="/hopeischurch/sermon/" class="bottom-nav-item" data-nav="sermon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+    </svg>
+    <span>설교</span>
+  </a>
+  <a href="/hopeischurch/#map" class="bottom-nav-item" data-nav="map">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+    </svg>
+    <span>위치</span>
+  </a>
+</nav>
+
 <script>
+  // 모바일 햄버거 메뉴
+  (function(){
+    const btn=document.getElementById('hamburgerBtn'),overlay=document.getElementById('drawerOverlay'),drawer=document.getElementById('drawer'),closeBtn=document.getElementById('drawerClose');
+    if(!btn) return;
+    function open(){ drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+    function close(){ drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow=''; }
+    btn.addEventListener('click',open); closeBtn.addEventListener('click',close); overlay.addEventListener('click',close);
+  })();
+
+  // 하단 탭바 + 드로어 active 상태
+  (function(){
+    const path=location.pathname;
+    document.querySelectorAll('.bottom-nav-item[data-nav], .drawer a[data-nav]').forEach(el=>{
+      const nav=el.dataset.nav;
+      if((nav==='bulletin'&&path.includes('/bulletin/'))||(nav==='sermon'&&path.includes('/sermon/')))
+        el.classList.add('is-active');
+    });
+  })();
+
   // 공지사항 동적 로드
   fetch('/hopeischurch/data/notice.json',{cache:'no-store'})
     .then(r=>r.json()).then(n=>{
-      const el=document.getElementById('siteNotice'); if(!el) return;
+      const el=document.getElementById('siteNotice');
+      if(el){ const items=n.items||[]; if(items.length){ el.innerHTML=items.map(item=>{ let line=escapeHtml(item.text||'').replace(/\n/g,'<br>'); if(item.link_url) line+=` <a href="${escapeHtml(item.link_url)}" target="_blank" rel="noreferrer">${escapeHtml(item.link_text||item.link_url)}</a>`; return `<div class="notice-item">${line}</div>`; }).join(''); } }
+      const mob=document.getElementById('mobileNotice'); if(!mob) return;
       const items=n.items||[]; if(!items.length) return;
-      el.innerHTML=items.map(item=>{
-        let line=escapeHtml(item.text||'').replace(/\n/g,'<br>');
-        if(item.link_url) line+=` <a href="${escapeHtml(item.link_url)}" target="_blank" rel="noreferrer">${escapeHtml(item.link_text||item.link_url)}</a>`;
-        return `<div class="notice-item">${line}</div>`;
-      }).join('');
+      mob.innerHTML=items.map(item=>`<div class="mobile-notice-item">${escapeHtml(item.text||'').replace(/\n/g,'<br>')}</div>`).join('');
+      mob.classList.add('has-items');
     }).catch(()=>{});
 
   // ✅ 안정적: GitHub API 대신 "우리 사이트"의 정적 파일을 읽음
