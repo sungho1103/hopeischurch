@@ -7,6 +7,29 @@
   <link rel="stylesheet" href="/hopeischurch/assets/common.css?v=20260203-01">
   <style>
     /* ================================================
+       PC 공지사항 배너
+    ================================================ */
+    .pc-notice {
+      display: none;
+      flex-direction: column;
+      gap: 0;
+      background: #f7f7f7;
+      border-bottom: 1px solid #e8e8e8;
+      margin: 0 -20px 24px;
+      padding: 0;
+    }
+    .pc-notice.has-items { display: flex; }
+    .pc-notice-item {
+      font-size: 13.5px;
+      color: #444;
+      line-height: 1.65;
+      padding: 9px 20px;
+      border-bottom: 1px solid #ebebeb;
+    }
+    .pc-notice-item:last-child { border-bottom: none; }
+    @media (max-width: 768px) { .pc-notice { display: none !important; } }
+
+    /* ================================================
        Hero
     ================================================ */
     .hero {
@@ -242,6 +265,9 @@
 
     <main>
 
+      <!-- PC 공지사항 배너 -->
+      <div class="pc-notice" id="pcNotice"></div>
+
       <!-- ① Hero -->
       <section class="hero">
         <div class="hero-eyebrow">기독교 대한 성결교회</div>
@@ -413,6 +439,11 @@
           const items=n.items||[]; if(!items.length) return;
           mob.innerHTML=items.map(item=>`<div class="mobile-notice-item">${_e(item.text||'').replace(/\n/g,'<br>')}</div>`).join('');
           mob.classList.add('has-items');
+          // PC 공지 배너
+          const pc=document.getElementById('pcNotice'); if(pc&&items.length){
+            pc.innerHTML=items.map(item=>`<div class="pc-notice-item">${_e(item.text||'').replace(/\n/g,'<br>')}</div>`).join('');
+            pc.classList.add('has-items');
+          }
         }).catch(()=>{});
     })();
 
