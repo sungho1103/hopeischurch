@@ -105,6 +105,59 @@
     @media (max-width: 980px){
       .page-sermon .grid{ grid-template-columns: 1fr; }
     }
+
+    /* 댓글 */
+    .page-sermon .comments{
+      margin-top:32px;
+      padding-top:24px;
+      border-top:1px solid #eee;
+    }
+    .page-sermon .comment-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-bottom:18px;
+    }
+    .page-sermon .comment-item{
+      padding:10px 14px;
+      background:#f8f8f8;
+      border-radius:10px;
+    }
+    .page-sermon .comment-meta{
+      font-size:0.72rem;
+      color:#bbb;
+      margin-bottom:4px;
+    }
+    .page-sermon .comment-author{ font-weight:600; color:#666; }
+    .page-sermon .comment-body{ font-size:0.88rem; color:#333; line-height:1.6; }
+    .page-sermon .comment-form{ display:flex; flex-direction:column; gap:8px; }
+    .page-sermon .comment-row{ display:flex; gap:8px; }
+    .page-sermon .c-input{
+      border:1px solid #ddd;
+      border-radius:8px;
+      padding:8px 10px;
+      font-size:0.85rem;
+      font-family:inherit;
+      outline:none;
+    }
+    .page-sermon .c-input:focus{ border-color:#999; }
+    .page-sermon .c-name{ width:110px; flex-shrink:0; }
+    .page-sermon .c-text{ flex:1; resize:none; height:62px; }
+    .page-sermon .c-footer{ display:flex; justify-content:space-between; align-items:center; }
+    .page-sermon .c-count{ font-size:0.72rem; color:#bbb; }
+    .page-sermon .c-submit{
+      padding:8px 18px;
+      background:#333;
+      color:#fff;
+      border:none;
+      border-radius:8px;
+      font-size:0.8rem;
+      cursor:pointer;
+    }
+    .page-sermon .c-submit:hover{ opacity:.75; }
+    .page-sermon .c-submit:disabled{ opacity:.4; cursor:default; }
+    .page-sermon .c-error{ font-size:0.72rem; color:#d44; min-height:16px; }
+    .page-sermon .c-empty{ text-align:center; color:#ccc; padding:20px 0; font-size:0.85rem; }
   </style>
 </head>
 
@@ -172,6 +225,26 @@
             <div class="muted">왼쪽에서 설교를 선택하세요.</div>
           </section>
         </div>
+
+        <!-- 성도 댓글 -->
+        <div id="commentsWrap" class="comments" style="display:none;">
+          <div class="muted" style="margin-bottom:14px;">성도 댓글</div>
+          <div id="commentList" class="comment-list">
+            <div class="c-empty">첫 번째 댓글을 남겨주세요.</div>
+          </div>
+          <div class="comment-form">
+            <div class="comment-row">
+              <input id="cName" class="c-input c-name" placeholder="이름" maxlength="20">
+              <textarea id="cText" class="c-input c-text" placeholder="100자 이내로 작성해주세요." maxlength="100"></textarea>
+            </div>
+            <div class="c-footer">
+              <span id="cCount" class="c-count">0 / 100</span>
+              <button id="cSubmit" class="c-submit">등록</button>
+            </div>
+            <div id="cError" class="c-error"></div>
+          </div>
+        </div>
+
       </div>
     </main>
   </div>
@@ -346,6 +419,7 @@
       </div>
       <pre>${escapeHtml(body || "(본문이 비어 있습니다)")}</pre>
     `;
+    document.dispatchEvent(new CustomEvent("sermonLoaded", { detail: { file: filename } }));
   }
 
   selectEl.addEventListener("change", () => {
@@ -370,6 +444,123 @@
       `;
     }
   })();
+</script>
+
+<script type="module">
+// =====================================================
+// ⚠️ Firebase 설정 — Firebase Console에서 복사해 붙여 넣으세요
+// =====================================================
+const FB = {
+  apiKey:            "여기에_API_KEY",
+  authDomain:        "여기에_PROJECT_ID.firebaseapp.com",
+  databaseURL:       "https://여기에_PROJECT_ID-default-rtdb.firebaseio.com",
+  projectId:         "여기에_PROJECT_ID",
+  storageBucket:     "여기에_PROJECT_ID.appspot.com",
+  messagingSenderId: "여기에_SENDER_ID",
+  appId:             "여기에_APP_ID",
+};
+// =====================================================
+
+import { initializeApp }               from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+let db;
+try {
+  db = getDatabase(initializeApp(FB));
+} catch(e) {
+  console.warn("Firebase 미설정 — 댓글 기능 비활성화:", e.message);
+}
+
+const wrap    = document.getElementById("commentsWrap");
+const listEl  = document.getElementById("commentList");
+const nameEl  = document.getElementById("cName");
+const textEl  = document.getElementById("cText");
+const countEl = document.getElementById("cCount");
+const errorEl = document.getElementById("cError");
+const submitEl= document.getElementById("cSubmit");
+
+textEl.addEventListener("input", () => {
+  countEl.textContent = `${textEl.value.length} / 100`;
+});
+
+function esc(s){
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+let cache = {};
+let unsub = null;
+
+function loadComments(file){
+  if(!db) return;
+  wrap.style.display = "";
+  if(unsub) unsub();
+  cache = {};
+  const key = file.replace(/[\.\#\$\[\]\/]/g, "_");
+  unsub = onValue(ref(db, `sermon_comments/${key}`), snap => {
+    cache = snap.val() || {};
+    render();
+  });
+}
+
+function render(){
+  const items = Object.entries(cache)
+    .map(([id,v]) => ({id,...v}))
+    .sort((a,b) => a.ts - b.ts);
+
+  if(!items.length){
+    listEl.innerHTML = '<div class="c-empty">첫 번째 댓글을 남겨주세요.</div>';
+    return;
+  }
+  listEl.innerHTML = items.map(c => {
+    const d = new Date(c.ts);
+    const dt = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+    return `<div class="comment-item">
+      <div class="comment-meta"><span class="comment-author">${esc(c.name)}</span> · ${dt}</div>
+      <div class="comment-body">${esc(c.text)}</div>
+    </div>`;
+  }).join("");
+}
+
+function validate(name, text){
+  if(!name.trim()) return "이름을 입력해주세요.";
+  if(!text.trim()) return "내용을 입력해주세요.";
+  if(text.length > 100) return "100자 이내로 작성해주세요.";
+
+  const items = Object.values(cache).sort((a,b) => a.ts - b.ts);
+
+  // 규칙 1: 중복 내용 금지
+  if(items.some(c => c.text.trim() === text.trim()))
+    return "이미 동일한 내용의 댓글이 있습니다.";
+
+  // 규칙 2: 같은 사람 연속 3번 금지
+  const last2 = items.slice(-2);
+  if(last2.length === 2 && last2.every(c => c.name.trim() === name.trim()))
+    return "같은 분이 연속으로 3번 이상 댓글을 달 수 없습니다.";
+
+  return null;
+}
+
+submitEl.addEventListener("click", async () => {
+  const name = nameEl.value.trim();
+  const text = textEl.value.trim();
+  const err  = validate(name, text);
+  if(err){ errorEl.textContent = err; return; }
+  errorEl.textContent = "";
+  submitEl.disabled = true;
+  try {
+    const file = new URLSearchParams(location.search).get("file") || "";
+    const key  = file.replace(/[\.\#\$\[\]\/]/g, "_");
+    await push(ref(db, `sermon_comments/${key}`), { name, text, ts: Date.now() });
+    textEl.value = "";
+    countEl.textContent = "0 / 100";
+  } catch(e) {
+    errorEl.textContent = "저장에 실패했습니다.";
+  } finally {
+    submitEl.disabled = false;
+  }
+});
+
+document.addEventListener("sermonLoaded", e => loadComments(e.detail.file));
 </script>
 </body>
 </html>
