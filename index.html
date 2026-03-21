@@ -498,13 +498,12 @@
   </script>
 
   <script>
-  // 3D 미디어아트 배경
+  // 3D 미디어아트 배경 — 궤도 링(orrery) 스타일
   (function(){
     const canvas = document.getElementById('bgCanvas');
-    const ctx = canvas.getContext('2d');
-    const WORDS = ['hope', 'is', 'church'];
-    const N = 60;
-    const FOV = 500;
+    const ctx    = canvas.getContext('2d');
+    const WORDS  = ['hope', 'is', 'church'];
+    const FOV    = 620;
     let W, H;
 
     function resize(){
@@ -514,63 +513,72 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // 구면 분포로 파티클 생성
-    const pts = Array.from({length: N}, () => {
-      const theta = Math.random() * Math.PI * 2;
-      const phi   = Math.acos(2 * Math.random() - 1);
-      const r     = 150 + Math.random() * 450;
-      return {
-        char:  WORDS[Math.floor(Math.random() * WORDS.length)],
-        x: r * Math.sin(phi) * Math.cos(theta),
-        y: r * Math.sin(phi) * Math.sin(theta),
-        z: r * Math.cos(phi),
-        size:  10 + Math.random() * 28,
-        dx: (Math.random() - .5) * .25,
-        dy: (Math.random() - .5) * .25,
-        dz: (Math.random() - .5) * .25,
-      };
+    // 세 궤도 링: 반지름 / 기울기 / 방위각 / 공전속도 / 파티클 수
+    const rings = [
+      { r:300, incl:0.40, az:0.0,  spd: 0.0040, n:10 },
+      { r:220, incl:1.15, az:2.10, spd:-0.0030, n: 7 },
+      { r:380, incl:0.75, az:4.20, spd: 0.0025, n:13 },
+    ];
+
+    const pts = [];
+    rings.forEach(ring => {
+      for(let i = 0; i < ring.n; i++){
+        pts.push({
+          ring,
+          phase: (i / ring.n) * Math.PI * 2,
+          word:  WORDS[Math.floor(Math.random() * WORDS.length)],
+          size:  10 + Math.random() * 12,
+        });
+      }
     });
 
-    let angleY = 0, angleX = 0;
+    let t = 0;
 
     function project(x, y, z){
-      const s = FOV / (FOV + z + 700);
-      return { sx: W/2 + x * s, sy: H/2 + y * s, s };
+      const s = FOV / (FOV + z + 480);
+      return { sx: W/2 + x*s, sy: H/2 + y*s, s };
     }
 
     function frame(){
       ctx.clearRect(0, 0, W, H);
-      angleY += .0035;
-      angleX += .0012;
-      const cY = Math.cos(angleY), sY = Math.sin(angleY);
-      const cX = Math.cos(angleX), sX = Math.sin(angleX);
+      t += 0.016;
+
+      const gt = Math.sin(t * 0.07) * 0.12; // 전체 씬 틸트 진동
 
       const visible = pts.map(p => {
-        // 드리프트
-        p.x += p.dx; p.y += p.dy; p.z += p.dz;
-        const mag = Math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
-        if(mag > 650){ p.dx *= -1; p.dy *= -1; p.dz *= -1; }
+        const angle = p.phase + t * p.ring.spd * 60;
 
-        // 회전 Y → X
-        const rx  =  p.x * cY - p.z * sY;
-        const rz1 =  p.x * sY + p.z * cY;
-        const ry  =  p.y * cX - rz1 * sX;
-        const rz  =  p.y * sX + rz1 * cX;
+        // 링 평면 위 좌표
+        let x = p.ring.r * Math.cos(angle);
+        let y = p.ring.r * Math.sin(angle);
+        let z = 0;
 
-        const {sx, sy, s} = project(rx, ry, rz);
-        return { char: p.char, sx, sy, s, size: p.size, rz };
-      }).sort((a, b) => a.rz - b.rz);
+        // 기울기 — X축 회전
+        const ci = Math.cos(p.ring.incl + gt);
+        const si = Math.sin(p.ring.incl + gt);
+        const y1 = y*ci - z*si;
+        const z1 = y*si + z*ci;
+
+        // 방위각 세차 — Y축 회전 (매우 느리게)
+        const ca = Math.cos(p.ring.az + t * 0.06);
+        const sa = Math.sin(p.ring.az + t * 0.06);
+        const x2 =  x*ca + z1*sa;
+        const z2 = -x*sa + z1*ca;
+
+        const { sx, sy, s } = project(x2, y1, z2);
+        return { word: p.word, sx, sy, s, size: p.size, z: z2 };
+      }).sort((a, b) => a.z - b.z);
 
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
 
       visible.forEach(p => {
         if(p.s <= 0) return;
-        const fs    = Math.max(6, p.size * p.s * 2.2);
-        const alpha = Math.min(.28, p.s * .42);
+        const fs    = Math.max(5, p.size * p.s * 2.4);
+        const alpha = Math.min(0.30, p.s * 0.44);
         ctx.font      = `300 ${fs}px -apple-system,BlinkMacSystemFont,sans-serif`;
-        ctx.fillStyle = `rgba(140,145,160,${alpha.toFixed(3)})`;
-        ctx.fillText(p.char, p.sx, p.sy);
+        ctx.fillStyle = `rgba(130,138,155,${alpha.toFixed(3)})`;
+        ctx.fillText(p.word, p.sx, p.sy);
       });
 
       requestAnimationFrame(frame);
