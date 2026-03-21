@@ -502,8 +502,8 @@
   (function(){
     const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
-    const WORD = 'hopeischurch';
-    const N = 90;
+    const WORDS = ['hope', 'is', 'church'];
+    const N = 60;
     const FOV = 500;
     let W, H;
 
@@ -520,7 +520,7 @@
       const phi   = Math.acos(2 * Math.random() - 1);
       const r     = 150 + Math.random() * 450;
       return {
-        char:  WORD[Math.floor(Math.random() * WORD.length)],
+        char:  WORDS[Math.floor(Math.random() * WORDS.length)],
         x: r * Math.sin(phi) * Math.cos(theta),
         y: r * Math.sin(phi) * Math.sin(theta),
         z: r * Math.cos(phi),
