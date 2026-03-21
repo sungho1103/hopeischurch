@@ -489,9 +489,11 @@ function esc(s){
 
 let cache = {};
 let unsub = null;
+let curFile = "";
 
 function loadComments(file){
   if(!db) return;
+  curFile = file;
   wrap.style.display = "";
   if(unsub) unsub();
   cache = {};
@@ -548,8 +550,7 @@ submitEl.addEventListener("click", async () => {
   errorEl.textContent = "";
   submitEl.disabled = true;
   try {
-    const file = new URLSearchParams(location.search).get("file") || "";
-    const key  = file.replace(/[\.\#\$\[\]\/]/g, "_");
+    const key = curFile.replace(/[\.\#\$\[\]\/]/g, "_");
     await push(ref(db, `sermon_comments/${key}`), { name, text, ts: Date.now() });
     textEl.value = "";
     countEl.textContent = "0 / 100";
