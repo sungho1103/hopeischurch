@@ -470,8 +470,8 @@ const FB = {
   appId:             "1:423981952872:web:6c7a337334a42c4bde30dd",
 };
 
-// ✏️ 관리자 비밀번호 — 원하는 값으로 변경하세요
-const ADMIN_PW = "hopeischurch";
+// 관리자 비밀번호의 SHA-256 해시 (평문 노출 방지)
+const ADMIN_HASH = "b243cf0ed002cd1d17567bb7a23bdd8d462cdef17e50f65c7adf7ca09afd96a2";
 
 import { initializeApp }                        from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
@@ -551,9 +551,8 @@ async function handleDelete(id, storedHash){
   if(entered === null) return;
 
   const enteredHash = await sha256(entered);
-  const adminHash   = await sha256(ADMIN_PW);
 
-  const isAdmin  = enteredHash === adminHash;
+  const isAdmin  = enteredHash === ADMIN_HASH;
   const isAuthor = storedHash && enteredHash === storedHash;
 
   if(!isAdmin && !isAuthor){
