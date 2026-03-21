@@ -226,7 +226,8 @@
     <p>관리자 페이지</p>
     <form id="loginForm">
       <input id="pwInput" type="password" placeholder="비밀번호" autocomplete="current-password" autofocus>
-      <button type="submit">로그인</button>
+      <div id="lockMsg" style="display:none;margin-bottom:12px;padding:10px 12px;background:#fff3f3;border:1px solid #f5c6c6;border-radius:8px;font-size:13px;color:#c0392b;line-height:1.6;"></div>
+      <button id="loginBtn" type="submit">로그인</button>
     </form>
   </div>
 </div>
@@ -532,12 +533,73 @@ function toast(msg, type = 'ok') {
 ════════════════════════════════════════════ */
 function isLoggedIn() { return sessionStorage.getItem('admin') === '1'; }
 
+// ── 브루트포스 잠금 ──────────────────────────
+const LOCK_KEY  = 'admin_lock_until';
+const FAIL_KEY  = 'admin_fail_count';
+let lockTimer   = null;
+
+function getFailCount(){ return parseInt(localStorage.getItem(FAIL_KEY)||'0',10); }
+function getLockUntil(){ return parseInt(localStorage.getItem(LOCK_KEY)||'0',10); }
+
+// failCount >= 5 일 때 잠금 시간(ms): 2^(failCount-4) 분
+function lockDurationMs(failCount){
+  return Math.pow(2, failCount - 4) * 60 * 1000;
+}
+
+function formatRemaining(ms){
+  const totalSec = Math.ceil(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return m > 0 ? `${m}분 ${s}초` : `${s}초`;
+}
+
+function startLockCountdown(){
+  const lockMsg = document.getElementById('lockMsg');
+  const loginBtn = document.getElementById('loginBtn');
+  if(lockTimer) clearInterval(lockTimer);
+
+  lockTimer = setInterval(() => {
+    const remaining = getLockUntil() - Date.now();
+    if(remaining <= 0){
+      clearInterval(lockTimer);
+      lockTimer = null;
+      lockMsg.style.display = 'none';
+      loginBtn.disabled = false;
+      loginBtn.textContent = '로그인';
+      document.getElementById('pwInput').focus();
+    } else {
+      lockMsg.style.display = 'block';
+      lockMsg.innerHTML = `⛔ 로그인이 잠겼습니다.<br><b>${formatRemaining(remaining)}</b> 후 다시 시도하세요.`;
+      loginBtn.disabled = true;
+      loginBtn.textContent = '잠금 중…';
+    }
+  }, 500);
+}
+
 function login(pw) {
-  if (pw === PASSWORD) {
+  const lockUntil = getLockUntil();
+  if(Date.now() < lockUntil){
+    startLockCountdown();
+    return;
+  }
+
+  if(pw === PASSWORD){
+    localStorage.removeItem(FAIL_KEY);
+    localStorage.removeItem(LOCK_KEY);
     sessionStorage.setItem('admin', '1');
     showAdmin();
   } else {
-    toast('비밀번호가 틀렸습니다', 'err');
+    const fails = getFailCount() + 1;
+    localStorage.setItem(FAIL_KEY, fails);
+
+    if(fails >= 5){
+      const until = Date.now() + lockDurationMs(fails);
+      localStorage.setItem(LOCK_KEY, until);
+      startLockCountdown();
+      toast(`비밀번호 오류 ${fails}회 — 잠금 시작`, 'err');
+    } else {
+      toast(`비밀번호가 틀렸습니다 (${fails}/5회)`, 'err');
+    }
   }
 }
 
@@ -1063,6 +1125,8 @@ async function uploadSermonImage() {
 window.onload = function() {
   if (isLoggedIn()) {
     showAdmin();
+  } else if (Date.now() < getLockUntil()) {
+    startLockCountdown();
   }
   document.getElementById('loginForm').addEventListener('submit', e => {
     e.preventDefault();
