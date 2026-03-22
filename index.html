@@ -395,8 +395,12 @@
         <span class="section-label">Location</span>
         <h2 class="section-title">찾아오는 길</h2>
         <p class="map-address">경기도 부천시 소사구 은성로 62번길 13 (3층)
-          <button onclick="navigator.clipboard.writeText('경기도 부천시 소사구 은성로 62번길 13').then(()=>{this.textContent='복사됨 ✓';setTimeout(()=>this.textContent='주소복사',1500)})"
-            style="margin-left:10px;padding:3px 10px;font-size:0.72rem;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;color:#555;vertical-align:middle;">주소복사</button>
+          <button id="copyAddrBtn" onclick="navigator.clipboard.writeText('경기도 부천시 소사구 은성로 62번길 13').then(()=>{this.textContent='복사됨 ✓';setTimeout(()=>{this.innerHTML=this.dataset.orig;},1500)})"
+            data-orig=""
+            style="margin-left:10px;padding:3px 10px;font-size:0.72rem;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;color:#555;vertical-align:middle;display:inline-flex;align-items:center;gap:5px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            주소복사</button>
+          <script>var b=document.getElementById('copyAddrBtn');b.dataset.orig=b.innerHTML;</script>
         </p>
         <p class="map-phone">
           <a href="tel:010-7795-2102"
