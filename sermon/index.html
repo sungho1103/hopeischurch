@@ -102,7 +102,27 @@
       font-size:0.9rem;
       line-height:1.8;
       font-family:inherit;
+      transition:font-size .2s;
     }
+    .font-size-ctrl{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      margin-bottom:14px;
+    }
+    .font-size-ctrl button{
+      background:none;
+      border:1px solid #ccc;
+      border-radius:6px;
+      padding:3px 9px;
+      font-size:0.78rem;
+      cursor:pointer;
+      color:#555;
+      line-height:1.4;
+    }
+    .font-size-ctrl button:hover:not(:disabled){ background:#f3f3f3; }
+    .font-size-ctrl button:disabled{ opacity:.35; cursor:default; }
+    .font-size-ctrl .fs-label{ font-size:0.72rem; color:#bbb; }
 
     @media (max-width: 980px){
       .page-sermon .grid{ grid-template-columns: 1fr; }
@@ -293,6 +313,12 @@
 
           </section>
 
+          <div class="font-size-ctrl">
+            <button id="fsMinus" onclick="changeFontSize(-1)" title="글자 작게">A−</button>
+            <span class="fs-label" id="fsLabel">1 / 5</span>
+            <button id="fsPlus"  onclick="changeFontSize(+1)" title="글자 크게">A+</button>
+          </div>
+
           <section class="panel" id="viewer">
             <div class="muted">왼쪽에서 설교를 선택하세요.</div>
           </section>
@@ -387,6 +413,22 @@
   // ✅ 안정적: GitHub API 대신 "우리 사이트"의 정적 파일을 읽음
   const LIST_URL  = "/hopeischurch/sermon/texts/index.json";
   const TEXT_BASE = "/hopeischurch/sermon/texts/";
+
+  // 글자 크기 단계 (5단계)
+  const FS_STEPS = ['0.9rem','1.05rem','1.2rem','1.4rem','1.6rem'];
+  let fsLevel = 0;
+
+  function changeFontSize(dir){
+    fsLevel = Math.max(0, Math.min(4, fsLevel + dir));
+    document.querySelectorAll('#viewer pre').forEach(el => el.style.fontSize = FS_STEPS[fsLevel]);
+    document.getElementById('fsLabel').textContent = `${fsLevel+1} / 5`;
+    document.getElementById('fsMinus').disabled = fsLevel === 0;
+    document.getElementById('fsPlus').disabled  = fsLevel === 4;
+  }
+  // 초기 버튼 상태
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('fsMinus').disabled = true;
+  });
 
   const selectEl = document.getElementById("select");
   const viewerEl = document.getElementById("viewer");
@@ -508,6 +550,7 @@
       </div>
       <pre>${escapeHtml(body || "(본문이 비어 있습니다)")}</pre>
     `;
+    if(fsLevel > 0) document.querySelectorAll('#viewer pre').forEach(el => el.style.fontSize = FS_STEPS[fsLevel]);
     document.dispatchEvent(new CustomEvent("sermonLoaded", { detail: { file: filename } }));
   }
 
