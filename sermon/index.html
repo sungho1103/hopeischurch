@@ -276,8 +276,8 @@
             <!-- 동영상 -->
             <div id="sermonVideo" style="display:none;">
               <div class="sermon-video-wrap">
-                <iframe id="sermonVideoEl" src="" allowfullscreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                <iframe id="sermonVideoEl" src=""
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope">
                 </iframe>
               </div>
             </div>
@@ -398,7 +398,7 @@
   function youtubeEmbedUrl(url){
     if(!url) return '';
     const m = url.match(/(?:youtube\.com\/watch\?.*v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-    return m ? `https://www.youtube.com/embed/${m[1]}` : '';
+    return m ? `https://www.youtube.com/embed/${m[1]}?fs=0` : '';
   }
 
   function parseSermonTxt(txt){
