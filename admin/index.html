@@ -418,6 +418,15 @@
             <div id="sImagePreview" style="margin-top:10px;"></div>
           </div>
 
+          <!-- 동영상 -->
+          <div class="form-group">
+            <label>동영상 URL (YouTube)</label>
+            <div style="display:flex;gap:8px;">
+              <input id="sVideoUrl" type="text" placeholder="https://www.youtube.com/watch?v=..." style="flex:1;">
+              <button type="button" class="btn-icon" onclick="document.getElementById('sVideoUrl').value='';" title="지우기">✕</button>
+            </div>
+          </div>
+
           <div class="form-group">
             <label>설교 내용</label>
             <textarea id="sBody" rows="16" placeholder="설교 본문을 입력하세요"></textarea>
@@ -1019,6 +1028,7 @@ function fillSermonForm(filename, txt) {
   const imgUrl = meta['이미지'] || meta['image'] || '';
   document.getElementById('sImageUrl').value = imgUrl;
   showSermonImgPreview(imgUrl);
+  document.getElementById('sVideoUrl').value = meta['동영상'] || meta['video'] || '';
 }
 
 function newSermon() {
@@ -1046,8 +1056,9 @@ async function saveSermon() {
   if (!date) { toast('날짜를 입력하세요', 'err'); return; }
 
   const imageUrl = document.getElementById('sImageUrl').value.trim();
+  const videoUrl = document.getElementById('sVideoUrl').value.trim();
   const filename = date.replace(/\./g, '-').replace(/[^\d-]/g, '') + '.txt';
-  const content = `제목: ${title}\n본문: ${ref}\n설교자: ${preacher}\n날짜: ${date}${imageUrl ? '\n이미지: '+imageUrl : ''}\n\n${body}`;
+  const content = `제목: ${title}\n본문: ${ref}\n설교자: ${preacher}\n날짜: ${date}${imageUrl ? '\n이미지: '+imageUrl : ''}${videoUrl ? '\n동영상: '+videoUrl : ''}\n\n${body}`;
 
   try {
     const filePath = `sermon/texts/${filename}`;

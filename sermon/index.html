@@ -106,6 +106,22 @@
       .page-sermon .grid{ grid-template-columns: 1fr; }
     }
 
+    /* 동영상 */
+    .sermon-video-wrap{
+      position:relative;
+      padding-bottom:56.25%;
+      height:0;
+      margin-top:16px;
+      border-radius:10px;
+      overflow:hidden;
+    }
+    .sermon-video-wrap iframe{
+      position:absolute;
+      top:0; left:0;
+      width:100%; height:100%;
+      border:0;
+    }
+
     /* 댓글 */
     .page-sermon .comments{
       margin-top:32px;
@@ -257,6 +273,15 @@
               <img id="sermonImgEl" src="" alt="" style="width:100%;border-radius:10px;display:block;object-fit:cover;">
             </div>
 
+            <!-- 동영상 -->
+            <div id="sermonVideo" style="display:none;">
+              <div class="sermon-video-wrap">
+                <iframe id="sermonVideoEl" src="" allowfullscreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                </iframe>
+              </div>
+            </div>
+
           </section>
 
           <section class="panel" id="viewer">
@@ -370,6 +395,12 @@
       .replaceAll("'","&#039;");
   }
 
+  function youtubeEmbedUrl(url){
+    if(!url) return '';
+    const m = url.match(/(?:youtube\.com\/watch\?.*v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    return m ? `https://www.youtube.com/embed/${m[1]}` : '';
+  }
+
   function parseSermonTxt(txt){
     const lines = txt.replace(/\r\n/g, "\n").split("\n");
     const meta = {};
@@ -444,12 +475,19 @@
     const date   = meta["날짜"] || meta["date"] || formatTitleFromFilename(filename);
     const ref    = meta["본문"] || meta["text"] || "";
     const who    = meta["설교자"] || meta["preacher"] || "";
-    const imgSrc = meta["이미지"] || meta["image"] || "";
+    const imgSrc  = meta["이미지"] || meta["image"] || "";
+    const vidSrc  = meta["동영상"] || meta["video"] || "";
 
     const imgDiv = document.getElementById("sermonImg");
     const imgEl  = document.getElementById("sermonImgEl");
     if (imgSrc) { imgEl.src = imgSrc; imgDiv.style.display = ""; }
     else        { imgDiv.style.display = "none"; imgEl.src = ""; }
+
+    const vidDiv = document.getElementById("sermonVideo");
+    const vidEl  = document.getElementById("sermonVideoEl");
+    const embedUrl = youtubeEmbedUrl(vidSrc);
+    if (embedUrl) { vidEl.src = embedUrl; vidDiv.style.display = ""; }
+    else          { vidDiv.style.display = "none"; vidEl.src = ""; }
 
     viewerEl.innerHTML = `
       <div class="muted" style="margin-bottom:6px;">${escapeHtml(date)}</div>
