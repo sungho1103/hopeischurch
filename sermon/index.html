@@ -538,9 +538,8 @@
     else          { vidDiv.style.display = "none"; vidEl.src = ""; }
 
     viewerEl.innerHTML = `
-      <div class="muted" style="margin-bottom:6px;">${escapeHtml(date)}</div>
-      <div class="sermon-title-row">
-        <h2 class="sermon-title">${escapeHtml(title)}</h2>
+      <div class="sermon-title-row" style="margin-bottom:6px;">
+        <div class="muted">${escapeHtml(date)}</div>
         <div class="font-size-ctrl">
           <span class="fs-label">글자크게</span>
           <button id="fsMinus" onclick="changeFontSize(-1)" title="글자 작게">A−</button>
@@ -548,6 +547,7 @@
           <button id="fsPlus"  onclick="changeFontSize(+1)" title="글자 크게">A+</button>
         </div>
       </div>
+      <h2 class="sermon-title" style="margin:0 0 10px;">${escapeHtml(title)}</h2>
       <div class="meta-row">
         ${ref ? `<span class="badge">본문: ${escapeHtml(ref)}</span>` : ""}
         ${who ? `<span class="badge">설교자: ${escapeHtml(who)}</span>` : ""}
