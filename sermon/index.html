@@ -108,8 +108,16 @@
       display:flex;
       align-items:center;
       gap:6px;
-      margin-bottom:14px;
+      flex-shrink:0;
     }
+    .sermon-title-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin:0 0 10px;
+      gap:12px;
+    }
+    .sermon-title-row .sermon-title{ margin:0; }
     .font-size-ctrl button{
       background:none;
       border:1px solid #ccc;
@@ -313,12 +321,6 @@
 
           </section>
 
-          <div class="font-size-ctrl">
-            <button id="fsMinus" onclick="changeFontSize(-1)" title="글자 작게">A−</button>
-            <span class="fs-label" id="fsLabel">1 / 5</span>
-            <button id="fsPlus"  onclick="changeFontSize(+1)" title="글자 크게">A+</button>
-          </div>
-
           <section class="panel" id="viewer">
             <div class="muted">왼쪽에서 설교를 선택하세요.</div>
           </section>
@@ -425,11 +427,6 @@
     document.getElementById('fsMinus').disabled = fsLevel === 0;
     document.getElementById('fsPlus').disabled  = fsLevel === 4;
   }
-  // 초기 버튼 상태
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('fsMinus').disabled = true;
-  });
-
   const selectEl = document.getElementById("select");
   const viewerEl = document.getElementById("viewer");
   const statusEl = document.getElementById("status");
@@ -542,7 +539,14 @@
 
     viewerEl.innerHTML = `
       <div class="muted" style="margin-bottom:6px;">${escapeHtml(date)}</div>
-      <h2 class="sermon-title">${escapeHtml(title)}</h2>
+      <div class="sermon-title-row">
+        <h2 class="sermon-title">${escapeHtml(title)}</h2>
+        <div class="font-size-ctrl">
+          <button id="fsMinus" onclick="changeFontSize(-1)" title="글자 작게">A−</button>
+          <span class="fs-label" id="fsLabel">${fsLevel+1} / 5</span>
+          <button id="fsPlus"  onclick="changeFontSize(+1)" title="글자 크게">A+</button>
+        </div>
+      </div>
       <div class="meta-row">
         ${ref ? `<span class="badge">본문: ${escapeHtml(ref)}</span>` : ""}
         ${who ? `<span class="badge">설교자: ${escapeHtml(who)}</span>` : ""}
@@ -550,6 +554,8 @@
       </div>
       <pre>${escapeHtml(body || "(본문이 비어 있습니다)")}</pre>
     `;
+    document.getElementById('fsMinus').disabled = fsLevel === 0;
+    document.getElementById('fsPlus').disabled  = fsLevel === 4;
     if(fsLevel > 0) document.querySelectorAll('#viewer pre').forEach(el => el.style.fontSize = FS_STEPS[fsLevel]);
     document.dispatchEvent(new CustomEvent("sermonLoaded", { detail: { file: filename } }));
   }
