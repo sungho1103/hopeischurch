@@ -125,12 +125,14 @@
       padding:3px 9px;
       font-size:0.78rem;
       cursor:pointer;
-      color:#555;
+      color:#111;
       line-height:1.4;
     }
     .font-size-ctrl button:hover:not(:disabled){ background:#f3f3f3; }
     .font-size-ctrl button:disabled{ opacity:.35; cursor:default; }
-    .font-size-ctrl .fs-label{ font-size:0.72rem; color:#bbb; }
+    .font-size-ctrl .fs-label{ font-size:0.72rem; color:#111; }
+    #fsPlus{ background:#111; color:#fff; border-color:#111; }
+    #fsPlus:hover:not(:disabled){ background:#333; }
 
     @media (max-width: 980px){
       .page-sermon .grid{ grid-template-columns: 1fr; }
