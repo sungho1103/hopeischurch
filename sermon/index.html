@@ -130,17 +130,18 @@
     }
     .page-sermon .comment-author{ font-weight:600; color:#666; }
     .page-sermon .comment-body{ font-size:0.88rem; color:#333; line-height:1.6; }
-    .page-sermon .c-del{
+    .page-sermon .c-del, .page-sermon .c-edit{
       float:right;
       background:none;
       border:none;
       color:#ccc;
-      font-size:0.9rem;
+      font-size:0.75rem;
       cursor:pointer;
-      padding:0 2px;
+      padding:0 3px;
       line-height:1;
     }
     .page-sermon .c-del:hover{ color:#d44; }
+    .page-sermon .c-edit:hover{ color:#557; }
     .page-sermon .comment-form{ display:flex; flex-direction:column; gap:8px; }
     .page-sermon .comment-row{ display:flex; gap:8px; }
     .page-sermon .c-input{
@@ -152,9 +153,9 @@
       outline:none;
     }
     .page-sermon .c-input:focus{ border-color:#999; }
-    .page-sermon .c-name{ width:90px; flex-shrink:0; }
+    .page-sermon .c-name{ width:120px; flex-shrink:0; }
     .page-sermon .c-pw{
-      width:90px; flex-shrink:0;
+      width:120px; flex-shrink:0;
       letter-spacing:0.12em;
       -webkit-user-select:none;
       user-select:none;
@@ -183,6 +184,16 @@
     }
     .page-sermon .c-submit:hover{ opacity:.75; }
     .page-sermon .c-submit:disabled{ opacity:.4; cursor:default; }
+    .page-sermon .c-cancel{
+      background:none;
+      border:none;
+      color:#aaa;
+      font-size:0.78rem;
+      cursor:pointer;
+      padding:0 4px;
+      display:none;
+    }
+    .page-sermon .c-cancel:hover{ color:#555; }
     .page-sermon .c-error{ font-size:0.72rem; color:#d44; min-height:16px; }
     .page-sermon .c-empty{ text-align:center; color:#ccc; padding:20px 0; font-size:0.85rem; }
   </style>
@@ -267,7 +278,10 @@
             </div>
             <div class="c-footer">
               <span id="cCount" class="c-count">0 / 200</span>
-              <button id="cSubmit" class="c-submit">등록</button>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button id="cCancel" class="c-cancel">취소</button>
+                <button id="cSubmit" class="c-submit">등록</button>
+              </div>
             </div>
             <div id="cError" class="c-error"></div>
           </div>
@@ -489,7 +503,7 @@ const FB = {
 const ADMIN_HASH = "b243cf0ed002cd1d17567bb7a23bdd8d462cdef17e50f65c7adf7ca09afd96a2";
 
 import { initializeApp }                        from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
 
 let db;
 try { db = getDatabase(initializeApp(FB)); }
@@ -577,8 +591,9 @@ function render(){
     const dt = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
     return `<div class="comment-item">
       <div class="comment-meta">
-        <span class="comment-author">${esc(c.name)}</span> · ${dt}
-        <button class="c-del" data-id="${esc(c.id)}" data-hash="${esc(c.pwHash||'')}">×</button>
+        <span class="comment-author">${esc(c.name)}</span> · ${dt}${c.edited ? ' <span style="font-size:0.65rem;color:#bbb;">(수정됨)</span>' : ''}
+        <button class="c-del" data-id="${esc(c.id)}" data-hash="${esc(c.pwHash||'')}">삭제</button>
+        <button class="c-edit" data-id="${esc(c.id)}" data-hash="${esc(c.pwHash||'')}" data-name="${esc(c.name)}" data-text="${esc(c.text)}">수정</button>
       </div>
       <div class="comment-body">${esc(c.text)}</div>
     </div>`;
@@ -587,6 +602,47 @@ function render(){
   listEl.querySelectorAll(".c-del").forEach(btn => {
     btn.addEventListener("click", () => handleDelete(btn.dataset.id, btn.dataset.hash));
   });
+  listEl.querySelectorAll(".c-edit").forEach(btn => {
+    btn.addEventListener("click", () => handleEdit(btn.dataset.id, btn.dataset.hash, btn.dataset.name, btn.dataset.text));
+  });
+}
+
+let editId   = null;
+let editHash = null;
+
+const cancelEl = document.getElementById('cCancel');
+cancelEl.addEventListener("click", () => resetEditMode());
+
+function resetEditMode(){
+  editId = null; editHash = null;
+  nameEl.value = ""; textEl.value = "";
+  realPw = ""; updatePwDisplay();
+  countEl.textContent = "0 / 200";
+  submitEl.textContent = "등록";
+  cancelEl.style.display = "none";
+  errorEl.textContent = "";
+}
+
+async function handleEdit(id, storedHash, name, text){
+  const entered = window.prompt("비밀번호를 입력하세요\n(작성 시 비밀번호 또는 관리자 비밀번호)");
+  if(entered === null) return;
+
+  const enteredHash = await sha256(entered);
+  const isAdmin  = enteredHash === ADMIN_HASH;
+  const isAuthor = storedHash && enteredHash === storedHash;
+
+  if(!isAdmin && !isAuthor){ alert("비밀번호가 맞지 않습니다."); return; }
+
+  editId   = id;
+  editHash = storedHash;
+  nameEl.value = name;
+  textEl.value = text;
+  realPw = entered; updatePwDisplay();
+  countEl.textContent = `${text.length} / 200`;
+  submitEl.textContent = "수정";
+  cancelEl.style.display = "inline-block";
+  textEl.focus();
+  document.getElementById('commentsWrap').scrollIntoView({ behavior:'smooth', block:'end' });
 }
 
 async function handleDelete(id, storedHash){
@@ -631,21 +687,42 @@ submitEl.addEventListener("click", async () => {
   const name = nameEl.value.trim();
   const pw   = realPw;
   const text = textEl.value.trim();
-  const err  = validate(name, pw, text);
-  if(err){ errorEl.textContent = err; return; }
-  errorEl.textContent = "";
-  submitEl.disabled = true;
-  try {
-    const pwHash = await sha256(pw);
-    await push(ref(db, `sermon_comments/${fileKey(curFile)}`), { name, text, ts: Date.now(), pwHash });
-    textEl.value = "";
-    realPw = "";
-    updatePwDisplay();
-    countEl.textContent = "0 / 200";
-  } catch(e){
-    errorEl.textContent = "저장에 실패했습니다.";
-  } finally {
-    submitEl.disabled = false;
+
+  if(editId){
+    // 수정 모드
+    if(!name){ errorEl.textContent = "이름을 입력해주세요."; return; }
+    if(!text){ errorEl.textContent = "내용을 입력해주세요."; return; }
+    if(text.length > 200){ errorEl.textContent = "200자 이내로 작성해주세요."; return; }
+    errorEl.textContent = "";
+    submitEl.disabled = true;
+    try {
+      const orig = cache[editId] || {};
+      await set(ref(db, `sermon_comments/${fileKey(curFile)}/${editId}`),
+        { name, text, ts: orig.ts || Date.now(), pwHash: editHash, edited: true });
+      resetEditMode();
+    } catch(e){
+      errorEl.textContent = "수정에 실패했습니다.";
+    } finally {
+      submitEl.disabled = false;
+    }
+  } else {
+    // 등록 모드
+    const err = validate(name, pw, text);
+    if(err){ errorEl.textContent = err; return; }
+    errorEl.textContent = "";
+    submitEl.disabled = true;
+    try {
+      const pwHash = await sha256(pw);
+      await push(ref(db, `sermon_comments/${fileKey(curFile)}`), { name, text, ts: Date.now(), pwHash });
+      textEl.value = "";
+      realPw = "";
+      updatePwDisplay();
+      countEl.textContent = "0 / 200";
+    } catch(e){
+      errorEl.textContent = "저장에 실패했습니다.";
+    } finally {
+      submitEl.disabled = false;
+    }
   }
 });
 
