@@ -938,13 +938,17 @@ async function saveBulletin() {
     const res = await ghSave(`bulletin/data/${weekId}.json`, JSON.stringify(data, null, 2), _currentBulletinSha, `content: 주보 ${weekId} ${isNew ? '추가' : '업데이트'}`);
     _currentBulletinSha = res.content.sha;
 
-    // 새 주차면 index.json도 업데이트
+    // 새 주차면 index.json도 업데이트 (GitHub 최신 내용을 직접 읽어 덮어쓰기 방지)
     if (isNew) {
-      _bulletinIndexSha = await ghGetSha('bulletin/data/index.json');
-      _bulletinIndex = [{ week_id: weekId, date, issue, title: '주일예배' }, ..._bulletinIndex]
-        .sort((a, b) => b.week_id.localeCompare(a.week_id));
-      const idxRes = await ghSave('bulletin/data/index.json', JSON.stringify(_bulletinIndex, null, 2), _bulletinIndexSha, `content: 주보 목록 업데이트 (${weekId})`);
+      const { text: idxText, sha: idxSha } = await ghGet('bulletin/data/index.json');
+      const freshIndex = JSON.parse(idxText);
+      if (!freshIndex.some(w => w.week_id === weekId)) {
+        freshIndex.push({ week_id: weekId, date, issue, title: '주일예배' });
+        freshIndex.sort((a, b) => b.week_id.localeCompare(a.week_id));
+      }
+      const idxRes = await ghSave('bulletin/data/index.json', JSON.stringify(freshIndex, null, 2), idxSha, `content: 주보 목록 업데이트 (${weekId})`);
       _bulletinIndexSha = idxRes.content.sha;
+      _bulletinIndex = freshIndex;
       await loadBulletinIndex();
     }
     toast(`주보 ${weekId} 저장됨 ✓`);
