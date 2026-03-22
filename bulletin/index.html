@@ -164,6 +164,7 @@
     <a href="/hopeischurch/bulletin/" data-nav="bulletin">주보</a>
     <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
     <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
+    <button id="installBtn" onclick="installApp()">📱 핸드폰에 저장하기</button>
   </nav>
   <div class="mobile-notice" id="mobileNotice"></div>
 
@@ -385,6 +386,22 @@
     console.error(err);
     document.getElementById("bulletinBody").innerHTML = "<div class='b3-grid'><section class='b-card'><h2>주보 불러오기 실패</h2><div class='muted' style='margin-top:10px;'>오류: "+escapeHtml(err&&err.message||String(err))+"</div></section></div>";
   });
+</script>
+<script>
+  let _installPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    _installPrompt = e;
+    document.getElementById('installBtn').classList.add('visible');
+  });
+  function installApp() {
+    if (_installPrompt) {
+      _installPrompt.prompt();
+      _installPrompt.userChoice.then(() => { _installPrompt = null; document.getElementById('installBtn').classList.remove('visible'); });
+    } else {
+      alert('홈화면 추가:\niOS Safari → 공유 버튼 → "홈 화면에 추가"\nAndroid Chrome → 브라우저 메뉴 → "홈 화면에 추가"');
+    }
+  }
 </script>
 </body>
 </html>

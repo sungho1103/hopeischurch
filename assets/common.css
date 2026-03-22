@@ -236,13 +236,28 @@ h2{
   .drawer a {
     font-size:1.15rem;
     font-weight:700;
-    padding:16px 0;
+    padding:11px 0;
     border-bottom:1px solid #f0f0f0;
     color:#111;
     text-decoration:none;
   }
   .drawer a:last-child { border-bottom:none; }
   .drawer a.is-active { color:#000; opacity:1; }
+  #installBtn {
+    display:none;
+    margin-top:16px;
+    padding:12px 0;
+    width:100%;
+    background:#111;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:1rem;
+    font-weight:700;
+    cursor:pointer;
+    text-align:center;
+  }
+  #installBtn.visible { display:block; }
 
   /* ── 공지사항 슬라이드 배너 ── */
   .mobile-notice {
