@@ -270,10 +270,10 @@
   <div class="drawer-overlay" id="drawerOverlay"></div>
   <nav class="drawer" id="drawer">
     <button class="drawer-close" id="drawerClose" aria-label="메뉴 닫기">×</button>
-    <a href="/hopeischurch/" data-nav="home">홈</a>
-    <a href="/hopeischurch/bulletin/" data-nav="bulletin">주보</a>
-    <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
-    <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
+    <a href="/" data-nav="home">홈</a>
+    <a href="/bulletin/" data-nav="bulletin">주보</a>
+    <a href="/sermon/" data-nav="sermon">주일설교</a>
+    <a href="/#map" data-nav="map">찾아오는 길</a>
     <button id="installBtn" onclick="installApp()">📱 핸드폰에 저장하기</button>
   </nav>
   <div class="mobile-notice" id="mobileNotice"></div>
@@ -283,10 +283,10 @@
       <div class="brand">희망은교회</div>
 
       <nav id="menu">
-        <a href="/hopeischurch/" data-nav="home">홈</a>
-        <a href="/hopeischurch/bulletin/" data-nav="bulletin">주보</a>
-        <a href="/hopeischurch/sermon/" data-nav="sermon">주일설교</a>
-        <a href="/hopeischurch/#map" data-nav="map">찾아오는 길</a>
+        <a href="/" data-nav="home">홈</a>
+        <a href="/bulletin/" data-nav="bulletin">주보</a>
+        <a href="/sermon/" data-nav="sermon">주일설교</a>
+        <a href="/#map" data-nav="map">찾아오는 길</a>
       </nav>
 
       <div class="notice" id="siteNotice"></div>
@@ -366,25 +366,25 @@
 
 <!-- 모바일 하단 탭바 -->
 <nav class="bottom-nav">
-  <a href="/hopeischurch/" class="bottom-nav-item" data-nav="home">
+  <a href="/" class="bottom-nav-item" data-nav="home">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/>
     </svg>
     <span>홈</span>
   </a>
-  <a href="/hopeischurch/bulletin/" class="bottom-nav-item" data-nav="bulletin">
+  <a href="/bulletin/" class="bottom-nav-item" data-nav="bulletin">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/>
     </svg>
     <span>주보</span>
   </a>
-  <a href="/hopeischurch/sermon/" class="bottom-nav-item" data-nav="sermon">
+  <a href="/sermon/" class="bottom-nav-item" data-nav="sermon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
     </svg>
     <span>설교</span>
   </a>
-  <a href="/hopeischurch/#map" class="bottom-nav-item" data-nav="map">
+  <a href="/#map" class="bottom-nav-item" data-nav="map">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
     </svg>
@@ -413,7 +413,7 @@
   })();
 
   // 공지사항 동적 로드
-  fetch('/hopeischurch/data/notice.json',{cache:'no-store'})
+  fetch('/data/notice.json',{cache:'no-store'})
     .then(r=>r.json()).then(n=>{
       const el=document.getElementById('siteNotice');
       if(el){ const items=n.items||[]; if(items.length){ el.innerHTML=items.map(item=>{ let line=escapeHtml(item.text||'').replace(/\n/g,'<br>'); if(item.link_url) line+=` <a href="${escapeHtml(item.link_url)}" target="_blank" rel="noreferrer">${escapeHtml(item.link_text||item.link_url)}</a>`; return `<div class="notice-item">${line}</div>`; }).join(''); } }
@@ -424,8 +424,8 @@
     }).catch(()=>{});
 
   // ✅ 안정적: GitHub API 대신 "우리 사이트"의 정적 파일을 읽음
-  const LIST_URL  = "/hopeischurch/sermon/texts/index.json";
-  const TEXT_BASE = "/hopeischurch/sermon/texts/";
+  const LIST_URL  = "/sermon/texts/index.json";
+  const TEXT_BASE = "/sermon/texts/";
 
   // 글자 크기 단계 (5단계)
   const FS_STEPS = ['0.9rem','1.05rem','1.2rem','1.4rem','1.6rem'];
