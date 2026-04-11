@@ -1122,7 +1122,7 @@ async function uploadSermonImage() {
         body: JSON.stringify(body)
       });
       if (!r.ok) { const err = await r.json().catch(()=>({})); throw new Error(err.message || r.status); }
-      const publicUrl = `/hopeischurch/sermon/images/${imgFilename}`;
+      const publicUrl = `/sermon/images/${imgFilename}`;
       document.getElementById('sImageUrl').value = publicUrl;
       showSermonImgPreview(publicUrl);
       fileInput.value = '';
