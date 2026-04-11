@@ -948,7 +948,7 @@ async function saveBulletin() {
     _currentBulletinSha = res.content.sha;
 
     // 새 주차면 index.json도 업데이트 (GitHub 최신 내용을 직접 읽어 덮어쓰기 방지)
-    if (isNew) {
+    if (isNew || !_bulletinIndex.some(w => w.week_id === weekId)) {
       const { text: idxText, sha: idxSha } = await ghGet('bulletin/data/index.json');
       const freshIndex = JSON.parse(idxText);
       if (!freshIndex.some(w => w.week_id === weekId)) {
