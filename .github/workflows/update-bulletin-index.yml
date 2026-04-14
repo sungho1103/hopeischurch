@@ -30,12 +30,12 @@ jobs:
           const index = files.map(file => {
             const raw = JSON.parse(readFileSync(join(dataDir, file), "utf8"));
             return {
-              week_id: raw.week_id,
-              date: raw.date,
-              issue: raw.issue,
-              title: raw.title,
+              week_id: raw.week?.week_id,
+              date: raw.week?.date,
+              issue: raw.week?.issue,
+              title: raw.week?.title,
             };
-          });
+          }).filter(entry => entry.week_id);
 
           writeFileSync(join(dataDir, "index.json"), JSON.stringify(index, null, 2), "utf8");
           console.log(`index.json updated with ${index.length} entries`);
