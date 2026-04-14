@@ -939,40 +939,52 @@ async function saveBulletin() {
 
   const date  = document.getElementById('bDate').value.trim() || weekId.replace(/-/g, '.');
   const issue = document.getElementById('bIssue').value.trim();
-  const data  = { week: { week_id: weekId, date, issue, title: '주일예배' }, worship_order, memory_verse, news };
+  const data  = {
+    week: { week_id: weekId, date, issue, title: '주일예배' },
+    worship_order, memory_verse, news
+  };
 
   try {
+    // 1) 주보 파일 저장
     _currentBulletinSha = await ghGetSha(`bulletin/data/${weekId}.json`);
     const isNew = !_currentBulletinSha;
-    const res = await ghSave(`bulletin/data/${weekId}.json`, JSON.stringify(data, null, 2), _currentBulletinSha, `content: 주보 ${weekId} ${isNew ? '추가' : '업데이트'}`);
+    const res = await ghSave(
+      `bulletin/data/${weekId}.json`,
+      JSON.stringify(data, null, 2),
+      _currentBulletinSha,
+      `content: 주보 ${weekId} ${isNew ? '추가' : '업데이트'}`
+    );
     _currentBulletinSha = res.content.sha;
 
-    // 새 주차면 index.json도 업데이트 (GitHub 최신 내용을 직접 읽어 덮어쓰기 방지)
-    if (isNew || !_bulletinIndex.some(w => w.week_id === weekId)) {
-      const { text: idxText, sha: idxSha } = await ghGet('bulletin/data/index.json');
-      const freshIndex = JSON.parse(idxText);
-      if (!freshIndex.some(w => w.week_id === weekId)) {
-        freshIndex.push({ week_id: weekId, date, issue, title: '주일예배' });
-        freshIndex.sort((a, b) => b.week_id.localeCompare(a.week_id));
-      }
-      const idxRes = await ghSave('bulletin/data/index.json', JSON.stringify(freshIndex, null, 2), idxSha, `content: 주보 목록 업데이트 (${weekId})`);
-      _bulletinIndexSha = idxRes.content.sha;
-      _bulletinIndex = freshIndex;
-      await loadBulletinIndex();
+    // 2) index.json 항상 업데이트 (새 주차 추가 + 기존 주차 date/issue 변경 모두 반영)
+    const { text: idxText, sha: idxSha } = await ghGet('bulletin/data/index.json');
+    const freshIndex = JSON.parse(idxText);
+    const existingIdx = freshIndex.findIndex(w => w.week_id === weekId);
+    const entry = { week_id: weekId, date, issue, title: '주일예배' };
+    if (existingIdx >= 0) {
+      freshIndex[existingIdx] = entry;   // 기존 항목 갱신
+    } else {
+      freshIndex.push(entry);            // 새 항목 추가
     }
+    freshIndex.sort((a, b) => b.week_id.localeCompare(a.week_id));
+
+    const idxRes = await ghSave(
+      'bulletin/data/index.json',
+      JSON.stringify(freshIndex, null, 2),
+      idxSha,
+      `content: 주보 목록 업데이트 (${weekId})`
+    );
+    _bulletinIndexSha = idxRes.content.sha;
+    _bulletinIndex = freshIndex;
+    await loadBulletinIndex();
+    document.getElementById('bulletinWeekSelect').value = weekId;
+
     toast(`주보 ${weekId} 저장됨 ✓`);
   } catch(e) {
     toast('저장 실패: ' + e.message, 'err');
   }
 }
 
-/* ════════════════════════════════════════════
-   설교
-════════════════════════════════════════════ */
-let _sermonIndexSha = null;
-let _sermonFiles    = [];
-let _currentSermonFile = null;
-let _currentSermonSha  = null;
 
 async function loadSermonIndex() {
   try {
