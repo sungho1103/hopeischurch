@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>주보 | 희망은교회</title>
+  <title>ì£¼ë³´ | í¬ë§ìêµí</title>
 
-  <!-- 공통 CSS -->
+  <!-- ê³µíµ CSS -->
     <link rel="stylesheet" href="/assets/common.css?v=20260411-01">
 
-  <!-- 주보 페이지 전용(스코프) CSS -->
+  <!-- ì£¼ë³´ íì´ì§ ì ì©(ì¤ì½í) CSS -->
   <style>
     /* ===============================
        Bulletin Page (Scoped)
@@ -150,32 +150,32 @@
   </style>
 </head>
 <body class="page-bulletin">
-  <!-- 모바일 Sticky Header -->
+  <!-- ëª¨ë°ì¼ Sticky Header -->
   <header class="mobile-header">
-    <span class="mobile-brand">희망은교회</span>
-    <button class="hamburger" id="hamburgerBtn" aria-label="메뉴 열기">
+    <span class="mobile-brand">í¬ë§ìêµí</span>
+    <button class="hamburger" id="hamburgerBtn" aria-label="ë©ë´ ì´ê¸°">
       <span></span><span></span><span></span>
     </button>
   </header>
   <div class="drawer-overlay" id="drawerOverlay"></div>
   <nav class="drawer" id="drawer">
-    <button class="drawer-close" id="drawerClose" aria-label="메뉴 닫기">×</button>
-    <a href="/" data-nav="home">홈</a>
-    <a href="/bulletin/" data-nav="bulletin">주보</a>
-    <a href="/sermon/" data-nav="sermon">주일설교</a>
-    <a href="/#map" data-nav="map">찾아오는 길</a>
-    <button id="installBtn" onclick="installApp()">📱 핸드폰에 저장하기</button>
+    <button class="drawer-close" id="drawerClose" aria-label="ë©ë´ ë«ê¸°">Ã</button>
+    <a href="/" data-nav="home">í</a>
+    <a href="/bulletin/" data-nav="bulletin">ì£¼ë³´</a>
+    <a href="/sermon/" data-nav="sermon">ì£¼ì¼ì¤êµ</a>
+    <a href="/#map" data-nav="map">ì°¾ìì¤ë ê¸¸</a>
+    <button id="installBtn" onclick="installApp()">ð± í¸ëí°ì ì ì¥íê¸°</button>
   </nav>
   <div class="mobile-notice" id="mobileNotice"></div>
 
 <div class="wrap">
   <aside>
-    <div class="brand">희망은교회</div>
+    <div class="brand">í¬ë§ìêµí</div>
     <nav id="menu">
-      <a href="/" data-nav="home">홈</a>
-      <a href="/bulletin/" data-nav="bulletin">주보</a>
-      <a href="/sermon/" data-nav="sermon">주일설교</a>
-      <a href="/#map" data-nav="map">찾아오는 길</a>
+      <a href="/" data-nav="home">í</a>
+      <a href="/bulletin/" data-nav="bulletin">ì£¼ë³´</a>
+      <a href="/sermon/" data-nav="sermon">ì£¼ì¼ì¤êµ</a>
+      <a href="/#map" data-nav="map">ì°¾ìì¤ë ê¸¸</a>
     </nav>
     <div class="notice" id="siteNotice"></div>
   </aside>
@@ -183,64 +183,64 @@
     <div class="container">
       <div class="topbar">
         <div>
-          <h1>주보</h1>
+          <h1>ì£¼ë³´</h1>
           <div class="controls" style="margin-top:10px;">
-            <label class="muted" for="weekSelect">주차 선택</label>
+            <label class="muted" for="weekSelect">ì£¼ì°¨ ì í</label>
             <select id="weekSelect"></select>
-            <button id="prevBtn" type="button">이전 주</button>
-            <button id="nextBtn" type="button">다음 주</button>
+            <button id="prevBtn" type="button">ì´ì  ì£¼</button>
+            <button id="nextBtn" type="button">ë¤ì ì£¼</button>
           </div>
         </div>
         <div class="meta">
-          <div><span class="badge" id="issueText">—</span></div>
-          <div class="muted" id="dateText" style="margin-top:8px;">—</div>
+          <div><span class="badge" id="issueText">â</span></div>
+          <div class="muted" id="dateText" style="margin-top:8px;">â</div>
         </div>
       </div>
       <hr/>
       <div id="bulletinBody">
         <div class="b3-grid">
-          <section class="b-card"><h2>예배순서</h2><div class="muted">불러오는 중…</div></section>
+          <section class="b-card"><h2>ìë°°ìì</h2><div class="muted">ë¶ë¬ì¤ë ì¤â¦</div></section>
           <section class="b-mid">
-            <section class="b-card"><h2>성경본문</h2><div class="muted">불러오는 중…</div></section>
-            <section class="b-card"><h2>예배위원</h2><div class="muted">불러오는 중…</div></section>
+            <section class="b-card"><h2>ì±ê²½ë³¸ë¬¸</h2><div class="muted">ë¶ë¬ì¤ë ì¤â¦</div></section>
+            <section class="b-card"><h2>ìë°°ìì</h2><div class="muted">ë¶ë¬ì¤ë ì¤â¦</div></section>
           </section>
-          <section class="b-card"><h2>교회소식</h2><div class="muted">불러오는 중…</div></section>
+          <section class="b-card"><h2>êµíìì</h2><div class="muted">ë¶ë¬ì¤ë ì¤â¦</div></section>
         </div>
       </div>
     </div>
   </main>
 </div>
 
-<!-- 모바일 하단 탭바 -->
+<!-- ëª¨ë°ì¼ íë¨ í­ë° -->
 <nav class="bottom-nav">
   <a href="/" class="bottom-nav-item" data-nav="home">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/>
     </svg>
-    <span>홈</span>
+    <span>í</span>
   </a>
   <a href="/bulletin/" class="bottom-nav-item" data-nav="bulletin">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/>
     </svg>
-    <span>주보</span>
+    <span>ì£¼ë³´</span>
   </a>
   <a href="/sermon/" class="bottom-nav-item" data-nav="sermon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
     </svg>
-    <span>설교</span>
+    <span>ì¤êµ</span>
   </a>
   <a href="/#map" class="bottom-nav-item" data-nav="map">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
     </svg>
-    <span>위치</span>
+    <span>ìì¹</span>
   </a>
 </nav>
 
 <script>
-  // 공지사항 동적 로드
+  // ê³µì§ì¬í­ ëì  ë¡ë
   fetch('/data/notice.json',{cache:'no-store'})
     .then(r=>r.json()).then(n=>{
       const el=document.getElementById('siteNotice');
@@ -251,7 +251,7 @@
       mob.classList.add('has-items');
     }).catch(()=>{});
 
-  // 모바일 햄버거 메뉴
+  // ëª¨ë°ì¼ íë²ê±° ë©ë´
   (function(){
     const btn=document.getElementById('hamburgerBtn'),overlay=document.getElementById('drawerOverlay'),drawer=document.getElementById('drawer'),closeBtn=document.getElementById('drawerClose');
     if(!btn) return;
@@ -260,7 +260,7 @@
     btn.addEventListener('click',open); closeBtn.addEventListener('click',close); overlay.addEventListener('click',close);
   })();
 
-  // 하단 탭바 + 드로어 active 상태
+  // íë¨ í­ë° + ëë¡ì´ active ìí
   (function(){
     const path=location.pathname;
     document.querySelectorAll('.bottom-nav-item[data-nav], .drawer a[data-nav], #menu a[data-nav]').forEach(el=>{
@@ -287,7 +287,7 @@
   }
   function formatWeekLabel(w){
     const date = w.date || w.week_id || "";
-    const issue = w.issue ? "("+w.issue+"호)" : "";
+    const issue = w.issue ? "("+w.issue+"í¸)" : "";
     const title = w.title ? " "+w.title : "";
     return (date+" "+issue+title).trim();
   }
@@ -297,31 +297,31 @@
     return await res.json();
   }
   async function loadWeeks(){
-    // GitHub Contents API로 bulletin/data/ 폴더 파일 목록 가져오기
+    // GitHub Contents APIë¡ bulletin/data/ í´ë íì¼ ëª©ë¡ ê°ì ¸ì¤ê¸°
     const dirRes = await fetch(
       "https://api.github.com/repos/sungho1103/hopeischurch/contents/bulletin/data?ref=main&_=" + Date.now(),
       { headers: { Accept: "application/vnd.github.v3+json" } }
     );
-    if (!dirRes.ok) throw new Error("폴더 목록 로드 실패: " + dirRes.status);
+    if (!dirRes.ok) throw new Error("í´ë ëª©ë¡ ë¡ë ì¤í¨: " + dirRes.status);
     const dirItems = await dirRes.json();
 
-    // YYYY-MM-DD.json 파일만 추출, 날짜 역순 정렬
+    // YYYY-MM-DD.json íì¼ë§ ì¶ì¶, ë ì§ ì­ì ì ë ¬
     const dateFiles = dirItems
       .filter(f => f.type === "file" && /^\d{4}-\d{2}-\d{2}\.json$/.test(f.name))
       .sort((a, b) => b.name.localeCompare(a.name));
 
     if (!dateFiles.length) {
-      weekSelect.innerHTML = "<option value=''>주차 데이터가 없습니다</option>";
+      weekSelect.innerHTML = "<option value=''>ì£¼ì°¨ ë°ì´í°ê° ììµëë¤</option>";
       return { weeks: [], selected: "" };
     }
 
-    // 각 파일의 week 필드 병렬 로드
+    // ê° íì¼ì week íë ë³ë ¬ ë¡ë
     const weekDataArr = await Promise.all(
       dateFiles.map(f =>
         fetch(f.download_url + "?_=" + Date.now(), { cache: "no-store" })
           .then(r => r.json())
-          .then(d => d.week || { week_id: f.name.replace(".json",""), date: f.name.replace(".json","").replace(/-/g,"."), issue: "", title: "주일예배" })
-          .catch(() => ({ week_id: f.name.replace(".json",""), date: f.name.replace(".json","").replace(/-/g,"."), issue: "", title: "주일예배" }))
+          .then(d => d.week || { week_id: f.name.replace(".json",""), date: f.name.replace(".json","").replace(/-/g,"."), issue: "", title: "ì£¼ì¼ìë°°" })
+          .catch(() => ({ week_id: f.name.replace(".json",""), date: f.name.replace(".json","").replace(/-/g,"."), issue: "", title: "ì£¼ì¼ìë°°" }))
       )
     );
 
@@ -344,58 +344,60 @@
   }
   function renderBulletin(data, monthCommittees){
     const week = data.week || {};
-    document.getElementById("issueText").textContent = week.issue ? "주보 "+week.issue+"호" : "주보";
+    document.getElementById("issueText").textContent = week.issue ? "ì£¼ë³´ "+week.issue+"í¸" : "ì£¼ë³´";
     document.getElementById("dateText").textContent = week.date || week.week_id || "";
     const news = (data.news || []).map(r => r.text).filter(Boolean);
     const order = (data.worship_order || []);
     const memory = (data.memory_verse || [])[0] || null;
 
-    // 예배위원: 월간 전체 주차 표시 (날짜 오름차순)
-    const rows = (monthCommittees || []).sort((a,b) => String(a.week_id).localeCompare(String(b.week_id)));
+    // ìë°°ìì: ìê° ì ì²´ ì£¼ì°¨ íì (ë ì§ ì¤ë¦ì°¨ì)
+    const today = new Date().toISOString().slice(0,10);
+  const rows = (monthCommittees || []).sort((a,b) => String(a.week_id).localeCompare(String(b.week_id)));
+  const upcomingWeekId = rows.filter(r => r.week_id >= today).map(r => r.week_id)[0] || rows[rows.length-1]?.week_id;
     const committeeHtml = rows.length
-      ? "<table class='roster-table'><thead><tr><th>날짜</th><th>기도</th><th>찬양</th><th>헌금위원</th></tr></thead><tbody>"
-        + rows.map(r => "<tr"+(r.week_id === week.week_id ? " style='background:#fffbe6;font-weight:600;'" : "")+">"
+      ? "<table class='roster-table'><thead><tr><th>ë ì§</th><th>ê¸°ë</th><th>ì°¬ì</th><th>íê¸ìì</th></tr></thead><tbody>"
+        + rows.map(r => "<tr"+(r.week_id === upcomingWeekId ? " style='background:#fffbe6;font-weight:600;'" : "")+">"
             +"<td>"+escapeHtml(r.week_id||"")+"</td>"
             +"<td>"+escapeHtml(r.pray||"")+"</td>"
             +"<td>"+escapeHtml(r.praise||"")+"</td>"
             +"<td>"+escapeHtml(r.offering||"")+"</td>"
           +"</tr>").join("")
         +"</tbody></table>"
-      : "<div class='muted'>예배위원 정보가 없습니다.</div>";
+      : "<div class='muted'>ìë°°ìì ì ë³´ê° ììµëë¤.</div>";
 
     const orderHtml = order.length
-      ? "<table class='order-table'><thead><tr><th style='width:90px;'>순서</th><th>내용</th><th style='width:90px;'>담당</th></tr></thead><tbody>"+order.map(r => "<tr><td>"+escapeHtml(r.step||"")+"</td><td>"+escapeHtml(r.content||"")+"</td><td>"+escapeHtml(r.person||"")+"</td></tr>").join("")+"</tbody></table>"
-      : "<div class='muted'>예배순서가 없습니다.</div>";
+      ? "<table class='order-table'><thead><tr><th style='width:90px;'>ìì</th><th>ë´ì©</th><th style='width:90px;'>ë´ë¹</th></tr></thead><tbody>"+order.map(r => "<tr><td>"+escapeHtml(r.step||"")+"</td><td>"+escapeHtml(r.content||"")+"</td><td>"+escapeHtml(r.person||"")+"</td></tr>").join("")+"</tbody></table>"
+      : "<div class='muted'>ìë°°ììê° ììµëë¤.</div>";
     const verseHtml = (memory && (memory.reference || memory.text))
       ? "<p class='verse'><b>"+escapeHtml(memory.reference||"")+"</b><br/>"+escapeHtml(memory.text||"")+"</p>"
-      : "<div class='muted'>등록된 외울 말씀이 없습니다.</div>";
+      : "<div class='muted'>ë±ë¡ë ì¸ì¸ ë§ìì´ ììµëë¤.</div>";
     const newsHtml = news.length
-      ? "<ul class='news'>"+news.map(t => "<li><span class='tag'>소식</span><div class='txt'>"+escapeHtml(t)+"</div></li>").join("")+"</ul>"
-      : "<div class='muted'>등록된 소식이 없습니다.</div>";
-    document.getElementById("bulletinBody").innerHTML = "<div class='b3-grid'><section class='b-card'><h2>예배순서</h2>"+orderHtml+"</section><section class='b-mid'><section class='b-card'><h2>성경본문</h2>"+verseHtml+"</section><section class='b-card'><h2>예배위원</h2>"+committeeHtml+"</section></section><section class='b-card'><h2>교회소식</h2>"+newsHtml+"</section></div>";
+      ? "<ul class='news'>"+news.map(t => "<li><span class='tag'>ìì</span><div class='txt'>"+escapeHtml(t)+"</div></li>").join("")+"</ul>"
+      : "<div class='muted'>ë±ë¡ë ììì´ ììµëë¤.</div>";
+    document.getElementById("bulletinBody").innerHTML = "<div class='b3-grid'><section class='b-card'><h2>ìë°°ìì</h2>"+orderHtml+"</section><section class='b-mid'><section class='b-card'><h2>ì±ê²½ë³¸ë¬¸</h2>"+verseHtml+"</section><section class='b-card'><h2>ìë°°ìì</h2>"+committeeHtml+"</section></section><section class='b-card'><h2>êµíìì</h2>"+newsHtml+"</section></div>";
   }
   async function main(){
     const { weeks, selected } = await loadWeeks();
     if(!weeks.length) return;
     hookPrevNext(weeks, selected);
 
-    // 현재 주차 데이터 + committee.json 병렬 로드
+    // íì¬ ì£¼ì°¨ ë°ì´í° + committee.json ë³ë ¬ ë¡ë
     const [data, allCommittee] = await Promise.all([
       fetchJSON(DATA_BASE+"/"+encodeURIComponent(selected)+".json"),
       fetchJSON(DATA_BASE+"/committee.json").catch(()=>[])
     ]);
 
-    // committee.json에서 해당 월(YYYY-MM)의 데이터만 필터링
+    // committee.jsonìì í´ë¹ ì(YYYY-MM)ì ë°ì´í°ë§ íí°ë§
     const selMonth = selected.slice(0,7);
     const monthRaws = allCommittee.filter(r => r.week_id && r.week_id.slice(0,7) === selMonth);
 
-    // week_id별로 그룹핑 → 한 행으로
+    // week_idë³ë¡ ê·¸ë£¹í â í íì¼ë¡
     const byWeek = {};
     monthRaws.forEach(r => {
       if(!byWeek[r.week_id]) byWeek[r.week_id] = { week_id: r.week_id, pray:"", praise:"", offering:"" };
-      if(r.role === "기도") byWeek[r.week_id].pray = r.name||"";
-      if(r.role === "찬양") byWeek[r.week_id].praise = r.name||"";
-      if(r.role === "헌금위원") byWeek[r.week_id].offering = r.name||"";
+      if(r.role === "ê¸°ë") byWeek[r.week_id].pray = r.name||"";
+      if(r.role === "ì°¬ì") byWeek[r.week_id].praise = r.name||"";
+      if(r.role === "íê¸ìì") byWeek[r.week_id].offering = r.name||"";
     });
     const monthCommittees = Object.values(byWeek).sort((a,b) => a.week_id.localeCompare(b.week_id));
 
@@ -403,7 +405,7 @@
   }
   main().catch(err => {
     console.error(err);
-    document.getElementById("bulletinBody").innerHTML = "<div class='b3-grid'><section class='b-card'><h2>주보 불러오기 실패</h2><div class='muted' style='margin-top:10px;'>오류: "+escapeHtml(err&&err.message||String(err))+"</div></section></div>";
+    document.getElementById("bulletinBody").innerHTML = "<div class='b3-grid'><section class='b-card'><h2>ì£¼ë³´ ë¶ë¬ì¤ê¸° ì¤í¨</h2><div class='muted' style='margin-top:10px;'>ì¤ë¥: "+escapeHtml(err&&err.message||String(err))+"</div></section></div>";
   });
 </script>
 <script>
@@ -418,7 +420,7 @@
       _installPrompt.prompt();
       _installPrompt.userChoice.then(() => { _installPrompt = null; document.getElementById('installBtn').classList.remove('visible'); });
     } else {
-      alert('홈화면 추가:\niOS Safari → 공유 버튼 → "홈 화면에 추가"\nAndroid Chrome → 브라우저 메뉴 → "홈 화면에 추가"');
+      alert('ííë©´ ì¶ê°:\niOS Safari â ê³µì  ë²í¼ â "í íë©´ì ì¶ê°"\nAndroid Chrome â ë¸ë¼ì°ì  ë©ë´ â "í íë©´ì ì¶ê°"');
     }
   }
 </script>
