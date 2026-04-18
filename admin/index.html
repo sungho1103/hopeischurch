@@ -854,7 +854,7 @@ async function newBulletinWeek() {
   }
 
   fillBulletinForm({
-    week: { week_id: weekId, date: weekId.replace(/-/g, '.'), issue: '', title: '주일예배' },
+    week: { week_id: weekId, date: weekId.replace(/-/g, '.'), issue: (()=>{ const last = (_bulletinIndex||[]).find(w=>w.issue); return last ? String(Number(last.issue)+1) : ''; })(), title: '주일예배' },
     worship_order: prev.worship_order || [],
     memory_verse:  prev.memory_verse  || [],
     news:          prev.news          || []
