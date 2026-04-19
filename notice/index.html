@@ -6,8 +6,14 @@
   <title>공지게시판</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, getDoc, doc,
+      updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+      signOut, createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTS7eCGaNcuo9dKX-nYF-flNUlAC4dopM",
@@ -22,175 +28,333 @@
 
     const ADMIN_UIDS = ["ADMIN_UID_HERE"];
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db  = getFirestore(app);
     const auth = getAuth(app);
-    let currentUser = null, currentView = 'list', currentPostId = null;
 
-    onAuthStateChanged(auth, (user) => {
-      currentUser = user; renderAuthBar();
-      if (currentView === 'list') renderPostList();
-      if (currentView === 'detail' && currentPostId) viewDetail(currentPostId);
+    let currentUser = null;
+    let currentView = "list";
+    let currentPostId = null;
+
+    /* ── 인증 ─────────────────────────────── */
+    onAuthStateChanged(auth, user => {
+      currentUser = user;
+      renderAuthBar();
+      if (currentView === "list") renderPostList();
+      if (currentView === "detail" && currentPostId) viewDetail(currentPostId);
     });
 
     function isAdmin() { return currentUser && ADMIN_UIDS.includes(currentUser.uid); }
     function canEdit(uid) { return currentUser && (currentUser.uid === uid || isAdmin()); }
+    function esc(s) {
+      if (!s) return "";
+      return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
 
+    /* ── Auth UI ──────────────────────────── */
     function renderAuthBar() {
-      const bar = document.getElementById('auth-bar');
+      const bar = document.getElementById("auth-bar");
       if (currentUser) {
-        bar.innerHTML = '<span class="auth-user">' + (isAdmin() ? '<span class="badge-admin">관리자</span>' : '') + currentUser.email + '</span><button onclick="doSignOut()" class="btn btn-sm btn-outline">로그아웃</button>';
+        bar.innerHTML =
+          (isAdmin() ? "<span class='badge-admin'>관리자</span>" : "") +
+          "<span class='auth-user'>" + currentUser.email + "</span>" +
+          "<button id='btn-logout' class='btn btn-sm btn-outline'>로그아웃</button>";
+        document.getElementById("btn-logout").onclick = () => signOut(auth);
       } else {
-        bar.innerHTML = '<button onclick="showLoginModal()" class="btn btn-sm">로그인</button><button onclick="showRegisterModal()" class="btn btn-sm btn-outline">회원가입</button>';
+        bar.innerHTML =
+          "<button id='btn-login' class='btn btn-sm'>로그인</button>" +
+          "<button id='btn-register' class='btn btn-sm btn-outline'>회원가입</button>";
+        document.getElementById("btn-login").onclick = () => showModal("modal-login");
+        document.getElementById("btn-register").onclick = () => showModal("modal-register");
       }
     }
 
-    window.doSignOut = async () => { await signOut(auth); };
-    window.showLoginModal = () => { document.getElementById('modal-login').style.display = 'flex'; };
-    window.closeLoginModal = () => { document.getElementById('modal-login').style.display = 'none'; };
-    window.showRegisterModal = () => { document.getElementById('modal-register').style.display = 'flex'; };
-    window.closeRegisterModal = () => { document.getElementById('modal-register').style.display = 'none'; };
+    function showModal(id) { document.getElementById(id).style.display = "flex"; }
+    function hideModal(id) { document.getElementById(id).style.display = "none"; }
+    window.closeLoginModal    = () => hideModal("modal-login");
+    window.closeRegisterModal = () => hideModal("modal-register");
 
     window.doLogin = async () => {
-      try { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value.trim(), document.getElementById('login-pw').value); closeLoginModal(); }
-      catch (e) { alert('로그인 실패: ' + e.message); }
+      const email = document.getElementById("login-email").value.trim();
+      const pw    = document.getElementById("login-pw").value;
+      try { await signInWithEmailAndPassword(auth, email, pw); hideModal("modal-login"); }
+      catch (e) { alert("로그인 실패: " + e.message); }
     };
-
     window.doRegister = async () => {
-      try { await createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value.trim(), document.getElementById('reg-pw').value); closeRegisterModal(); alert('가입 완료!'); }
-      catch (e) { alert('회원가입 실패: ' + e.message); }
+      const email = document.getElementById("reg-email").value.trim();
+      const pw    = document.getElementById("reg-pw").value;
+      try { await createUserWithEmailAndPassword(auth, email, pw); hideModal("modal-register"); alert("가입 완료!"); }
+      catch (e) { alert("회원가입 실패: " + e.message); }
     };
 
+    /* ── 글 목록 ──────────────────────────── */
     async function renderPostList() {
-      currentView = 'list';
-      const main = document.getElementById('main-content');
-      main.innerHTML = '<p class="loading">불러오는 중...</p>';
-      const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-      onSnapshot(q, (snapshot) => {
-        if (snapshot.empty) { main.innerHTML = '<div class="empty-state"><p>등록된 공지가 없습니다.</p><button onclick="showWriteForm()" class="btn">첫 글 작성하기</button></div>'; return; }
-        let html = '<div class="list-header"><h2>공지사항</h2><button onclick="showWriteForm()" class="btn">✏️ 새 글 작성</button></div><table class="post-table"><thead><tr><th style="width:50px">번호</th><th>제목</th><th style="width:120px">작성자</th><th style="width:120px">날짜</th></tr></thead><tbody>';
-        snapshot.docs.forEach((d, i) => {
-          const dt = d.data(); const date = dt.createdAt ? dt.createdAt.toDate().toLocaleDateString('ko-KR') : '-';
-          html += '<tr class="post-row" onclick="viewDetail(\'' + d.id + '\')"><td class="tc">' + (snapshot.size - i) + '</td><td class="post-title-cell">' + (dt.isPinned ? '<span>📌</span>' : '') + escHtml(dt.title) + (dt.commentCount > 0 ? '<span class="comment-count">[' + dt.commentCount + ']</span>' : '') + '</td><td class="tc">' + escHtml(dt.authorName || '익명') + '</td><td class="tc">' + date + '</td></tr>';
+      currentView = "list";
+      const main = document.getElementById("main-content");
+      main.innerHTML = "<p class='loading'>불러오는 중...</p>";
+
+      const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+      onSnapshot(q, snap => {
+        if (snap.empty) {
+          main.innerHTML =
+            "<div class='empty-state'><p>등록된 공지가 없습니다.</p>" +
+            "<button class='btn' id='btn-first-write'>첫 글 작성하기</button></div>";
+          document.getElementById("btn-first-write").onclick = () => showWriteForm();
+          return;
+        }
+        let rows = "";
+        snap.docs.forEach((d, i) => {
+          const dt = d.data();
+          const date = dt.createdAt ? dt.createdAt.toDate().toLocaleDateString("ko-KR") : "-";
+          rows +=
+            "<tr class='post-row' data-id='" + d.id + "'>" +
+            "<td class='tc'>" + (snap.size - i) + "</td>" +
+            "<td class='post-title-cell'>" +
+              (dt.isPinned ? "📌 " : "") + esc(dt.title) +
+              (dt.commentCount > 0 ? "<span class='comment-count'>[" + dt.commentCount + "]</span>" : "") +
+            "</td>" +
+            "<td class='tc'>" + esc(dt.authorName || "익명") + "</td>" +
+            "<td class='tc'>" + date + "</td>" +
+            "</tr>";
         });
-        html += '</tbody></table>'; main.innerHTML = html;
+        main.innerHTML =
+          "<div class='list-header'><h2>공지사항</h2><button class='btn' id='btn-new-post'>✏️ 새 글 작성</button></div>" +
+          "<table class='post-table'><thead><tr>" +
+          "<th style='width:50px'>번호</th><th>제목</th><th style='width:120px'>작성자</th><th style='width:120px'>날짜</th>" +
+          "</tr></thead><tbody>" + rows + "</tbody></table>";
+        document.getElementById("btn-new-post").onclick = () => showWriteForm();
+        main.querySelectorAll(".post-row").forEach(row => {
+          row.onclick = () => viewDetail(row.dataset.id);
+        });
       });
     }
 
-    window.showWriteForm = (ed) => {
-      currentView = 'write'; const main = document.getElementById('main-content'); const isEdit = !!ed;
-      const defName = currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : '';
-      main.innerHTML = '<div class="form-card"><h2>' + (isEdit ? '✏️ 글 수정' : '✏️ 새 글 작성') + '</h2>' +
-        '<div class="form-group"><label>작성자 이름</label><input id="w-name" type="text" class="input" placeholder="익명" value="' + (isEdit ? escHtml(ed.authorName || '') : defName) + '" /></div>' +
-        '<div class="form-group"><label>비밀번호 <small>(비로그인 시 수정/삭제에 사용)</small></label><input id="w-pass" type="password" class="input" placeholder="비밀번호 입력" ' + (isEdit ? 'disabled' : '') + ' /></div>' +
-        '<div class="form-group"><label>제목 *</label><input id="w-title" type="text" class="input" placeholder="제목을 입력하세요" value="' + (isEdit ? escHtml(ed.title) : '') + '" /></div>' +
-        '<div class="form-group"><label>내용 *</label><textarea id="w-body" class="textarea" rows="10" placeholder="내용을 입력하세요...">' + (isEdit ? escHtml(ed.body) : '') + '</textarea></div>' +
-        '<div class="form-actions"><button onclick="' + (isEdit ? 'submitEdit(\'' + ed.id + '\')' : 'submitPost()') + '" class="btn">' + (isEdit ? '수정 완료' : '등록하기') + '</button>' +
-        '<button onclick="' + (isEdit ? 'viewDetail(\'' + ed.id + '\')' : 'goList()') + '" class="btn btn-outline">취소</button></div></div>';
-    };
+    /* ── 글 작성 / 수정 폼 ────────────────── */
+    function showWriteForm(editData) {
+      currentView = "write";
+      const main   = document.getElementById("main-content");
+      const isEdit = !!editData;
+      const defName = currentUser
+        ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
 
-    window.submitPost = async () => {
-      const t = document.getElementById('w-title').value.trim(), b = document.getElementById('w-body').value.trim();
-      const n = document.getElementById('w-name').value.trim() || '익명', p = document.getElementById('w-pass').value;
-      if (!t || !b) { alert('제목과 내용을 입력해주세요.'); return; }
+      main.innerHTML =
+        "<div class='form-card'>" +
+          "<h2>" + (isEdit ? "✏️ 글 수정" : "✏️ 새 글 작성") + "</h2>" +
+          "<div class='form-group'><label>작성자 이름</label>" +
+            "<input id='w-name' type='text' class='input' placeholder='익명' value='" +
+            esc(isEdit ? editData.authorName || "" : defName) + "' /></div>" +
+          "<div class='form-group'><label>비밀번호 <small>(비로그인 시 수정/삭제에 사용)</small></label>" +
+            "<input id='w-pass' type='password' class='input' placeholder='비밀번호 입력' " +
+            (isEdit ? "disabled" : "") + " /></div>" +
+          "<div class='form-group'><label>제목 *</label>" +
+            "<input id='w-title' type='text' class='input' placeholder='제목을 입력하세요' value='" +
+            esc(isEdit ? editData.title : "") + "' /></div>" +
+          "<div class='form-group'><label>내용 *</label>" +
+            "<textarea id='w-body' class='textarea' rows='10' placeholder='내용을 입력하세요...'>" +
+            esc(isEdit ? editData.body : "") + "</textarea></div>" +
+          "<div class='form-actions'>" +
+            "<button class='btn' id='btn-submit-write'>" + (isEdit ? "수정 완료" : "등록하기") + "</button>" +
+            "<button class='btn btn-outline' id='btn-cancel-write'>취소</button>" +
+          "</div>" +
+        "</div>";
+
+      document.getElementById("btn-submit-write").onclick = isEdit
+        ? () => submitEdit(editData.id)
+        : () => submitPost();
+      document.getElementById("btn-cancel-write").onclick = isEdit
+        ? () => viewDetail(editData.id)
+        : () => goList();
+    }
+
+    async function submitPost() {
+      const title = document.getElementById("w-title").value.trim();
+      const body  = document.getElementById("w-body").value.trim();
+      const name  = document.getElementById("w-name").value.trim() || "익명";
+      const pass  = document.getElementById("w-pass").value;
+      if (!title || !body) { alert("제목과 내용을 입력해주세요."); return; }
       try {
-        await addDoc(collection(db, 'posts'), { title: t, body: b, authorName: n, authorUid: currentUser ? currentUser.uid : null, authorEmail: currentUser ? currentUser.email : null, password: p || null, commentCount: 0, isPinned: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-        alert('글이 등록되었습니다.'); goList();
-      } catch (e) { alert('등록 실패: ' + e.message); }
-    };
+        await addDoc(collection(db, "posts"), {
+          title, body, authorName: name,
+          authorUid:   currentUser ? currentUser.uid   : null,
+          authorEmail: currentUser ? currentUser.email : null,
+          password: pass || null, commentCount: 0, isPinned: false,
+          createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        });
+        alert("글이 등록되었습니다."); goList();
+      } catch (e) { alert("등록 실패: " + e.message); }
+    }
 
-    window.submitEdit = async (pid) => {
-      const t = document.getElementById('w-title').value.trim(), b = document.getElementById('w-body').value.trim();
-      if (!t || !b) { alert('제목과 내용을 입력해주세요.'); return; }
-      try { await updateDoc(doc(db, 'posts', pid), { title: t, body: b, updatedAt: serverTimestamp() }); alert('수정되었습니다.'); viewDetail(pid); }
-      catch (e) { alert('수정 실패: ' + e.message); }
-    };
+    async function submitEdit(pid) {
+      const title = document.getElementById("w-title").value.trim();
+      const body  = document.getElementById("w-body").value.trim();
+      if (!title || !body) { alert("제목과 내용을 입력해주세요."); return; }
+      try {
+        await updateDoc(doc(db, "posts", pid), { title, body, updatedAt: serverTimestamp() });
+        alert("수정되었습니다."); viewDetail(pid);
+      } catch (e) { alert("수정 실패: " + e.message); }
+    }
 
-    window.viewDetail = async (pid) => {
-      currentView = 'detail'; currentPostId = pid;
-      const main = document.getElementById('main-content');
-      main.innerHTML = '<p class="loading">불러오는 중...</p>';
-      const ps = await getDoc(doc(db, 'posts', pid));
-      if (!ps.exists()) { alert('삭제된 글입니다.'); goList(); return; }
-      const d = ps.data();
-      const date = d.createdAt ? d.createdAt.toDate().toLocaleString('ko-KR') : '-';
-      const upd = d.updatedAt && d.updatedAt.seconds !== d.createdAt.seconds ? ' (수정됨: ' + d.updatedAt.toDate().toLocaleString('ko-KR') + ')' : '';
-      const ce = canEdit(d.authorUid);
-      const dcn = currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : '';
-      main.innerHTML = '<button onclick="goList()" class="btn btn-outline btn-back">← 목록으로</button>' +
-        '<div class="detail-card"><div class="detail-header"><h2>' + (d.isPinned ? '📌 ' : '') + escHtml(d.title) + '</h2>' +
-        '<div class="detail-meta"><span>작성자: <strong>' + escHtml(d.authorName || '익명') + '</strong></span><span>' + date + upd + '</span></div></div>' +
-        '<div class="detail-body">' + escHtml(d.body).replace(/\n/g, '<br/>') + '</div>' +
-        (ce ? '<div class="detail-actions"><button onclick=\'startEdit("' + pid + '")' class="btn btn-sm">수정</button><button onclick=\'deletePost("' + pid + '","' + (d.authorUid || '') + '")' class="btn btn-sm btn-danger">삭제</button></div>' : '') +
-        '</div><div class="comment-section"><h3>💬 댓글 <span id="cmt-count"></span></h3><div id="comment-list"></div>' +
-        '<div class="comment-form"><input id="c-name" type="text" class="input" placeholder="이름 (익명)" value="' + dcn + '" />' +
-        '<input id="c-pass" type="password" class="input" placeholder="비밀번호 (선택)" />' +
-        '<textarea id="c-body" class="textarea" rows="3" placeholder="댓글을 입력하세요..."></textarea>' +
-        '<button onclick="submitComment(\'' + pid + '\')" class="btn">댓글 등록</button></div></div>';
+    /* ── 글 상세 ──────────────────────────── */
+    async function viewDetail(pid) {
+      currentView = "detail"; currentPostId = pid;
+      const main = document.getElementById("main-content");
+      main.innerHTML = "<p class='loading'>불러오는 중...</p>";
+
+      const ps = await getDoc(doc(db, "posts", pid));
+      if (!ps.exists()) { alert("삭제된 글입니다."); goList(); return; }
+      const d    = ps.data();
+      const date = d.createdAt ? d.createdAt.toDate().toLocaleString("ko-KR") : "-";
+      const upd  = (d.updatedAt && d.updatedAt.seconds !== d.createdAt.seconds)
+        ? " (수정됨: " + d.updatedAt.toDate().toLocaleString("ko-KR") + ")" : "";
+      const dcn  = currentUser
+        ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
+
+      main.innerHTML =
+        "<button class='btn btn-outline btn-back' id='btn-back'>← 목록으로</button>" +
+        "<div class='detail-card'>" +
+          "<div class='detail-header'>" +
+            "<h2>" + (d.isPinned ? "📌 " : "") + esc(d.title) + "</h2>" +
+            "<div class='detail-meta'>" +
+              "<span>작성자: <strong>" + esc(d.authorName || "익명") + "</strong></span>" +
+              "<span>" + date + upd + "</span>" +
+            "</div>" +
+          "</div>" +
+          "<div class='detail-body'>" + esc(d.body).replace(/\n/g, "<br>") + "</div>" +
+          (canEdit(d.authorUid)
+            ? "<div class='detail-actions'>" +
+                "<button class='btn btn-sm' id='btn-edit-post'>수정</button>" +
+                "<button class='btn btn-sm btn-danger' id='btn-del-post'>삭제</button>" +
+              "</div>"
+            : "") +
+        "</div>" +
+        "<div class='comment-section'>" +
+          "<h3>💬 댓글 <span id='cmt-count'></span></h3>" +
+          "<div id='comment-list'></div>" +
+          "<div class='comment-form'>" +
+            "<input id='c-name' type='text' class='input' placeholder='이름 (익명)' value='" + esc(dcn) + "' />" +
+            "<input id='c-pass' type='password' class='input' placeholder='비밀번호 (선택)' />" +
+            "<textarea id='c-body' class='textarea' rows='3' placeholder='댓글을 입력하세요...'></textarea>" +
+            "<button class='btn' id='btn-submit-cmt'>댓글 등록</button>" +
+          "</div>" +
+        "</div>";
+
+      document.getElementById("btn-back").onclick = () => goList();
+      document.getElementById("btn-submit-cmt").onclick = () => submitComment(pid);
+
+      if (canEdit(d.authorUid)) {
+        document.getElementById("btn-edit-post").onclick = () => startEdit(pid);
+        document.getElementById("btn-del-post").onclick  = () => deletePost(pid, d.authorUid, d.password);
+      }
       loadComments(pid);
-    };
+    }
 
-    window.startEdit = async (pid) => {
-      const ps = await getDoc(doc(db, 'posts', pid)); if (!ps.exists()) return;
+    async function startEdit(pid) {
+      const ps = await getDoc(doc(db, "posts", pid));
+      if (!ps.exists()) return;
       const d = ps.data();
-      if (!canEdit(d.authorUid)) { const pw = prompt('비밀번호를 입력하세요'); if (pw !== d.password) { alert('비밀번호가 틀립니다.'); return; } }
+      if (!canEdit(d.authorUid)) {
+        const pw = prompt("비밀번호를 입력하세요");
+        if (pw !== d.password) { alert("비밀번호가 틀립니다."); return; }
+      }
       showWriteForm({ id: pid, ...d });
-    };
+    }
 
-    window.deletePost = async (pid, auid) => {
-      let ok = canEdit(auid || null);
-      if (!ok) { const ps = await getDoc(doc(db, 'posts', pid)); const pw = prompt('비밀번호를 입력하세요'); if (pw !== ps.data().password) { alert('비밀번호가 틀립니다.'); return; } }
-      if (!confirm('정말 삭제하시겠습니까?')) return;
-      try { const cs = await getDocs(collection(db, 'posts', pid, 'comments')); for (const c of cs.docs) await deleteDoc(c.ref); await deleteDoc(doc(db, 'posts', pid)); alert('삭제되었습니다.'); goList(); }
-      catch (e) { alert('삭제 실패: ' + e.message); }
-    };
+    async function deletePost(pid, authorUid, savedPw) {
+      if (!canEdit(authorUid)) {
+        const pw = prompt("비밀번호를 입력하세요");
+        if (pw !== savedPw) { alert("비밀번호가 틀립니다."); return; }
+      }
+      if (!confirm("정말 삭제하시겠습니까?")) return;
+      try {
+        const cs = await getDocs(collection(db, "posts", pid, "comments"));
+        for (const c of cs.docs) await deleteDoc(c.ref);
+        await deleteDoc(doc(db, "posts", pid));
+        alert("삭제되었습니다."); goList();
+      } catch (e) { alert("삭제 실패: " + e.message); }
+    }
 
+    /* ── 댓글 ─────────────────────────────── */
     function loadComments(pid) {
-      const q = query(collection(db, 'posts', pid, 'comments'), orderBy('createdAt', 'asc'));
-      onSnapshot(q, (snap) => {
-        const ce = document.getElementById('cmt-count'); if (ce) ce.textContent = '(' + snap.size + ')';
-        const list = document.getElementById('comment-list'); if (!list) return;
-        if (snap.empty) { list.innerHTML = '<p class="no-comment">아직 댓글이 없습니다.</p>'; return; }
-        let html = '';
-        snap.docs.forEach((cd) => {
-          const c = cd.data(); const cdate = c.createdAt ? c.createdAt.toDate().toLocaleString('ko-KR') : '';
-          html += '<div class="comment-item"><div class="cmt-meta"><strong>' + escHtml(c.authorName || '익명') + '</strong><span>' + cdate + '</span>' +
-            '<button onclick=\'deleteComment("' + pid + '","' + cd.id + '","' + (c.authorUid || '') + '","' + (c.password || '') + '")' class="btn btn-xs btn-danger">삭제</button></div>' +
-            '<div class="cmt-body">' + escHtml(c.body).replace(/\n/g, '<br/>') + '</div></div>';
+      const q = query(collection(db, "posts", pid, "comments"), orderBy("createdAt", "asc"));
+      onSnapshot(q, snap => {
+        const ce = document.getElementById("cmt-count");
+        if (ce) ce.textContent = "(" + snap.size + ")";
+        const list = document.getElementById("comment-list");
+        if (!list) return;
+        if (snap.empty) { list.innerHTML = "<p class='no-comment'>아직 댓글이 없습니다.</p>"; return; }
+
+        list.innerHTML = "";
+        snap.docs.forEach(cd => {
+          const c     = cd.data();
+          const cdate = c.createdAt ? c.createdAt.toDate().toLocaleString("ko-KR") : "";
+          const item  = document.createElement("div");
+          item.className = "comment-item";
+          item.innerHTML =
+            "<div class='cmt-meta'>" +
+              "<strong>" + esc(c.authorName || "익명") + "</strong>" +
+              "<span>" + cdate + "</span>" +
+              "<button class='btn btn-xs btn-danger cmt-del-btn' " +
+                "data-pid='" + pid + "' data-cid='" + cd.id + "' " +
+                "data-auid='" + (c.authorUid || "") + "' data-pw='" + esc(c.password || "") + "'>삭제</button>" +
+            "</div>" +
+            "<div class='cmt-body'>" + esc(c.body).replace(/\n/g, "<br>") + "</div>";
+          list.appendChild(item);
         });
-        list.innerHTML = html;
+
+        list.querySelectorAll(".cmt-del-btn").forEach(btn => {
+          btn.onclick = () => deleteComment(
+            btn.dataset.pid, btn.dataset.cid,
+            btn.dataset.auid, btn.dataset.pw
+          );
+        });
       });
     }
 
-    window.submitComment = async (pid) => {
-      const n = document.getElementById('c-name').value.trim() || '익명', p = document.getElementById('c-pass').value, b = document.getElementById('c-body').value.trim();
-      if (!b) { alert('댓글 내용을 입력해주세요.'); return; }
+    async function submitComment(pid) {
+      const name = document.getElementById("c-name").value.trim() || "익명";
+      const pass = document.getElementById("c-pass").value;
+      const body = document.getElementById("c-body").value.trim();
+      if (!body) { alert("댓글 내용을 입력해주세요."); return; }
       try {
-        await addDoc(collection(db, 'posts', pid, 'comments'), { authorName: n, authorUid: currentUser ? currentUser.uid : null, password: p || null, body: b, createdAt: serverTimestamp() });
-        const pr = doc(db, 'posts', pid); const ps = await getDoc(pr);
+        await addDoc(collection(db, "posts", pid, "comments"), {
+          authorName: name, authorUid: currentUser ? currentUser.uid : null,
+          password: pass || null, body, createdAt: serverTimestamp()
+        });
+        const pr = doc(db, "posts", pid);
+        const ps = await getDoc(pr);
         await updateDoc(pr, { commentCount: (ps.data().commentCount || 0) + 1 });
-        document.getElementById('c-body').value = '';
-      } catch (e) { alert('댓글 등록 실패: ' + e.message); }
-    };
+        document.getElementById("c-body").value = "";
+      } catch (e) { alert("댓글 등록 실패: " + e.message); }
+    }
 
-    window.deleteComment = async (pid, cid, auid, pw) => {
-      const ok = currentUser && (currentUser.uid === auid || isAdmin());
-      if (!ok) { const p = prompt('비밀번호를 입력하세요'); if (p !== pw) { alert('비밀번호가 틀립니다.'); return; } }
-      if (!confirm('댓글을 삭제하시겠습니까?')) return;
-      try { await deleteDoc(doc(db, 'posts', pid, 'comments', cid)); const pr = doc(db, 'posts', pid); const ps = await getDoc(pr); const cnt = (ps.data().commentCount || 1) - 1; await updateDoc(pr, { commentCount: cnt < 0 ? 0 : cnt }); }
-      catch (e) { alert('댓글 삭제 실패: ' + e.message); }
-    };
+    async function deleteComment(pid, cid, auid, pw) {
+      const canDel = currentUser && (currentUser.uid === auid || isAdmin());
+      if (!canDel) {
+        const p = prompt("비밀번호를 입력하세요");
+        if (p !== pw) { alert("비밀번호가 틀립니다."); return; }
+      }
+      if (!confirm("댓글을 삭제하시겠습니까?")) return;
+      try {
+        await deleteDoc(doc(db, "posts", pid, "comments", cid));
+        const pr  = doc(db, "posts", pid);
+        const ps  = await getDoc(pr);
+        const cnt = (ps.data().commentCount || 1) - 1;
+        await updateDoc(pr, { commentCount: cnt < 0 ? 0 : cnt });
+      } catch (e) { alert("댓글 삭제 실패: " + e.message); }
+    }
 
-    window.goList = () => { currentPostId = null; renderPostList(); };
-    function escHtml(s) { if (!s) return ''; return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-    renderAuthBar(); renderPostList();
+    function goList() { currentPostId = null; renderPostList(); }
+
+    /* ── 초기 실행 ────────────────────────── */
+    renderAuthBar();
+    renderPostList();
   </script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Noto Sans KR', sans-serif; background: #f5f6fa; color: #222; }
+    body { font-family: "Noto Sans KR", sans-serif; background: #f5f6fa; color: #222; }
     .site-header { background: #2d6a4f; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
     .site-header h1 { font-size: 1.2rem; font-weight: 700; }
     #auth-bar { display: flex; align-items: center; gap: 10px; }
-    .auth-user { font-size: 0.9rem; opacity: .85; }
+    .auth-user { font-size: .9rem; opacity: .85; }
     .badge-admin { background: #f4a261; color: #fff; font-size: .72rem; padding: 2px 7px; border-radius: 10px; margin-right: 4px; }
     .container { max-width: 900px; margin: 30px auto; padding: 0 16px; }
     .btn { padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer; font-size: .92rem; background: #2d6a4f; color: #fff; transition: background .2s; }
@@ -207,7 +371,7 @@
     .empty-state p { margin-bottom: 16px; }
     .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .list-header h2 { font-size: 1.3rem; }
-    .post-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px #0001; }
+    .post-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
     .post-table thead tr { background: #2d6a4f; color: #fff; }
     .post-table th, .post-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #eee; }
     .post-table th { font-weight: 600; font-size: .9rem; }
@@ -216,7 +380,7 @@
     .post-title-cell { font-weight: 500; }
     .comment-count { color: #2d6a4f; font-size: .85rem; margin-left: 6px; }
     .tc { text-align: center !important; }
-    .form-card, .detail-card { background: #fff; border-radius: 10px; padding: 28px; box-shadow: 0 2px 8px #0001; margin-bottom: 24px; }
+    .form-card, .detail-card { background: #fff; border-radius: 10px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 24px; }
     .form-card h2, .detail-card h2 { margin-bottom: 20px; font-size: 1.2rem; }
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: .88rem; color: #555; margin-bottom: 5px; }
@@ -227,20 +391,20 @@
     .form-actions { display: flex; gap: 10px; margin-top: 8px; }
     .detail-header { border-bottom: 1px solid #eee; margin-bottom: 18px; padding-bottom: 14px; }
     .detail-header h2 { font-size: 1.3rem; margin-bottom: 8px; }
-    .detail-meta { display: flex; gap: 18px; color: #888; font-size: .88rem; }
+    .detail-meta { display: flex; gap: 18px; color: #888; font-size: .88rem; flex-wrap: wrap; }
     .detail-body { line-height: 1.8; font-size: .97rem; white-space: pre-wrap; }
     .detail-actions { margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; }
-    .comment-section { background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px #0001; }
+    .comment-section { background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
     .comment-section h3 { margin-bottom: 16px; font-size: 1.05rem; }
     .comment-item { border-bottom: 1px solid #f0f0f0; padding: 14px 0; }
     .comment-item:last-child { border-bottom: none; }
-    .cmt-meta { display: flex; align-items: center; gap: 12px; font-size: .85rem; color: #888; margin-bottom: 6px; }
+    .cmt-meta { display: flex; align-items: center; gap: 12px; font-size: .85rem; color: #888; margin-bottom: 6px; flex-wrap: wrap; }
     .cmt-meta strong { color: #333; }
     .cmt-body { font-size: .95rem; line-height: 1.7; }
     .no-comment { text-align: center; color: #aaa; padding: 20px 0; font-size: .9rem; }
     .comment-form { margin-top: 20px; padding-top: 18px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 8px; }
     .comment-form .btn { align-self: flex-start; }
-    .modal-overlay { display: none; position: fixed; inset: 0; background: #0007; z-index: 100; align-items: center; justify-content: center; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
     .modal { background: #fff; border-radius: 12px; padding: 32px 28px; width: 360px; max-width: 95vw; position: relative; }
     .modal h3 { margin-bottom: 20px; font-size: 1.1rem; }
     .modal .form-group { margin-bottom: 14px; }
@@ -257,23 +421,48 @@
   <div class="container">
     <div id="main-content"></div>
   </div>
+
+  <!-- 로그인 모달 -->
   <div id="modal-login" class="modal-overlay">
     <div class="modal">
       <button class="modal-close" onclick="closeLoginModal()">✕</button>
       <h3>로그인</h3>
-      <div class="form-group"><label>이메일</label><input id="login-email" type="email" class="input" placeholder="이메일 입력" /></div>
-      <div class="form-group"><label>비밀번호</label><input id="login-pw" type="password" class="input" placeholder="비밀번호 입력" /></div>
-      <div class="form-actions"><button onclick="doLogin()" class="btn">로그인</button><button onclick="closeLoginModal()" class="btn btn-outline">취소</button></div>
+      <div class="form-group">
+        <label>이메일</label>
+        <input id="login-email" type="email" class="input" placeholder="이메일 입력" />
+      </div>
+      <div class="form-group">
+        <label>비밀번호</label>
+        <input id="login-pw" type="password" class="input" placeholder="비밀번호 입력" />
+      </div>
+      <div class="form-actions">
+        <button onclick="doLogin()" class="btn">로그인</button>
+        <button onclick="closeLoginModal()" class="btn btn-outline">취소</button>
+      </div>
     </div>
   </div>
+
+  <!-- 회원가입 모달 -->
   <div id="modal-register" class="modal-overlay">
     <div class="modal">
       <button class="modal-close" onclick="closeRegisterModal()">✕</button>
       <h3>회원가입</h3>
-      <div class="form-group"><label>닉네임 <small>(선택)</small></label><input id="reg-name" type="text" class="input" placeholder="표시될 이름" /></div>
-      <div class="form-group"><label>이메일</label><input id="reg-email" type="email" class="input" placeholder="이메일 입력" /></div>
-      <div class="form-group"><label>비밀번호</label><input id="reg-pw" type="password" class="input" placeholder="6자 이상" /></div>
-      <div class="form-actions"><button onclick="doRegister()" class="btn">가입하기</button><button onclick="closeRegisterModal()" class="btn btn-outline">취소</button></div>
+      <div class="form-group">
+        <label>닉네임 <small>(선택)</small></label>
+        <input id="reg-name" type="text" class="input" placeholder="표시될 이름" />
+      </div>
+      <div class="form-group">
+        <label>이메일</label>
+        <input id="reg-email" type="email" class="input" placeholder="이메일 입력" />
+      </div>
+      <div class="form-group">
+        <label>비밀번호</label>
+        <input id="reg-pw" type="password" class="input" placeholder="6자 이상" />
+      </div>
+      <div class="form-actions">
+        <button onclick="doRegister()" class="btn">가입하기</button>
+        <button onclick="closeRegisterModal()" class="btn btn-outline">취소</button>
+      </div>
     </div>
   </div>
 </body>
