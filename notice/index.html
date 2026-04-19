@@ -3,180 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>게시판 — 희망은교회</title>
-  <link rel="stylesheet" href="/assets/common.css?v=20260411-01">
-  <style>
-    /* ── 게시판 전용 스타일 ── */
-    .notice-wrap { max-width: 900px; margin: 0 auto; }
-    .btn-board { display: inline-block; padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer; font-size: .92rem; background: #111; color: #fff; transition: background .2s; }
-    .btn-board:hover { background: #333; }
-    .btn-outline-board { background: #fff; color: #111; border: 1.5px solid #333; }
-    .btn-outline-board:hover { background: #f3f5f9; }
-    .btn-sm-board { padding: 5px 13px; font-size: .85rem; }
-    .btn-xs-board { padding: 2px 8px; font-size: .78rem; }
-    .btn-danger-board { background: #e63946; color:#fff; }
-    .btn-danger-board:hover { background: #c1121f; }
-    .btn-back-board { margin-bottom: 14px; }
-    .board-auth-bar { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-    .board-auth-bar .auth-user { font-size: .88rem; color: #555; }
-    .badge-admin { background: #e63946; color: #fff; font-size: .72rem; padding: 2px 8px; border-radius: 10px; }
-    .loading-msg { text-align: center; padding: 40px; color: #888; }
-    .empty-state { text-align: center; padding: 40px 20px; color: #888; }
-    .empty-state p { margin-bottom: 16px; }
-    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .list-header h2 { font-size: 1.3rem; font-weight: 700; }
-    .post-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-    .post-table thead tr { background: #111; color: #fff; }
-    .post-table th, .post-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #eee; }
-    .post-table th { font-weight: 600; font-size: .9rem; }
-    .post-row { cursor: pointer; transition: background .15s; }
-    .post-row:hover { background: #f5f6fa; }
-    .post-title-cell { font-weight: 500; }
-    .comment-count { color: #555; font-size: .85rem; margin-left: 6px; }
-    .tc { text-align: center !important; }
-    .form-card, .detail-card { background: #fff; border-radius: 10px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 24px; }
-    .form-card h2, .detail-card h2 { margin-bottom: 20px; font-size: 1.2rem; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: .88rem; color: #555; margin-bottom: 5px; }
-    .board-input { width: 100%; padding: 9px 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: .95rem; font-family: inherit; }
-    .board-input:focus { outline: none; border-color: #111; }
-    .board-textarea { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: .95rem; resize: vertical; font-family: inherit; }
-    .board-textarea:focus { outline: none; border-color: #111; }
-    .form-actions-board { display: flex; gap: 10px; margin-top: 8px; }
-    .detail-header { border-bottom: 1px solid #eee; margin-bottom: 18px; padding-bottom: 14px; }
-    .detail-header h2 { font-size: 1.3rem; margin-bottom: 8px; }
-    .detail-meta { display: flex; gap: 18px; color: #888; font-size: .88rem; flex-wrap: wrap; }
-    .detail-body { line-height: 1.8; font-size: .97rem; white-space: pre-wrap; }
-    .detail-actions { margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; }
-    .comment-section { background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-    .comment-section h3 { margin-bottom: 16px; font-size: 1.05rem; }
-    .comment-item { border-bottom: 1px solid #f0f0f0; padding: 14px 0; }
-    .comment-item:last-child { border-bottom: none; }
-    .cmt-meta { display: flex; align-items: center; gap: 12px; font-size: .85rem; color: #888; margin-bottom: 6px; flex-wrap: wrap; }
-    .cmt-meta strong { color: #333; }
-    .cmt-body { font-size: .95rem; line-height: 1.7; }
-    .no-comment { text-align: center; color: #aaa; padding: 20px 0; font-size: .9rem; }
-    .comment-form { margin-top: 20px; padding-top: 18px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 8px; }
-    .comment-form .btn-board { align-self: flex-start; }
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 500; align-items: center; justify-content: center; }
-    .modal-overlay.show { display: flex; }
-    .modal { background: #fff; border-radius: 12px; padding: 32px 28px; width: 360px; max-width: 95vw; position: relative; }
-    .modal h3 { margin-bottom: 20px; font-size: 1.1rem; }
-    .modal .form-group { margin-bottom: 14px; }
-    .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #888; }
-    small { color: #aaa; font-size: .78rem; }
-    @media (max-width: 768px) {
-      .list-header h2 { font-size: 1.1rem; }
-      .post-table th, .post-table td { padding: 10px 10px; font-size: .88rem; }
-    }
-  </style>
-</head>
-<body>
-  <!-- 모바일 Sticky Header -->
-  <header class="mobile-header">
-    <a href="/" class="mobile-brand">희망은교회</a>
-    <button class="hamburger" id="hamburgerBtn" aria-label="메뉴 열기">
-      <span></span><span></span><span></span>
-    </button>
-  </header>
-
-  <div class="drawer-overlay" id="drawerOverlay"></div>
-  <nav class="drawer" id="drawer">
-    <button class="drawer-close" id="drawerClose" aria-label="메뉴 닫기">×</button>
-    <a href="/" data-nav="home">홈</a>
-    <a href="/bulletin/" data-nav="bulletin">주보</a>
-    <a href="/sermon/" data-nav="sermon">주일설교</a>
-    <a href="/notice/" data-nav="notice">게시판</a>
-    <a href="/#map" data-nav="map">찾아오는 길</a>
-    <img src="/menu_m_slogan.jpg" alt="" style="margin-top:auto;padding-top:24px;width:100%;border-radius:8px;object-fit:contain;">
-  </nav>
-
-  <div class="wrap">
-    <aside>
-      <div class="brand"><a href="/" style="color:inherit;">희망은교회</a></div>
-      <nav id="menu">
-        <a href="/" data-nav="home">홈</a>
-        <a href="/bulletin/" data-nav="bulletin">주보</a>
-        <a href="/sermon/" data-nav="sermon">주일설교</a>
-        <a href="/notice/" data-nav="notice">게시판</a>
-        <a href="/#map" data-nav="map">찾아오는 길</a>
-      </nav>
-      <div class="board-auth-bar" id="auth-bar"></div>
-    </aside>
-
-    <main>
-      <div class="notice-wrap">
-        <div id="main-content"></div>
-      </div>
-    </main>
-  </div>
-
-  <!-- 모바일 하단 탭바 -->
-  <nav class="bottom-nav">
-    <a href="/" class="bottom-nav-item" data-nav="home">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/>
-      </svg>
-      <span>홈</span>
-    </a>
-    <a href="/bulletin/" class="bottom-nav-item" data-nav="bulletin">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/>
-      </svg>
-      <span>주보</span>
-    </a>
-    <a href="/sermon/" class="bottom-nav-item" data-nav="sermon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
-      </svg>
-      <span>설교</span>
-    </a>
-    <a href="/notice/" class="bottom-nav-item" data-nav="notice">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-      </svg>
-      <span>게시판</span>
-    </a>
-    <a href="/#map" class="bottom-nav-item" data-nav="map">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-      </svg>
-      <span>위치</span>
-    </a>
-  </nav>
-
-  <!-- 로그인 모달 -->
-  <div id="modal-login" class="modal-overlay">
-    <div class="modal">
-      <button class="modal-close" id="closeLogin">✕</button>
-      <h3>로그인</h3>
-      <div class="form-group"><label>이메일</label><input id="login-email" type="email" class="board-input" placeholder="이메일 입력"></div>
-      <div class="form-group"><label>비밀번호</label><input id="login-pw" type="password" class="board-input" placeholder="비밀번호 입력"></div>
-      <div class="form-actions-board">
-        <button id="btn-do-login" class="btn-board">로그인</button>
-        <button id="btn-cancel-login" class="btn-board btn-outline-board">취소</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 회원가입 모달 -->
-  <div id="modal-register" class="modal-overlay">
-    <div class="modal">
-      <button class="modal-close" id="closeRegister">✕</button>
-      <h3>회원가입</h3>
-      <div class="form-group"><label>이메일</label><input id="reg-email" type="email" class="board-input" placeholder="이메일 입력"></div>
-      <div class="form-group"><label>비밀번호</label><input id="reg-pw" type="password" class="board-input" placeholder="6자 이상"></div>
-      <div class="form-actions-board">
-        <button id="btn-do-register" class="btn-board">가입하기</button>
-        <button id="btn-cancel-register" class="btn-board btn-outline-board">취소</button>
-      </div>
-    </div>
-  </div>
-
+  <title>공지게시판</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, getDoc, doc,
+      updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+      signOut, createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTS7eCGaNcuo9dKX-nYF-flNUlAC4dopM",
@@ -188,42 +25,16 @@
       appId: "1:423981952872:web:6c7a337334a42c4bde30dd",
       measurementId: "G-TP6F5RGF3L"
     };
-    const ADMIN_UIDS = ["ADMIN_UID_HERE"];
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const ADMIN_UIDS = ["ADMIN_UID_HERE"];
+    const app  = initializeApp(firebaseConfig);
+    const db   = getFirestore(app);
     const auth = getAuth(app);
-    let currentUser = null;
-    let currentView = "list";
+
+    let currentUser   = null;
+    let currentView   = "list";
     let currentPostId = null;
 
-    const isAdmin = () => currentUser && ADMIN_UIDS.includes(currentUser.uid);
-    const canEdit = uid => currentUser && (currentUser.uid === uid || isAdmin());
-    const esc = s => s ? s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") : "";
-
-    // ── 모달 ──
-    const showModal = id => document.getElementById(id).classList.add("show");
-    const hideModal = id => document.getElementById(id).classList.remove("show");
-    document.getElementById("closeLogin").onclick = () => hideModal("modal-login");
-    document.getElementById("btn-cancel-login").onclick = () => hideModal("modal-login");
-    document.getElementById("closeRegister").onclick = () => hideModal("modal-register");
-    document.getElementById("btn-cancel-register").onclick = () => hideModal("modal-register");
-
-    document.getElementById("btn-do-login").onclick = async () => {
-      try {
-        await signInWithEmailAndPassword(auth, document.getElementById("login-email").value.trim(), document.getElementById("login-pw").value);
-        hideModal("modal-login");
-      } catch(e) { alert("로그인 실패: " + e.message); }
-    };
-    document.getElementById("btn-do-register").onclick = async () => {
-      try {
-        await createUserWithEmailAndPassword(auth, document.getElementById("reg-email").value.trim(), document.getElementById("reg-pw").value);
-        hideModal("modal-register");
-        alert("가입 완료!");
-      } catch(e) { alert("회원가입 실패: " + e.message); }
-    };
-
-    // ── 인증 상태 ──
     onAuthStateChanged(auth, user => {
       currentUser = user;
       renderAuthBar();
@@ -231,71 +42,96 @@
       if (currentView === "detail" && currentPostId) viewDetail(currentPostId);
     });
 
+    const isAdmin  = () => currentUser && ADMIN_UIDS.includes(currentUser.uid);
+    const canEdit  = uid => currentUser && (currentUser.uid === uid || isAdmin());
+    const esc      = s => s ? s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") : "";
+    const showModal = id => { document.getElementById(id).style.display = "flex"; };
+    const hideModal = id => { document.getElementById(id).style.display = "none"; };
+
+    window.closeLoginModal    = () => hideModal("modal-login");
+    window.closeRegisterModal = () => hideModal("modal-register");
+
     function renderAuthBar() {
       const bar = document.getElementById("auth-bar");
       bar.innerHTML = "";
       if (currentUser) {
         if (isAdmin()) {
           const badge = document.createElement("span");
-          badge.className = "badge-admin";
-          badge.textContent = "관리자";
+          badge.className = "badge-admin"; badge.textContent = "관리자";
           bar.appendChild(badge);
         }
         const em = document.createElement("span");
-        em.className = "auth-user";
-        em.textContent = currentUser.email;
+        em.className = "auth-user"; em.textContent = currentUser.email;
         bar.appendChild(em);
         const btn = document.createElement("button");
-        btn.className = "btn-board btn-sm-board btn-outline-board";
-        btn.textContent = "로그아웃";
+        btn.className = "btn btn-sm btn-outline"; btn.textContent = "로그아웃";
         btn.onclick = () => signOut(auth);
         bar.appendChild(btn);
       } else {
         const b1 = document.createElement("button");
-        b1.className = "btn-board btn-sm-board";
-        b1.textContent = "로그인";
+        b1.className = "btn btn-sm"; b1.textContent = "로그인";
         b1.onclick = () => showModal("modal-login");
         bar.appendChild(b1);
         const b2 = document.createElement("button");
-        b2.className = "btn-board btn-sm-board btn-outline-board";
-        b2.textContent = "회원가입";
+        b2.className = "btn btn-sm btn-outline"; b2.textContent = "회원가입";
         b2.onclick = () => showModal("modal-register");
         bar.appendChild(b2);
       }
     }
 
-    /* ── 글 목록 ── */
-    function renderPostList() {
+    window.doLogin = async () => {
+      try {
+        await signInWithEmailAndPassword(auth,
+          document.getElementById("login-email").value.trim(),
+          document.getElementById("login-pw").value);
+        hideModal("modal-login");
+      } catch(e) { alert("로그인 실패: " + e.message); }
+    };
+
+    window.doRegister = async () => {
+      try {
+        await createUserWithEmailAndPassword(auth,
+          document.getElementById("reg-email").value.trim(),
+          document.getElementById("reg-pw").value);
+        hideModal("modal-register");
+        alert("가입 완료!");
+      } catch(e) { alert("회원가입 실패: " + e.message); }
+    };
+
+    /* ── 글 목록 ─────────────────────────── */
+    async function renderPostList() {
       currentView = "list";
       const main = document.getElementById("main-content");
-      main.innerHTML = "<p class='loading-msg'>불러오는 중...</p>";
+      main.innerHTML = "<p class='loading'>불러오는 중...</p>";
       const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
       onSnapshot(q, snap => {
         main.innerHTML = "";
+
         const header = document.createElement("div");
         header.className = "list-header";
         header.innerHTML = "<h2>공지사항</h2>";
         const newBtn = document.createElement("button");
-        newBtn.className = "btn-board";
-        newBtn.textContent = "✏️ 새 글 작성";
+        newBtn.className = "btn"; newBtn.textContent = "✏️ 새 글 작성";
         newBtn.onclick = () => showWriteForm();
         header.appendChild(newBtn);
         main.appendChild(header);
+
         if (snap.empty) {
           const emp = document.createElement("div");
           emp.className = "empty-state";
           emp.innerHTML = "<p>등록된 공지가 없습니다.</p>";
           const firstBtn = document.createElement("button");
-          firstBtn.className = "btn-board";
-          firstBtn.textContent = "첫 글 작성하기";
+          firstBtn.className = "btn"; firstBtn.textContent = "첫 글 작성하기";
           firstBtn.onclick = () => showWriteForm();
           emp.appendChild(firstBtn);
           main.appendChild(emp);
           return;
         }
+
         const table = document.createElement("table");
         table.className = "post-table";
-        table.innerHTML = "<thead><tr>" +
+        table.innerHTML =
+          "<thead><tr>" +
           "<th class='tc' style='width:50px'>번호</th>" +
           "<th>제목</th>" +
           "<th class='tc' style='width:120px'>작성자</th>" +
@@ -303,13 +139,16 @@
           "</tr></thead>";
         const tbody = document.createElement("tbody");
         snap.docs.forEach((d, i) => {
-          const dt = d.data();
+          const dt   = d.data();
           const date = dt.createdAt ? dt.createdAt.toDate().toLocaleDateString("ko-KR") : "-";
-          const tr = document.createElement("tr");
+          const tr   = document.createElement("tr");
           tr.className = "post-row";
-          tr.innerHTML = "<td class='tc'>" + (snap.size - i) + "</td>" +
-            "<td class='post-title-cell'>" + (dt.isPinned ? "📌 " : "") + esc(dt.title) +
-            (dt.commentCount > 0 ? "<span class='comment-count'>[" + dt.commentCount + "]</span>" : "") + "</td>" +
+          tr.innerHTML =
+            "<td class='tc'>" + (snap.size - i) + "</td>" +
+            "<td class='post-title-cell'>" +
+              (dt.isPinned ? "📌 " : "") + esc(dt.title) +
+              (dt.commentCount > 0 ? "<span class='comment-count'>[" + dt.commentCount + "]</span>" : "") +
+            "</td>" +
             "<td class='tc'>" + esc(dt.authorName || "익명") + "</td>" +
             "<td class='tc'>" + date + "</td>";
           tr.onclick = () => viewDetail(d.id);
@@ -320,40 +159,44 @@
       });
     }
 
-    /* ── 글 작성/수정 폼 ── */
+    /* ── 글 작성/수정 폼 ─────────────────── */
     function showWriteForm(editData) {
       currentView = "write";
-      const main = document.getElementById("main-content");
+      const main   = document.getElementById("main-content");
       const isEdit = !!editData;
       const defName = currentUser ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
+
       main.innerHTML = "";
       const card = document.createElement("div");
       card.className = "form-card";
-      card.innerHTML = "<h2>" + (isEdit ? "✏️ 글 수정" : "✏️ 새 글 작성") + "</h2>" +
+      card.innerHTML =
+        "<h2>" + (isEdit ? "✏️ 글 수정" : "✏️ 새 글 작성") + "</h2>" +
         "<div class='form-group'><label>작성자 이름</label>" +
-        "<input id='w-name' type='text' class='board-input' placeholder='익명'></div>" +
+          "<input id='w-name' type='text' class='input' placeholder='익명'></div>" +
         "<div class='form-group'><label>비밀번호 <small>(비로그인 시 수정/삭제에 사용)</small></label>" +
-        "<input id='w-pass' type='password' class='board-input' placeholder='비밀번호 입력'" + (isEdit ? " disabled" : "") + "></div>" +
+          "<input id='w-pass' type='password' class='input' placeholder='비밀번호 입력'" + (isEdit ? " disabled" : "") + "></div>" +
         "<div class='form-group'><label>제목 *</label>" +
-        "<input id='w-title' type='text' class='board-input' placeholder='제목을 입력하세요'></div>" +
+          "<input id='w-title' type='text' class='input' placeholder='제목을 입력하세요'></div>" +
         "<div class='form-group'><label>내용 *</label>" +
-        "<textarea id='w-body' class='board-textarea' rows='10' placeholder='내용을 입력하세요...'></textarea></div>" +
-        "<div class='form-actions-board'>" +
-        "<button class='btn-board' id='btn-submit'>" + (isEdit ? "수정 완료" : "등록하기") + "</button>" +
-        "<button class='btn-board btn-outline-board' id='btn-cancel'>취소</button></div>";
+          "<textarea id='w-body' class='textarea' rows='10' placeholder='내용을 입력하세요...'></textarea></div>" +
+        "<div class='form-actions'>" +
+          "<button class='btn' id='btn-submit'>" + (isEdit ? "수정 완료" : "등록하기") + "</button>" +
+          "<button class='btn btn-outline' id='btn-cancel'>취소</button></div>";
       main.appendChild(card);
-      document.getElementById("w-name").value = isEdit ? (editData.authorName || "") : defName;
-      document.getElementById("w-title").value = isEdit ? editData.title : "";
-      if (isEdit) document.getElementById("w-body").value = editData.body || "";
+
+      document.getElementById("w-name").value  = esc(isEdit ? editData.authorName || "" : defName);
+      document.getElementById("w-title").value = esc(isEdit ? editData.title : "");
+      if (isEdit) document.getElementById("w-body").value = isEdit ? editData.body : "";
+
       document.getElementById("btn-submit").onclick = isEdit ? () => submitEdit(editData.id) : submitPost;
       document.getElementById("btn-cancel").onclick = isEdit ? () => viewDetail(editData.id) : goList;
     }
 
     async function submitPost() {
       const title = document.getElementById("w-title").value.trim();
-      const body = document.getElementById("w-body").value.trim();
-      const name = document.getElementById("w-name").value.trim() || "익명";
-      const pass = document.getElementById("w-pass").value;
+      const body  = document.getElementById("w-body").value.trim();
+      const name  = document.getElementById("w-name").value.trim() || "익명";
+      const pass  = document.getElementById("w-pass").value;
       if (!title || !body) { alert("제목과 내용을 입력해주세요."); return; }
       try {
         await addDoc(collection(db, "posts"), {
@@ -369,7 +212,7 @@
 
     async function submitEdit(pid) {
       const title = document.getElementById("w-title").value.trim();
-      const body = document.getElementById("w-body").value.trim();
+      const body  = document.getElementById("w-body").value.trim();
       if (!title || !body) { alert("제목과 내용을 입력해주세요."); return; }
       try {
         await updateDoc(doc(db, "posts", pid), { title, body, updatedAt: serverTimestamp() });
@@ -377,55 +220,60 @@
       } catch(e) { alert("수정 실패: " + e.message); }
     }
 
-    /* ── 글 상세 ── */
+    /* ── 글 상세 ─────────────────────────── */
     async function viewDetail(pid) {
       currentView = "detail"; currentPostId = pid;
       const main = document.getElementById("main-content");
-      main.innerHTML = "<p class='loading-msg'>불러오는 중...</p>";
+      main.innerHTML = "<p class='loading'>불러오는 중...</p>";
       const ps = await getDoc(doc(db, "posts", pid));
       if (!ps.exists()) { alert("삭제된 글입니다."); goList(); return; }
-      const d = ps.data();
+      const d    = ps.data();
       const date = d.createdAt ? d.createdAt.toDate().toLocaleString("ko-KR") : "-";
-      const upd = d.updatedAt && d.updatedAt.seconds !== d.createdAt.seconds
+      const upd  = d.updatedAt && d.updatedAt.seconds !== d.createdAt.seconds
         ? " (수정됨: " + d.updatedAt.toDate().toLocaleString("ko-KR") + ")" : "";
-      const dcn = currentUser ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
+      const dcn  = currentUser ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
+
       main.innerHTML = "";
+
       const backBtn = document.createElement("button");
-      backBtn.className = "btn-board btn-outline-board btn-back-board";
-      backBtn.textContent = "← 목록으로";
-      backBtn.onclick = goList;
-      main.appendChild(backBtn);
+      backBtn.className = "btn btn-outline btn-back"; backBtn.textContent = "← 목록으로";
+      backBtn.onclick = goList; main.appendChild(backBtn);
+
       const card = document.createElement("div");
       card.className = "detail-card";
-      card.innerHTML = "<div class='detail-header'>" +
-        "<h2>" + (d.isPinned ? "📌 " : "") + esc(d.title) + "</h2>" +
-        "<div class='detail-meta'>" +
-        "<span>작성자: <strong>" + esc(d.authorName || "익명") + "</strong></span>" +
-        "<span>" + date + upd + "</span>" +
-        "</div></div>" +
+      card.innerHTML =
+        "<div class='detail-header'>" +
+          "<h2>" + (d.isPinned ? "📌 " : "") + esc(d.title) + "</h2>" +
+          "<div class='detail-meta'>" +
+            "<span>작성자: <strong>" + esc(d.authorName || "익명") + "</strong></span>" +
+            "<span>" + date + upd + "</span>" +
+          "</div></div>" +
         "<div class='detail-body'>" + esc(d.body).replace(/\n/g, "<br>") + "</div>";
       if (canEdit(d.authorUid)) {
         const actions = document.createElement("div");
         actions.className = "detail-actions";
         const editBtn = document.createElement("button");
-        editBtn.className = "btn-board btn-sm-board"; editBtn.textContent = "수정";
+        editBtn.className = "btn btn-sm"; editBtn.textContent = "수정";
         editBtn.onclick = () => startEdit(pid);
         const delBtn = document.createElement("button");
-        delBtn.className = "btn-board btn-sm-board btn-danger-board"; delBtn.textContent = "삭제";
+        delBtn.className = "btn btn-sm btn-danger"; delBtn.textContent = "삭제";
         delBtn.onclick = () => deletePost(pid, d.authorUid, d.password);
         actions.appendChild(editBtn); actions.appendChild(delBtn);
         card.appendChild(actions);
       }
       main.appendChild(card);
+
       const cmtSection = document.createElement("div");
       cmtSection.className = "comment-section";
-      cmtSection.innerHTML = "<h3>💬 댓글 <span id='cmt-count'></span></h3>" +
+      cmtSection.innerHTML =
+        "<h3>💬 댓글 <span id='cmt-count'></span></h3>" +
         "<div id='comment-list'></div>" +
         "<div class='comment-form'>" +
-        "<input id='c-name' type='text' class='board-input' placeholder='이름 (익명)'>" +
-        "<input id='c-pass' type='password' class='board-input' placeholder='비밀번호 (선택)'>" +
-        "<textarea id='c-body' class='board-textarea' rows='3' placeholder='댓글을 입력하세요...'></textarea>" +
-        "<button class='btn-board' id='btn-submit-cmt'>댓글 등록</button></div>";
+          "<input id='c-name' type='text' class='input' placeholder='이름 (익명)'>" +
+          "<input id='c-pass' type='password' class='input' placeholder='비밀번호 (선택)'>" +
+          "<textarea id='c-body' class='textarea' rows='3' placeholder='댓글을 입력하세요...'></textarea>" +
+          "<button class='btn' id='btn-submit-cmt'>댓글 등록</button>" +
+        "</div>";
       main.appendChild(cmtSection);
       document.getElementById("c-name").value = dcn;
       document.getElementById("btn-submit-cmt").onclick = () => submitComment(pid);
@@ -457,7 +305,7 @@
       } catch(e) { alert("삭제 실패: " + e.message); }
     }
 
-    /* ── 댓글 ── */
+    /* ── 댓글 ────────────────────────────── */
     function loadComments(pid) {
       const q = query(collection(db, "posts", pid, "comments"), orderBy("createdAt", "asc"));
       onSnapshot(q, snap => {
@@ -466,20 +314,27 @@
         const list = document.getElementById("comment-list");
         if (!list) return;
         list.innerHTML = "";
-        if (snap.empty) { list.innerHTML = "<p class='no-comment'>아직 댓글이 없습니다.</p>"; return; }
+        if (snap.empty) {
+          list.innerHTML = "<p class='no-comment'>아직 댓글이 없습니다.</p>";
+          return;
+        }
         snap.docs.forEach(cd => {
-          const c = cd.data();
+          const c     = cd.data();
           const cdate = c.createdAt ? c.createdAt.toDate().toLocaleString("ko-KR") : "";
-          const item = document.createElement("div");
+          const item  = document.createElement("div");
           item.className = "comment-item";
-          const meta = document.createElement("div"); meta.className = "cmt-meta";
-          const strong = document.createElement("strong"); strong.textContent = c.authorName || "익명";
-          const dateSpan = document.createElement("span"); dateSpan.textContent = cdate;
+          const meta = document.createElement("div");
+          meta.className = "cmt-meta";
+          const strong = document.createElement("strong");
+          strong.textContent = c.authorName || "익명";
+          const dateSpan = document.createElement("span");
+          dateSpan.textContent = cdate;
           const delBtn = document.createElement("button");
-          delBtn.className = "btn-board btn-xs-board btn-danger-board"; delBtn.textContent = "삭제";
+          delBtn.className = "btn btn-xs btn-danger"; delBtn.textContent = "삭제";
           delBtn.onclick = () => deleteComment(pid, cd.id, c.authorUid || "", c.password || "");
           meta.appendChild(strong); meta.appendChild(dateSpan); meta.appendChild(delBtn);
-          const body = document.createElement("div"); body.className = "cmt-body";
+          const body = document.createElement("div");
+          body.className = "cmt-body";
           body.innerHTML = esc(c.body).replace(/\n/g, "<br>");
           item.appendChild(meta); item.appendChild(body);
           list.appendChild(item);
@@ -513,41 +368,115 @@
       if (!confirm("댓글을 삭제하시겠습니까?")) return;
       try {
         await deleteDoc(doc(db, "posts", pid, "comments", cid));
-        const pr = doc(db, "posts", pid);
-        const ps = await getDoc(pr);
+        const pr  = doc(db, "posts", pid);
+        const ps  = await getDoc(pr);
         const cnt = (ps.data().commentCount || 1) - 1;
         await updateDoc(pr, { commentCount: cnt < 0 ? 0 : cnt });
       } catch(e) { alert("댓글 삭제 실패: " + e.message); }
     }
 
     const goList = () => { currentPostId = null; renderPostList(); };
+
     renderAuthBar();
     renderPostList();
   </script>
-
-  <script>
-    // 모바일 햄버거 메뉴
-    (function(){
-      const btn = document.getElementById("hamburgerBtn");
-      const overlay = document.getElementById("drawerOverlay");
-      const drawer = document.getElementById("drawer");
-      const closeBtn = document.getElementById("drawerClose");
-      if (!btn) return;
-      function open(){ drawer.classList.add("open"); overlay.classList.add("open"); document.body.style.overflow = "hidden"; }
-      function close(){ drawer.classList.remove("open"); overlay.classList.remove("open"); document.body.style.overflow = ""; }
-      btn.addEventListener("click", open);
-      closeBtn.addEventListener("click", close);
-      overlay.addEventListener("click", close);
-    })();
-
-    // active 상태
-    (function(){
-      const path = location.pathname;
-      const isNotice = path.includes("/notice/");
-      document.querySelectorAll(".bottom-nav-item[data-nav], .drawer a[data-nav], #menu a[data-nav]").forEach(el => {
-        if (el.dataset.nav === "notice" && isNotice) el.classList.add("is-active");
-      });
-    })();
-  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Noto Sans KR", sans-serif; background: #f5f6fa; color: #222; }
+    .site-header { background: #2d6a4f; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .site-header h1 { font-size: 1.2rem; font-weight: 700; }
+    #auth-bar { display: flex; align-items: center; gap: 10px; }
+    .auth-user { font-size: .9rem; opacity: .85; }
+    .badge-admin { background: #f4a261; color: #fff; font-size: .72rem; padding: 2px 7px; border-radius: 10px; margin-right: 4px; }
+    .container { max-width: 900px; margin: 30px auto; padding: 0 16px; }
+    .btn { padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer; font-size: .92rem; background: #2d6a4f; color: #fff; transition: background .2s; }
+    .btn:hover { background: #1b4332; }
+    .btn-outline { background: #fff; color: #2d6a4f; border: 1.5px solid #2d6a4f; }
+    .btn-outline:hover { background: #e9f5ee; }
+    .btn-sm { padding: 5px 13px; font-size: .85rem; }
+    .btn-xs { padding: 2px 8px; font-size: .78rem; }
+    .btn-danger { background: #e63946; }
+    .btn-danger:hover { background: #c1121f; }
+    .btn-back { margin-bottom: 14px; }
+    .loading { text-align: center; padding: 40px; color: #888; }
+    .empty-state { text-align: center; padding: 40px 20px; color: #888; }
+    .empty-state p { margin-bottom: 16px; }
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .list-header h2 { font-size: 1.3rem; }
+    .post-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .post-table thead tr { background: #2d6a4f; color: #fff; }
+    .post-table th, .post-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #eee; }
+    .post-table th { font-weight: 600; font-size: .9rem; }
+    .post-row { cursor: pointer; transition: background .15s; }
+    .post-row:hover { background: #f0faf4; }
+    .post-title-cell { font-weight: 500; }
+    .comment-count { color: #2d6a4f; font-size: .85rem; margin-left: 6px; }
+    .tc { text-align: center !important; white-space: nowrap; }
+    .form-card, .detail-card { background: #fff; border-radius: 10px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 24px; }
+    .form-card h2, .detail-card h2 { margin-bottom: 20px; font-size: 1.2rem; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: .88rem; color: #555; margin-bottom: 5px; }
+    .input { width: 100%; padding: 9px 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: .95rem; }
+    .input:focus { outline: none; border-color: #2d6a4f; }
+    .textarea { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: .95rem; resize: vertical; }
+    .textarea:focus { outline: none; border-color: #2d6a4f; }
+    .form-actions { display: flex; gap: 10px; margin-top: 8px; }
+    .detail-header { border-bottom: 1px solid #eee; margin-bottom: 18px; padding-bottom: 14px; }
+    .detail-header h2 { font-size: 1.3rem; margin-bottom: 8px; }
+    .detail-meta { display: flex; gap: 18px; color: #888; font-size: .88rem; flex-wrap: wrap; }
+    .detail-body { line-height: 1.8; font-size: .97rem; white-space: pre-wrap; }
+    .detail-actions { margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; }
+    .comment-section { background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .comment-section h3 { margin-bottom: 16px; font-size: 1.05rem; }
+    .comment-item { border-bottom: 1px solid #f0f0f0; padding: 14px 0; }
+    .comment-item:last-child { border-bottom: none; }
+    .cmt-meta { display: flex; align-items: center; gap: 12px; font-size: .85rem; color: #888; margin-bottom: 6px; flex-wrap: wrap; }
+    .cmt-meta strong { color: #333; }
+    .cmt-body { font-size: .95rem; line-height: 1.7; }
+    .no-comment { text-align: center; color: #aaa; padding: 20px 0; font-size: .9rem; }
+    .comment-form { margin-top: 20px; padding-top: 18px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 8px; }
+    .comment-form .btn { align-self: flex-start; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
+    .modal { background: #fff; border-radius: 12px; padding: 32px 28px; width: 360px; max-width: 95vw; position: relative; }
+    .modal h3 { margin-bottom: 20px; font-size: 1.1rem; }
+    .modal .form-group { margin-bottom: 14px; }
+    .modal .form-actions { margin-top: 4px; }
+    .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #888; }
+    small { color: #aaa; font-size: .78rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1>📋 공지게시판</h1>
+    <div id="auth-bar"></div>
+  </header>
+  <div class="container">
+    <div id="main-content"></div>
+  </div>
+  <div id="modal-login" class="modal-overlay">
+    <div class="modal">
+      <button class="modal-close" onclick="closeLoginModal()">✕</button>
+      <h3>로그인</h3>
+      <div class="form-group"><label>이메일</label><input id="login-email" type="email" class="input" placeholder="이메일 입력"></div>
+      <div class="form-group"><label>비밀번호</label><input id="login-pw" type="password" class="input" placeholder="비밀번호 입력"></div>
+      <div class="form-actions">
+        <button onclick="doLogin()" class="btn">로그인</button>
+        <button onclick="closeLoginModal()" class="btn btn-outline">취소</button>
+      </div>
+    </div>
+  </div>
+  <div id="modal-register" class="modal-overlay">
+    <div class="modal">
+      <button class="modal-close" onclick="closeRegisterModal()">✕</button>
+      <h3>회원가입</h3>
+      <div class="form-group"><label>닉네임 <small>(선택)</small></label><input id="reg-name" type="text" class="input" placeholder="표시될 이름"></div>
+      <div class="form-group"><label>이메일</label><input id="reg-email" type="email" class="input" placeholder="이메일 입력"></div>
+      <div class="form-group"><label>비밀번호</label><input id="reg-pw" type="password" class="input" placeholder="6자 이상"></div>
+      <div class="form-actions">
+        <button onclick="doRegister()" class="btn">가입하기</button>
+        <button onclick="closeRegisterModal()" class="btn btn-outline">취소</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
