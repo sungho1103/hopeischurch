@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>공지게시판</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, getDoc, doc,
+      updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+      signOut, createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const ADMIN_UIDS = ["ADMIN_UID_HERE"];
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+    let currentView = 'list';
+    let currentPostId = null;
+
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      renderAuthBar();
+      if (currentView === 'list') renderPostList();
+      if (currentView === 'detail' && currentPostId) renderDetail(currentPostId);
+    });
+
+    function isAdmin() { return currentUser && ADMIN_UIDS.includes(currentUser.uid); }
+    function canEdit(authorUid) { return currentUser && (currentUser.uid === authorUid || isAdmin()); }
+
+    function renderAuthBar() {
+      const bar = document.getElementById('auth-bar');
+      if (currentUser) {
+        bar.innerHTML = '<span class="auth-user">' + (isAdmin() ? '<span class="badge-admin">관리자</span>' : '') + currentUser.email + '</span><button onclick="doSignOut()" class="btn btn-sm btn-outline">로그아웃</button>';
+      } else {
+        bar.innerHTML = '<button onclick="showLoginModal()" class="btn btn-sm">로그인</button><button onclick="showRegisterModal()" class="btn btn-sm btn-outline">회원가입</button>';
+      }
+    }
+
+    window.doSignOut = async () => { await signOut(auth); };
+    window.showLoginModal = () => { document.getElementById('modal-login').style.display = 'flex'; };
+    window.closeLoginModal = () => { document.getElementById('modal-login').style.display = 'none'; };
+    window.showRegisterModal = () => { document.getElementById('modal-register').style.display = 'flex'; };
+    window.closeRegisterModal = () => { document.getElementById('modal-register').style.display = 'none'; };
+
+    window.doLogin = async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const pw = document.getElementById('login-pw').value;
+      try { await signInWithEmailAndPassword(auth, email, pw); closeLoginModal(); }
+      catch (e) { alert('로그인 실패: ' + e.message); }
+    };
+
+    window.doRegister = async () => {
+      const email = document.getElementById('reg-email').value.trim();
+      const pw = document.getElementById('reg-pw').value;
+      const name = document.getElementById('reg-name').value.trim() || email.split('@')[0];
+      try {
+        await createUserWithEmailAndPassword(auth, email, pw);
+        closeRegisterModal();
+        alert('가입 완료!');
+      } catch (e) { alert('회원가입 실패: ' + e.message); }
+    };
+
+    async function renderPostList() {
+      currentView = 'list';
+      const main = document.getElementById('main-content');
+      main.innerHTML = '<p class="loading">불러오는 중...</p>';
+      const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+      onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+          main.innerHTML = '<div class="empty-state"><p>등록된 공지가 없습니다.</p><button onclick="showWriteForm()" class="btn">첫 글 작성하기</button></div>';
+          return;
+        }
+        let html = '<div class="list-header"><h2>공지사항</h2><button onclick="showWriteForm()" class="btn">✏️ 새 글 작성</button></div><table class="post-table"><thead><tr><th style="width:50px">번호</th><th>제목</th><th style="width:120px">작성자</th><th style="width:120px">날짜</th></tr></thead><tbody>';
+        snapshot.docs.forEach((docSnap, idx) => {
+          const d = docSnap.data();
+          const date = d.createdAt ? d.createdAt.toDate().toLocaleDateString('ko-KR') : '-';
+          html += '<tr class="post-row" onclick="viewDetail('' + docSnap.id + '')"><td class="tc">' + (snapshot.size - idx) + '</td><td class="post-title-cell">' + (d.isPinned ? '<span>📌</span>' : '') + escHtml(d.title) + (d.commentCount > 0 ? '<span class="comment-count">[' + d.commentCount + ']</span>' : '') + '</td><td class="tc">' + escHtml(d.authorName || '익명') + '</td><td class="tc">' + date + '</td></tr>';
+        });
+        html += '</tbody></table>';
+        main.innerHTML = html;
+      });
+    }
+
+    window.showWriteForm = (editData) => {
+      currentView = 'write';
+      const main = document.getElementById('main-content');
+      const isEdit = !!editData;
+      const defName = currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : '';
+      main.innerHTML = '<div class="form-card"><h2>' + (isEdit ? '✏️ 글 수정' : '✏️ 새 글 작성') + '</h2><div class="form-group"><label>작성자 이름 (선택)</label><input id="w-name" type="text" class="input" placeholder="익명" value="' + (isEdit ? escHtml(editData.authorName || '') : defName) + '" /></div><div class="form-group"><label>비밀번호 <small>(비로그인 시 수정/삭제에 사용)</small></label><input id="w-pass" type="password" class="input" placeholder="비밀번호 입력" ' + (isEdit ? 'disabled' : '') + ' /></div><div class="form-group"><label>제목 *</label><input id="w-title" type="text" class="input" placeholder="제목을 입력하세요" value="' + (isEdit ? escHtml(editData.title) : '') + '" /></div><div class="form-group"><label>내용 *</label><textarea id="w-body" class="textarea" rows="10" placeholder="내용을 입력하세요...">' + (isEdit ? escHtml(editData.body) : '') + '</textarea></div><div class="form-actions"><button onclick="' + (isEdit ? 'submitEdit('' + editData.id + '')' : 'submitPost()') + '" class="btn">' + (isEdit ? '수정 완료' : '등록하기') + '</button><button onclick="' + (isEdit ? 'viewDetail('' + editData.id + '')' : 'goList()') + '" class="btn btn-outline">취소</button></div></div>';
+    };
+
+    window.submitPost = async () => {
+      const title = document.getElementById('w-title').value.trim();
+      const body = document.getElementById('w-body').value.trim();
+      const name = document.getElementById('w-name').value.trim() || '익명';
+      const pass = document.getElementById('w-pass').value;
+      if (!title || !body) { alert('제목과 내용을 입력해주세요.'); return; }
+      try {
+        await addDoc(collection(db, 'posts'), {
+          title, body, authorName: name,
+          authorUid: currentUser ? currentUser.uid : null,
+          authorEmail: currentUser ? currentUser.email : null,
+          password: pass || null, commentCount: 0, isPinned: false,
+          createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        });
+        alert('글이 등록되었습니다.'); goList();
+      } catch (e) { alert('등록 실패: ' + e.message); }
+    };
+
+    window.submitEdit = async (postId) => {
+      const title = document.getElementById('w-title').value.trim();
+      const body = document.getElementById('w-body').value.trim();
+      if (!title || !body) { alert('제목과 내용을 입력해주세요.'); return; }
+      try {
+        await updateDoc(doc(db, 'posts', postId), { title, body, updatedAt: serverTimestamp() });
+        alert('수정되었습니다.'); viewDetail(postId);
+      } catch (e) { alert('수정 실패: ' + e.message); }
+    };
+
+    window.viewDetail = async (postId) => {
+      currentView = 'detail'; currentPostId = postId;
+      const main = document.getElementById('main-content');
+      main.innerHTML = '<p class="loading">불러오는 중...</p>';
+      const postSnap = await getDoc(doc(db, 'posts', postId));
+      if (!postSnap.exists()) { alert('삭제된 글입니다.'); goList(); return; }
+      const d = postSnap.data();
+      const date = d.createdAt ? d.createdAt.toDate().toLocaleString('ko-KR') : '-';
+      const updDate = d.updatedAt && d.updatedAt.seconds !== (d.createdAt && d.createdAt.seconds) ? ' (수정됨: ' + d.updatedAt.toDate().toLocaleString('ko-KR') + ')' : '';
+      const canEditPost = canEdit(d.authorUid);
+      const defCName = currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : '';
+      main.innerHTML = '<button onclick="goList()" class="btn btn-outline btn-back">← 목록으로</button><div class="detail-card"><div class="detail-header"><h2>' + (d.isPinned ? '📌 ' : '') + escHtml(d.title) + '</h2><div class="detail-meta"><span>작성자: <strong>' + escHtml(d.authorName || '익명') + '</strong></span><span>' + date + updDate + '</span></div></div><div class="detail-body">' + escHtml(d.body).replace(/
+/g, '<br/>') + '</div>' + (canEditPost ? '<div class="detail-actions"><button onclick='startEdit("' + postId + '")' class="btn btn-sm">수정</button><button onclick='deletePost("' + postId + '","' + (d.authorUid || '') + '")' class="btn btn-sm btn-danger">삭제</button></div>' : '') + '</div><div class="comment-section"><h3>💬 댓글 <span id="cmt-count"></span></h3><div id="comment-list"></div><div class="comment-form"><input id="c-name" type="text" class="input" placeholder="이름 (익명)" value="' + defCName + '" /><input id="c-pass" type="password" class="input" placeholder="비밀번호 (선택)" /><textarea id="c-body" class="textarea" rows="3" placeholder="댓글을 입력하세요..."></textarea><button onclick="submitComment('' + postId + '')" class="btn">댓글 등록</button></div></div>';
+      loadComments(postId);
+    };
+
+    window.startEdit = async (postId) => {
+      const postSnap = await getDoc(doc(db, 'posts', postId));
+      if (!postSnap.exists()) return;
+      const d = postSnap.data();
+      if (!canEdit(d.authorUid)) {
+        const pw = prompt('비밀번호를 입력하세요');
+        if (pw !== d.password) { alert('비밀번호가 틀립니다.'); return; }
+      }
+      showWriteForm({ id: postId, ...d });
+    };
+
+    window.deletePost = async (postId, authorUid) => {
+      let okToProceed = canEdit(authorUid || null);
+      if (!okToProceed) {
+        const postSnap = await getDoc(doc(db, 'posts', postId));
+        const pw = prompt('비밀번호를 입력하세요');
+        if (pw !== postSnap.data().password) { alert('비밀번호가 틀립니다.'); return; }
+      }
+      if (!confirm('정말 삭제하시겠습니까?')) return;
+      try {
+        const cmtSnap = await getDocs(collection(db, 'posts', postId, 'comments'));
+        for (const c of cmtSnap.docs) await deleteDoc(c.ref);
+        await deleteDoc(doc(db, 'posts', postId));
+        alert('삭제되었습니다.'); goList();
+      } catch (e) { alert('삭제 실패: ' + e.message); }
+    };
+
+    function loadComments(postId) {
+      const q = query(collection(db, 'posts', postId, 'comments'), orderBy('createdAt', 'asc'));
+      onSnapshot(q, (snap) => {
+        const cntEl = document.getElementById('cmt-count');
+        if (cntEl) cntEl.textContent = '(' + snap.size + ')';
+        const list = document.getElementById('comment-list');
+        if (!list) return;
+        if (snap.empty) { list.innerHTML = '<p class="no-comment">아직 댓글이 없습니다.</p>'; return; }
+        let html = '';
+        snap.docs.forEach((cdoc) => {
+          const c = cdoc.data();
+          const cdate = c.createdAt ? c.createdAt.toDate().toLocaleString('ko-KR') : '';
+          html += '<div class="comment-item"><div class="cmt-meta"><strong>' + escHtml(c.authorName || '익명') + '</strong><span>' + cdate + '</span><button onclick='deleteComment("' + postId + '","' + cdoc.id + '","' + (c.authorUid || '') + '","' + (c.password || '') + '")' class="btn btn-xs btn-danger">삭제</button></div><div class="cmt-body">' + escHtml(c.body).replace(/
+/g, '<br/>') + '</div></div>';
+        });
+        list.innerHTML = html;
+      });
+    }
+
+    window.submitComment = async (postId) => {
+      const name = document.getElementById('c-name').value.trim() || '익명';
+      const pass = document.getElementById('c-pass').value;
+      const body = document.getElementById('c-body').value.trim();
+      if (!body) { alert('댓글 내용을 입력해주세요.'); return; }
+      try {
+        await addDoc(collection(db, 'posts', postId, 'comments'), {
+          authorName: name, authorUid: currentUser ? currentUser.uid : null,
+          password: pass || null, body, createdAt: serverTimestamp()
+        });
+        const postRef = doc(db, 'posts', postId);
+        const postSnap = await getDoc(postRef);
+        await updateDoc(postRef, { commentCount: (postSnap.data().commentCount || 0) + 1 });
+        document.getElementById('c-body').value = '';
+      } catch (e) { alert('댓글 등록 실패: ' + e.message); }
+    };
+
+    window.deleteComment = async (postId, cmtId, authorUid, password) => {
+      const canDelCmt = currentUser && (currentUser.uid === authorUid || isAdmin());
+      if (!canDelCmt) {
+        const pw = prompt('비밀번호를 입력하세요');
+        if (pw !== password) { alert('비밀번호가 틀립니다.'); return; }
+      }
+      if (!confirm('댓글을 삭제하시겠습니까?')) return;
+      try {
+        await deleteDoc(doc(db, 'posts', postId, 'comments', cmtId));
+        const postRef = doc(db, 'posts', postId);
+        const postSnap = await getDoc(postRef);
+        const cnt = (postSnap.data().commentCount || 1) - 1;
+        await updateDoc(postRef, { commentCount: cnt < 0 ? 0 : cnt });
+      } catch (e) { alert('댓글 삭제 실패: ' + e.message); }
+    };
+
+    window.goList = () => { currentPostId = null; renderPostList(); };
+
+    function escHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    renderAuthBar();
+    renderPostList();
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans KR', sans-serif; background: #f5f6fa; color: #222; }
+    .site-header { background: #2d6a4f; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .site-header h1 { font-size: 1.2rem; font-weight: 700; }
+    #auth-bar { display: flex; align-items: center; gap: 10px; }
+    .auth-user { font-size: 0.9rem; opacity: .85; }
+    .badge-admin { background: #f4a261; color: #fff; font-size: .72rem; padding: 2px 7px; border-radius: 10px; margin-right: 4px; }
+    .container { max-width: 900px; margin: 30px auto; padding: 0 16px; }
+    .btn { padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer; font-size: .92rem; background: #2d6a4f; color: #fff; transition: background .2s; }
+    .btn:hover { background: #1b4332; }
+    .btn-outline { background: #fff; color: #2d6a4f; border: 1.5px solid #2d6a4f; }
+    .btn-outline:hover { background: #e9f5ee; }
+    .btn-sm { padding: 5px 13px; font-size: .85rem; }
+    .btn-xs { padding: 2px 8px; font-size: .78rem; }
+    .btn-danger { background: #e63946; }
+    .btn-danger:hover { background: #c1121f; }
+    .btn-back { margin-bottom: 14px; }
+    .loading { text-align: center; padding: 40px; color: #888; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #888; }
+    .empty-state p { margin-bottom: 16px; }
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .list-header h2 { font-size: 1.3rem; }
+    .post-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px #0001; }
+    .post-table thead tr { background: #2d6a4f; color: #fff; }
+    .post-table th, .post-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #eee; }
+    .post-table th { font-weight: 600; font-size: .9rem; }
+    .post-row { cursor: pointer; transition: background .15s; }
+    .post-row:hover { background: #f0faf4; }
+    .post-title-cell { font-weight: 500; }
+    .comment-count { color: #2d6a4f; font-size: .85rem; margin-left: 6px; }
+    .tc { text-align: center !important; }
+    .form-card, .detail-card { background: #fff; border-radius: 10px; padding: 28px; box-shadow: 0 2px 8px #0001; margin-bottom: 24px; }
+    .form-card h2, .detail-card h2 { margin-bottom: 20px; font-size: 1.2rem; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: .88rem; color: #555; margin-bottom: 5px; }
+    .input { width: 100%; padding: 9px 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: .95rem; }
+    .input:focus { outline: none; border-color: #2d6a4f; }
+    .textarea { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: .95rem; resize: vertical; }
+    .textarea:focus { outline: none; border-color: #2d6a4f; }
+    .form-actions { display: flex; gap: 10px; margin-top: 8px; }
+    .detail-header { border-bottom: 1px solid #eee; margin-bottom: 18px; padding-bottom: 14px; }
+    .detail-header h2 { font-size: 1.3rem; margin-bottom: 8px; }
+    .detail-meta { display: flex; gap: 18px; color: #888; font-size: .88rem; }
+    .detail-body { line-height: 1.8; font-size: .97rem; white-space: pre-wrap; }
+    .detail-actions { margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; }
+    .comment-section { background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px #0001; }
+    .comment-section h3 { margin-bottom: 16px; font-size: 1.05rem; }
+    .comment-item { border-bottom: 1px solid #f0f0f0; padding: 14px 0; }
+    .comment-item:last-child { border-bottom: none; }
+    .cmt-meta { display: flex; align-items: center; gap: 12px; font-size: .85rem; color: #888; margin-bottom: 6px; }
+    .cmt-meta strong { color: #333; }
+    .cmt-body { font-size: .95rem; line-height: 1.7; }
+    .no-comment { text-align: center; color: #aaa; padding: 20px 0; font-size: .9rem; }
+    .comment-form { margin-top: 20px; padding-top: 18px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 8px; }
+    .comment-form .btn { align-self: flex-start; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: #0007; z-index: 100; align-items: center; justify-content: center; }
+    .modal { background: #fff; border-radius: 12px; padding: 32px 28px; width: 360px; max-width: 95vw; position: relative; }
+    .modal h3 { margin-bottom: 20px; font-size: 1.1rem; }
+    .modal .form-group { margin-bottom: 14px; }
+    .modal .form-actions { margin-top: 4px; }
+    .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #888; }
+    small { color: #aaa; font-size: .78rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1>📋 공지게시판</h1>
+    <div id="auth-bar"></div>
+  </header>
+  <div class="container">
+    <div id="main-content"></div>
+  </div>
+  <div id="modal-login" class="modal-overlay">
+    <div class="modal">
+      <button class="modal-close" onclick="closeLoginModal()">✕</button>
+      <h3>로그인</h3>
+      <div class="form-group"><label>이메일</label><input id="login-email" type="email" class="input" placeholder="이메일 입력" /></div>
+      <div class="form-group"><label>비밀번호</label><input id="login-pw" type="password" class="input" placeholder="비밀번호 입력" /></div>
+      <div class="form-actions"><button onclick="doLogin()" class="btn">로그인</button><button onclick="closeLoginModal()" class="btn btn-outline">취소</button></div>
+    </div>
+  </div>
+  <div id="modal-register" class="modal-overlay">
+    <div class="modal">
+      <button class="modal-close" onclick="closeRegisterModal()">✕</button>
+      <h3>회원가입</h3>
+      <div class="form-group"><label>닉네임 <small>(선택)</small></label><input id="reg-name" type="text" class="input" placeholder="표시될 이름" /></div>
+      <div class="form-group"><label>이메일</label><input id="reg-email" type="email" class="input" placeholder="이메일 입력" /></div>
+      <div class="form-group"><label>비밀번호</label><input id="reg-pw" type="password" class="input" placeholder="6자 이상" /></div>
+      <div class="form-actions"><button onclick="doRegister()" class="btn">가입하기</button><button onclick="closeRegisterModal()" class="btn btn-outline">취소</button></div>
+    </div>
+  </div>
+</body>
+</html>
