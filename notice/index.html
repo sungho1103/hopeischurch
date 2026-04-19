@@ -3,17 +3,183 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>공지게시판</title>
+  <title>게시판 — 희망은교회</title>
+  <link rel="stylesheet" href="/assets/common.css?v=20260411-01">
+  <style>
+    .notice-wrap { max-width: 900px; margin: 0 auto; }
+
+    /* 버튼 */
+    .bb { display:inline-block; padding:7px 16px; border-radius:6px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; background:#111; color:#fff; transition:background .15s; }
+    .bb:hover { background:#333; }
+    .bb-outline { background:#fff; color:#111; border:1.5px solid #333; }
+    .bb-outline:hover { background:#f3f5f9; }
+    .bb-sm { padding:4px 10px; font-size:.78rem; }
+    .bb-xs { padding:2px 7px; font-size:.72rem; border-radius:4px; }
+    .bb-danger { background:#e63946; color:#fff; border:none; }
+    .bb-danger:hover { background:#c1121f; }
+
+    /* auth bar */
+    .board-auth-bar { display:flex; align-items:center; gap:8px; margin-left:auto; }
+    .board-auth-bar .auth-email { font-size:.82rem; color:#666; }
+    .badge-admin { background:#e63946; color:#fff; font-size:.7rem; padding:2px 7px; border-radius:10px; }
+
+    /* 목록 */
+    .list-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .list-header h2 { font-size:1.25rem; font-weight:700; }
+    .loading-msg { text-align:center; padding:40px; color:#888; }
+    .empty-state { text-align:center; padding:40px 20px; color:#888; }
+    .empty-state p { margin-bottom:14px; }
+    .post-table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    .post-table thead tr { background:#111; color:#fff; }
+    .post-table th, .post-table td { padding:10px 12px; text-align:left; border-bottom:1px solid #eee; white-space:nowrap; font-size:.9rem; }
+    .post-table th { font-weight:600; font-size:.85rem; }
+    .post-row:hover { background:#f5f6fa; cursor:pointer; }
+    .col-title { white-space:normal !important; }
+    .comment-count { color:#888; font-size:.8rem; margin-left:5px; }
+    .tc { text-align:center !important; }
+    .col-actions { white-space:nowrap; text-align:right !important; }
+    .col-actions .bb { margin-left:4px; }
+
+    /* 폼 */
+    .form-card, .detail-card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 2px 8px rgba(0,0,0,.06); margin-bottom:20px; }
+    .form-card h2, .detail-card h2 { margin-bottom:18px; font-size:1.1rem; }
+    .fg { margin-bottom:14px; }
+    .fg label { display:block; font-size:.83rem; color:#555; margin-bottom:4px; }
+    .bi { width:100%; padding:8px 11px; border:1.5px solid #ddd; border-radius:6px; font-size:.92rem; font-family:inherit; }
+    .bi:focus { outline:none; border-color:#111; }
+    .bta { width:100%; padding:9px 11px; border:1.5px solid #ddd; border-radius:6px; font-size:.92rem; resize:vertical; font-family:inherit; }
+    .bta:focus { outline:none; border-color:#111; }
+    .fa { display:flex; gap:8px; margin-top:8px; }
+    .btn-back { margin-bottom:12px; }
+
+    /* 상세 */
+    .detail-header { border-bottom:1px solid #eee; margin-bottom:16px; padding-bottom:12px; }
+    .detail-header h2 { font-size:1.2rem; margin-bottom:7px; }
+    .detail-meta { display:flex; gap:16px; color:#999; font-size:.83rem; flex-wrap:wrap; }
+    .detail-body { line-height:1.85; font-size:.95rem; white-space:pre-wrap; }
+    .detail-actions { margin-top:18px; display:flex; gap:7px; justify-content:flex-end; }
+
+    /* 댓글 */
+    .comment-section { background:#fff; border-radius:10px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    .comment-section h3 { margin-bottom:14px; font-size:1rem; }
+    .comment-item { border-bottom:1px solid #f0f0f0; padding:12px 0; }
+    .comment-item:last-child { border-bottom:none; }
+    .cmt-meta { display:flex; align-items:center; gap:10px; font-size:.8rem; color:#999; margin-bottom:5px; flex-wrap:wrap; }
+    .cmt-meta strong { color:#333; font-size:.85rem; }
+    .cmt-body { font-size:.92rem; line-height:1.7; }
+    .no-comment { text-align:center; color:#bbb; padding:16px 0; font-size:.88rem; }
+    .comment-form { margin-top:18px; padding-top:16px; border-top:1px solid #eee; display:flex; flex-direction:column; gap:7px; }
+
+    /* 모달 */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:center; justify-content:center; }
+    .modal-overlay.show { display:flex; }
+    .modal { background:#fff; border-radius:12px; padding:28px 24px; width:340px; max-width:94vw; position:relative; }
+    .modal h3 { margin-bottom:18px; font-size:1.05rem; }
+    .modal-close { position:absolute; top:12px; right:14px; background:none; border:none; font-size:1.3rem; cursor:pointer; color:#999; }
+    small { color:#bbb; font-size:.75rem; }
+
+    @media(max-width:768px){
+      .post-table th, .post-table td { padding:8px 8px; font-size:.82rem; }
+      .form-card, .detail-card, .comment-section { padding:16px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 모바일 Sticky Header -->
+  <header class="mobile-header">
+    <a href="/" class="mobile-brand">희망은교회</a>
+    <button class="hamburger" id="hamburgerBtn" aria-label="메뉴 열기">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <nav class="drawer" id="drawer">
+    <button class="drawer-close" id="drawerClose" aria-label="메뉴 닫기">×</button>
+    <a href="/" data-nav="home">홈</a>
+    <a href="/bulletin/" data-nav="bulletin">주보</a>
+    <a href="/sermon/" data-nav="sermon">주일설교</a>
+    <a href="/notice/" data-nav="notice">게시판</a>
+    <a href="/#map" data-nav="map">찾아오는 길</a>
+    <img src="/menu_m_slogan.jpg" alt="" style="margin-top:auto;padding-top:24px;width:100%;border-radius:8px;object-fit:contain;">
+  </nav>
+
+  <div class="wrap">
+    <aside>
+      <div class="brand"><a href="/" style="color:inherit;">희망은교회</a></div>
+      <nav id="menu">
+        <a href="/" data-nav="home">홈</a>
+        <a href="/bulletin/" data-nav="bulletin">주보</a>
+        <a href="/sermon/" data-nav="sermon">주일설교</a>
+        <a href="/notice/" data-nav="notice">게시판</a>
+        <a href="/#map" data-nav="map">찾아오는 길</a>
+      </nav>
+      <div class="board-auth-bar" id="auth-bar"></div>
+    </aside>
+
+    <main>
+      <div class="notice-wrap">
+        <div id="main-content"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 모바일 하단 탭바 -->
+  <nav class="bottom-nav">
+    <a href="/" class="bottom-nav-item" data-nav="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+      <span>홈</span>
+    </a>
+    <a href="/bulletin/" class="bottom-nav-item" data-nav="bulletin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
+      <span>주보</span>
+    </a>
+    <a href="/sermon/" class="bottom-nav-item" data-nav="sermon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      <span>설교</span>
+    </a>
+    <a href="/notice/" class="bottom-nav-item" data-nav="notice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>게시판</span>
+    </a>
+    <a href="/#map" class="bottom-nav-item" data-nav="map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <span>위치</span>
+    </a>
+  </nav>
+
+  <!-- 로그인 모달 -->
+  <div id="modal-login" class="modal-overlay">
+    <div class="modal">
+      <button class="modal-close" id="closeLogin">✕</button>
+      <h3>로그인</h3>
+      <div class="fg"><label>이메일</label><input id="login-email" type="email" class="bi" placeholder="이메일 입력"></div>
+      <div class="fg"><label>비밀번호</label><input id="login-pw" type="password" class="bi" placeholder="비밀번호 입력"></div>
+      <div class="fa">
+        <button id="btn-do-login" class="bb">로그인</button>
+        <button id="btn-cancel-login" class="bb bb-outline">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 회원가입 모달 -->
+  <div id="modal-register" class="modal-overlay">
+    <div class="modal">
+      <button class="modal-close" id="closeRegister">✕</button>
+      <h3>회원가입</h3>
+      <div class="fg"><label>이메일</label><input id="reg-email" type="email" class="bi" placeholder="이메일 입력"></div>
+      <div class="fg"><label>비밀번호</label><input id="reg-pw" type="password" class="bi" placeholder="6자 이상"></div>
+      <div class="fa">
+        <button id="btn-do-register" class="bb">가입하기</button>
+        <button id="btn-cancel-register" class="bb bb-outline">취소</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getFirestore, collection, addDoc, getDocs, getDoc, doc,
-      updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import {
-      getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-      signOut, createUserWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTS7eCGaNcuo9dKX-nYF-flNUlAC4dopM",
@@ -25,15 +191,36 @@
       appId: "1:423981952872:web:6c7a337334a42c4bde30dd",
       measurementId: "G-TP6F5RGF3L"
     };
-
     const ADMIN_UIDS = ["ADMIN_UID_HERE"];
-    const app  = initializeApp(firebaseConfig);
-    const db   = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
     const auth = getAuth(app);
-
-    let currentUser   = null;
-    let currentView   = "list";
+    let currentUser = null;
+    let currentView = "list";
     let currentPostId = null;
+
+    const isAdmin = () => currentUser && ADMIN_UIDS.includes(currentUser.uid);
+    const canEdit = uid => currentUser && (currentUser.uid === uid || isAdmin());
+    const esc = s => s ? s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") : "";
+
+    const showModal = id => document.getElementById(id).classList.add("show");
+    const hideModal = id => document.getElementById(id).classList.remove("show");
+    document.getElementById("closeLogin").onclick = () => hideModal("modal-login");
+    document.getElementById("btn-cancel-login").onclick = () => hideModal("modal-login");
+    document.getElementById("closeRegister").onclick = () => hideModal("modal-register");
+    document.getElementById("btn-cancel-register").onclick = () => hideModal("modal-register");
+    document.getElementById("btn-do-login").onclick = async () => {
+      try {
+        await signInWithEmailAndPassword(auth, document.getElementById("login-email").value.trim(), document.getElementById("login-pw").value);
+        hideModal("modal-login");
+      } catch(e) { alert("로그인 실패: " + e.message); }
+    };
+    document.getElementById("btn-do-register").onclick = async () => {
+      try {
+        await createUserWithEmailAndPassword(auth, document.getElementById("reg-email").value.trim(), document.getElementById("reg-pw").value);
+        hideModal("modal-register"); alert("가입 완료!");
+      } catch(e) { alert("회원가입 실패: " + e.message); }
+    };
 
     onAuthStateChanged(auth, user => {
       currentUser = user;
@@ -42,441 +229,231 @@
       if (currentView === "detail" && currentPostId) viewDetail(currentPostId);
     });
 
-    const isAdmin  = () => currentUser && ADMIN_UIDS.includes(currentUser.uid);
-    const canEdit  = uid => currentUser && (currentUser.uid === uid || isAdmin());
-    const esc      = s => s ? s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") : "";
-    const showModal = id => { document.getElementById(id).style.display = "flex"; };
-    const hideModal = id => { document.getElementById(id).style.display = "none"; };
-
-    window.closeLoginModal    = () => hideModal("modal-login");
-    window.closeRegisterModal = () => hideModal("modal-register");
-
     function renderAuthBar() {
       const bar = document.getElementById("auth-bar");
       bar.innerHTML = "";
       if (currentUser) {
-        if (isAdmin()) {
-          const badge = document.createElement("span");
-          badge.className = "badge-admin"; badge.textContent = "관리자";
-          bar.appendChild(badge);
-        }
-        const em = document.createElement("span");
-        em.className = "auth-user"; em.textContent = currentUser.email;
-        bar.appendChild(em);
-        const btn = document.createElement("button");
-        btn.className = "btn btn-sm btn-outline"; btn.textContent = "로그아웃";
-        btn.onclick = () => signOut(auth);
-        bar.appendChild(btn);
+        if (isAdmin()) { const b = document.createElement("span"); b.className="badge-admin"; b.textContent="관리자"; bar.appendChild(b); }
+        const em = document.createElement("span"); em.className="auth-email"; em.textContent=currentUser.email; bar.appendChild(em);
+        const btn = document.createElement("button"); btn.className="bb bb-sm bb-outline"; btn.textContent="로그아웃"; btn.onclick=()=>signOut(auth); bar.appendChild(btn);
       } else {
-        const b1 = document.createElement("button");
-        b1.className = "btn btn-sm"; b1.textContent = "로그인";
-        b1.onclick = () => showModal("modal-login");
-        bar.appendChild(b1);
-        const b2 = document.createElement("button");
-        b2.className = "btn btn-sm btn-outline"; b2.textContent = "회원가입";
-        b2.onclick = () => showModal("modal-register");
-        bar.appendChild(b2);
+        const b1 = document.createElement("button"); b1.className="bb bb-sm"; b1.textContent="로그인"; b1.onclick=()=>showModal("modal-login"); bar.appendChild(b1);
+        const b2 = document.createElement("button"); b2.className="bb bb-sm bb-outline"; b2.textContent="회원가입"; b2.onclick=()=>showModal("modal-register"); bar.appendChild(b2);
       }
     }
 
-    window.doLogin = async () => {
-      try {
-        await signInWithEmailAndPassword(auth,
-          document.getElementById("login-email").value.trim(),
-          document.getElementById("login-pw").value);
-        hideModal("modal-login");
-      } catch(e) { alert("로그인 실패: " + e.message); }
-    };
-
-    window.doRegister = async () => {
-      try {
-        await createUserWithEmailAndPassword(auth,
-          document.getElementById("reg-email").value.trim(),
-          document.getElementById("reg-pw").value);
-        hideModal("modal-register");
-        alert("가입 완료!");
-      } catch(e) { alert("회원가입 실패: " + e.message); }
-    };
-
-    /* ── 글 목록 ─────────────────────────── */
-    async function renderPostList() {
+    /* ── 글 목록 ── */
+    function renderPostList() {
       currentView = "list";
       const main = document.getElementById("main-content");
-      main.innerHTML = "<p class='loading'>불러오는 중...</p>";
+      main.innerHTML = "<p class='loading-msg'>불러오는 중...</p>";
       const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
       onSnapshot(q, snap => {
         main.innerHTML = "";
-
         const header = document.createElement("div");
         header.className = "list-header";
         header.innerHTML = "<h2>공지사항</h2>";
         const newBtn = document.createElement("button");
-        newBtn.className = "btn"; newBtn.textContent = "✏️ 새 글 작성";
+        newBtn.className = "bb"; newBtn.textContent = "✏️ 새 글 작성";
         newBtn.onclick = () => showWriteForm();
         header.appendChild(newBtn);
         main.appendChild(header);
-
         if (snap.empty) {
-          const emp = document.createElement("div");
-          emp.className = "empty-state";
+          const emp = document.createElement("div"); emp.className = "empty-state";
           emp.innerHTML = "<p>등록된 공지가 없습니다.</p>";
-          const firstBtn = document.createElement("button");
-          firstBtn.className = "btn"; firstBtn.textContent = "첫 글 작성하기";
-          firstBtn.onclick = () => showWriteForm();
-          emp.appendChild(firstBtn);
-          main.appendChild(emp);
-          return;
+          const fb = document.createElement("button"); fb.className="bb"; fb.textContent="첫 글 작성하기"; fb.onclick=()=>showWriteForm();
+          emp.appendChild(fb); main.appendChild(emp); return;
         }
-
-        const table = document.createElement("table");
-        table.className = "post-table";
-        table.innerHTML =
-          "<thead><tr>" +
-          "<th class='tc' style='width:50px'>번호</th>" +
-          "<th>제목</th>" +
-          "<th class='tc' style='width:120px'>작성자</th>" +
-          "<th class='tc' style='width:120px'>날짜</th>" +
-          "</tr></thead>";
+        const table = document.createElement("table"); table.className = "post-table";
+        table.innerHTML = "<thead><tr><th class='tc' style='width:48px'>번호</th><th>제목</th><th class='tc' style='width:90px'>작성자</th><th class='tc' style='width:100px'>날짜</th><th style='width:80px'></th></tr></thead>";
         const tbody = document.createElement("tbody");
         snap.docs.forEach((d, i) => {
-          const dt   = d.data();
+          const dt = d.data();
           const date = dt.createdAt ? dt.createdAt.toDate().toLocaleDateString("ko-KR") : "-";
-          const tr   = document.createElement("tr");
-          tr.className = "post-row";
-          tr.innerHTML =
-            "<td class='tc'>" + (snap.size - i) + "</td>" +
-            "<td class='post-title-cell'>" +
-              (dt.isPinned ? "📌 " : "") + esc(dt.title) +
-              (dt.commentCount > 0 ? "<span class='comment-count'>[" + dt.commentCount + "]</span>" : "") +
-            "</td>" +
-            "<td class='tc'>" + esc(dt.authorName || "익명") + "</td>" +
-            "<td class='tc'>" + date + "</td>";
+          const tr = document.createElement("tr"); tr.className = "post-row";
+          const numTd = document.createElement("td"); numTd.className="tc"; numTd.textContent = snap.size - i;
+          const titleTd = document.createElement("td"); titleTd.className="col-title";
+          titleTd.innerHTML = (dt.isPinned?"📌 ":"") + esc(dt.title) + (dt.commentCount>0?"<span class='comment-count'>["+dt.commentCount+"]</span>":"");
+          const nameTd = document.createElement("td"); nameTd.className="tc"; nameTd.textContent = dt.authorName||"익명";
+          const dateTd = document.createElement("td"); dateTd.className="tc"; dateTd.textContent = date;
+          const actionTd = document.createElement("td"); actionTd.className="col-actions";
+          if (canEdit(dt.authorUid)) {
+            const editBtn = document.createElement("button"); editBtn.className="bb bb-xs bb-outline"; editBtn.textContent="수정";
+            editBtn.onclick = e => { e.stopPropagation(); startEdit(d.id); };
+            const delBtn = document.createElement("button"); delBtn.className="bb bb-xs bb-danger"; delBtn.textContent="삭제";
+            delBtn.onclick = e => { e.stopPropagation(); deletePost(d.id, dt.authorUid, dt.password); };
+            actionTd.appendChild(editBtn); actionTd.appendChild(delBtn);
+          }
+          tr.appendChild(numTd); tr.appendChild(titleTd); tr.appendChild(nameTd); tr.appendChild(dateTd); tr.appendChild(actionTd);
           tr.onclick = () => viewDetail(d.id);
           tbody.appendChild(tr);
         });
-        table.appendChild(tbody);
-        main.appendChild(table);
+        table.appendChild(tbody); main.appendChild(table);
       });
     }
 
-    /* ── 글 작성/수정 폼 ─────────────────── */
+    /* ── 글 작성/수정 폼 ── */
     function showWriteForm(editData) {
       currentView = "write";
-      const main   = document.getElementById("main-content");
+      const main = document.getElementById("main-content");
       const isEdit = !!editData;
-      const defName = currentUser ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
-
+      const defName = currentUser ? (currentUser.displayName||currentUser.email.split("@")[0]) : "";
       main.innerHTML = "";
-      const card = document.createElement("div");
-      card.className = "form-card";
-      card.innerHTML =
-        "<h2>" + (isEdit ? "✏️ 글 수정" : "✏️ 새 글 작성") + "</h2>" +
-        "<div class='form-group'><label>작성자 이름</label>" +
-          "<input id='w-name' type='text' class='input' placeholder='익명'></div>" +
-        "<div class='form-group'><label>비밀번호 <small>(비로그인 시 수정/삭제에 사용)</small></label>" +
-          "<input id='w-pass' type='password' class='input' placeholder='비밀번호 입력'" + (isEdit ? " disabled" : "") + "></div>" +
-        "<div class='form-group'><label>제목 *</label>" +
-          "<input id='w-title' type='text' class='input' placeholder='제목을 입력하세요'></div>" +
-        "<div class='form-group'><label>내용 *</label>" +
-          "<textarea id='w-body' class='textarea' rows='10' placeholder='내용을 입력하세요...'></textarea></div>" +
-        "<div class='form-actions'>" +
-          "<button class='btn' id='btn-submit'>" + (isEdit ? "수정 완료" : "등록하기") + "</button>" +
-          "<button class='btn btn-outline' id='btn-cancel'>취소</button></div>";
+      const card = document.createElement("div"); card.className="form-card";
+      card.innerHTML = "<h2>"+(isEdit?"✏️ 글 수정":"✏️ 새 글 작성")+"</h2>"+
+        "<div class='fg'><label>작성자 이름</label><input id='w-name' type='text' class='bi' placeholder='익명'></div>"+
+        "<div class='fg'><label>비밀번호 <small>(비로그인 시 수정/삭제에 사용)</small></label><input id='w-pass' type='password' class='bi' placeholder='비밀번호 입력'"+(isEdit?" disabled":"")+" ></div>"+
+        "<div class='fg'><label>제목 *</label><input id='w-title' type='text' class='bi' placeholder='제목을 입력하세요'></div>"+
+        "<div class='fg'><label>내용 *</label><textarea id='w-body' class='bta' rows='9' placeholder='내용을 입력하세요...'></textarea></div>"+
+        "<div class='fa'><button class='bb' id='btn-submit'>"+(isEdit?"수정 완료":"등록하기")+"</button><button class='bb bb-outline' id='btn-cancel'>취소</button></div>";
       main.appendChild(card);
-
-      document.getElementById("w-name").value  = esc(isEdit ? editData.authorName || "" : defName);
-      document.getElementById("w-title").value = esc(isEdit ? editData.title : "");
-      if (isEdit) document.getElementById("w-body").value = isEdit ? editData.body : "";
-
-      document.getElementById("btn-submit").onclick = isEdit ? () => submitEdit(editData.id) : submitPost;
-      document.getElementById("btn-cancel").onclick = isEdit ? () => viewDetail(editData.id) : goList;
+      document.getElementById("w-name").value = isEdit?(editData.authorName||""):defName;
+      document.getElementById("w-title").value = isEdit?editData.title:"";
+      if (isEdit) document.getElementById("w-body").value = editData.body||"";
+      document.getElementById("btn-submit").onclick = isEdit?()=>submitEdit(editData.id):submitPost;
+      document.getElementById("btn-cancel").onclick = isEdit?()=>viewDetail(editData.id):goList;
     }
 
     async function submitPost() {
-      const title = document.getElementById("w-title").value.trim();
-      const body  = document.getElementById("w-body").value.trim();
-      const name  = document.getElementById("w-name").value.trim() || "익명";
-      const pass  = document.getElementById("w-pass").value;
-      if (!title || !body) { alert("제목과 내용을 입력해주세요."); return; }
+      const title=document.getElementById("w-title").value.trim();
+      const body=document.getElementById("w-body").value.trim();
+      const name=document.getElementById("w-name").value.trim()||"익명";
+      const pass=document.getElementById("w-pass").value;
+      if (!title||!body){alert("제목과 내용을 입력해주세요.");return;}
       try {
-        await addDoc(collection(db, "posts"), {
-          title, body, authorName: name,
-          authorUid: currentUser ? currentUser.uid : null,
-          authorEmail: currentUser ? currentUser.email : null,
-          password: pass || null, commentCount: 0, isPinned: false,
-          createdAt: serverTimestamp(), updatedAt: serverTimestamp()
-        });
+        await addDoc(collection(db,"posts"),{title,body,authorName:name,authorUid:currentUser?currentUser.uid:null,authorEmail:currentUser?currentUser.email:null,password:pass||null,commentCount:0,isPinned:false,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
         alert("글이 등록되었습니다."); goList();
-      } catch(e) { alert("등록 실패: " + e.message); }
+      } catch(e){alert("등록 실패: "+e.message);}
     }
 
     async function submitEdit(pid) {
-      const title = document.getElementById("w-title").value.trim();
-      const body  = document.getElementById("w-body").value.trim();
-      if (!title || !body) { alert("제목과 내용을 입력해주세요."); return; }
-      try {
-        await updateDoc(doc(db, "posts", pid), { title, body, updatedAt: serverTimestamp() });
-        alert("수정되었습니다."); viewDetail(pid);
-      } catch(e) { alert("수정 실패: " + e.message); }
+      const title=document.getElementById("w-title").value.trim();
+      const body=document.getElementById("w-body").value.trim();
+      if(!title||!body){alert("제목과 내용을 입력해주세요.");return;}
+      try { await updateDoc(doc(db,"posts",pid),{title,body,updatedAt:serverTimestamp()}); alert("수정되었습니다."); viewDetail(pid); }
+      catch(e){alert("수정 실패: "+e.message);}
     }
 
-    /* ── 글 상세 ─────────────────────────── */
+    /* ── 글 상세 ── */
     async function viewDetail(pid) {
-      currentView = "detail"; currentPostId = pid;
-      const main = document.getElementById("main-content");
-      main.innerHTML = "<p class='loading'>불러오는 중...</p>";
-      const ps = await getDoc(doc(db, "posts", pid));
-      if (!ps.exists()) { alert("삭제된 글입니다."); goList(); return; }
-      const d    = ps.data();
-      const date = d.createdAt ? d.createdAt.toDate().toLocaleString("ko-KR") : "-";
-      const upd  = d.updatedAt && d.updatedAt.seconds !== d.createdAt.seconds
-        ? " (수정됨: " + d.updatedAt.toDate().toLocaleString("ko-KR") + ")" : "";
-      const dcn  = currentUser ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
-
-      main.innerHTML = "";
-
-      const backBtn = document.createElement("button");
-      backBtn.className = "btn btn-outline btn-back"; backBtn.textContent = "← 목록으로";
-      backBtn.onclick = goList; main.appendChild(backBtn);
-
-      const card = document.createElement("div");
-      card.className = "detail-card";
-      card.innerHTML =
-        "<div class='detail-header'>" +
-          "<h2>" + (d.isPinned ? "📌 " : "") + esc(d.title) + "</h2>" +
-          "<div class='detail-meta'>" +
-            "<span>작성자: <strong>" + esc(d.authorName || "익명") + "</strong></span>" +
-            "<span>" + date + upd + "</span>" +
-          "</div></div>" +
-        "<div class='detail-body'>" + esc(d.body).replace(/\n/g, "<br>") + "</div>";
-      if (canEdit(d.authorUid)) {
-        const actions = document.createElement("div");
-        actions.className = "detail-actions";
-        const editBtn = document.createElement("button");
-        editBtn.className = "btn btn-sm"; editBtn.textContent = "수정";
-        editBtn.onclick = () => startEdit(pid);
-        const delBtn = document.createElement("button");
-        delBtn.className = "btn btn-sm btn-danger"; delBtn.textContent = "삭제";
-        delBtn.onclick = () => deletePost(pid, d.authorUid, d.password);
-        actions.appendChild(editBtn); actions.appendChild(delBtn);
-        card.appendChild(actions);
+      currentView="detail"; currentPostId=pid;
+      const main=document.getElementById("main-content");
+      main.innerHTML="<p class='loading-msg'>불러오는 중...</p>";
+      const ps=await getDoc(doc(db,"posts",pid));
+      if(!ps.exists()){alert("삭제된 글입니다.");goList();return;}
+      const d=ps.data();
+      const date=d.createdAt?d.createdAt.toDate().toLocaleString("ko-KR"):"-";
+      const upd=d.updatedAt&&d.updatedAt.seconds!==d.createdAt.seconds?" (수정됨: "+d.updatedAt.toDate().toLocaleString("ko-KR")+")":"";
+      const dcn=currentUser?(currentUser.displayName||currentUser.email.split("@")[0]):"";
+      main.innerHTML="";
+      const backBtn=document.createElement("button"); backBtn.className="bb bb-outline btn-back"; backBtn.textContent="← 목록으로"; backBtn.onclick=goList;
+      main.appendChild(backBtn);
+      const card=document.createElement("div"); card.className="detail-card";
+      card.innerHTML="<div class='detail-header'><h2>"+(d.isPinned?"📌 ":"")+esc(d.title)+"</h2><div class='detail-meta'><span>작성자: <strong>"+esc(d.authorName||"익명")+"</strong></span><span>"+date+upd+"</span></div></div><div class='detail-body'>"+esc(d.body).replace(/\n/g,"<br>")+"</div>";
+      if(canEdit(d.authorUid)){
+        const actions=document.createElement("div"); actions.className="detail-actions";
+        const eb=document.createElement("button"); eb.className="bb bb-sm"; eb.textContent="수정"; eb.onclick=()=>startEdit(pid);
+        const db2=document.createElement("button"); db2.className="bb bb-sm bb-danger"; db2.textContent="삭제"; db2.onclick=()=>deletePost(pid,d.authorUid,d.password);
+        actions.appendChild(eb); actions.appendChild(db2); card.appendChild(actions);
       }
       main.appendChild(card);
-
-      const cmtSection = document.createElement("div");
-      cmtSection.className = "comment-section";
-      cmtSection.innerHTML =
-        "<h3>💬 댓글 <span id='cmt-count'></span></h3>" +
-        "<div id='comment-list'></div>" +
-        "<div class='comment-form'>" +
-          "<input id='c-name' type='text' class='input' placeholder='이름 (익명)'>" +
-          "<input id='c-pass' type='password' class='input' placeholder='비밀번호 (선택)'>" +
-          "<textarea id='c-body' class='textarea' rows='3' placeholder='댓글을 입력하세요...'></textarea>" +
-          "<button class='btn' id='btn-submit-cmt'>댓글 등록</button>" +
-        "</div>";
+      const cmtSection=document.createElement("div"); cmtSection.className="comment-section";
+      cmtSection.innerHTML="<h3>💬 댓글 <span id='cmt-count'></span></h3><div id='comment-list'></div><div class='comment-form'><input id='c-name' type='text' class='bi' placeholder='이름 (익명)'><input id='c-pass' type='password' class='bi' placeholder='비밀번호 (선택)'><textarea id='c-body' class='bta' rows='3' placeholder='댓글을 입력하세요...'></textarea><button class='bb' id='btn-submit-cmt'>댓글 등록</button></div>";
       main.appendChild(cmtSection);
-      document.getElementById("c-name").value = dcn;
-      document.getElementById("btn-submit-cmt").onclick = () => submitComment(pid);
+      document.getElementById("c-name").value=dcn;
+      document.getElementById("btn-submit-cmt").onclick=()=>submitComment(pid);
       loadComments(pid);
     }
 
     async function startEdit(pid) {
-      const ps = await getDoc(doc(db, "posts", pid));
-      if (!ps.exists()) return;
-      const d = ps.data();
-      if (!canEdit(d.authorUid)) {
-        const pw = prompt("비밀번호를 입력하세요");
-        if (pw !== d.password) { alert("비밀번호가 틀립니다."); return; }
-      }
-      showWriteForm({ id: pid, ...d });
+      const ps=await getDoc(doc(db,"posts",pid)); if(!ps.exists())return;
+      const d=ps.data();
+      if(!canEdit(d.authorUid)){const pw=prompt("비밀번호를 입력하세요"); if(pw!==d.password){alert("비밀번호가 틀립니다.");return;}}
+      showWriteForm({id:pid,...d});
     }
 
-    async function deletePost(pid, authorUid, savedPw) {
-      if (!canEdit(authorUid)) {
-        const pw = prompt("비밀번호를 입력하세요");
-        if (pw !== savedPw) { alert("비밀번호가 틀립니다."); return; }
-      }
-      if (!confirm("정말 삭제하시겠습니까?")) return;
+    async function deletePost(pid,authorUid,savedPw) {
+      if(!canEdit(authorUid)){const pw=prompt("비밀번호를 입력하세요"); if(pw!==savedPw){alert("비밀번호가 틀립니다.");return;}}
+      if(!confirm("정말 삭제하시겠습니까?"))return;
       try {
-        const cs = await getDocs(collection(db, "posts", pid, "comments"));
-        for (const c of cs.docs) await deleteDoc(c.ref);
-        await deleteDoc(doc(db, "posts", pid));
-        alert("삭제되었습니다."); goList();
-      } catch(e) { alert("삭제 실패: " + e.message); }
+        const cs=await getDocs(collection(db,"posts",pid,"comments"));
+        for(const c of cs.docs) await deleteDoc(c.ref);
+        await deleteDoc(doc(db,"posts",pid)); alert("삭제되었습니다."); goList();
+      } catch(e){alert("삭제 실패: "+e.message);}
     }
 
-    /* ── 댓글 ────────────────────────────── */
+    /* ── 댓글 ── */
     function loadComments(pid) {
-      const q = query(collection(db, "posts", pid, "comments"), orderBy("createdAt", "asc"));
-      onSnapshot(q, snap => {
-        const ce = document.getElementById("cmt-count");
-        if (ce) ce.textContent = "(" + snap.size + ")";
-        const list = document.getElementById("comment-list");
-        if (!list) return;
-        list.innerHTML = "";
-        if (snap.empty) {
-          list.innerHTML = "<p class='no-comment'>아직 댓글이 없습니다.</p>";
-          return;
-        }
-        snap.docs.forEach(cd => {
-          const c     = cd.data();
-          const cdate = c.createdAt ? c.createdAt.toDate().toLocaleString("ko-KR") : "";
-          const item  = document.createElement("div");
-          item.className = "comment-item";
-          const meta = document.createElement("div");
-          meta.className = "cmt-meta";
-          const strong = document.createElement("strong");
-          strong.textContent = c.authorName || "익명";
-          const dateSpan = document.createElement("span");
-          dateSpan.textContent = cdate;
-          const delBtn = document.createElement("button");
-          delBtn.className = "btn btn-xs btn-danger"; delBtn.textContent = "삭제";
-          delBtn.onclick = () => deleteComment(pid, cd.id, c.authorUid || "", c.password || "");
-          meta.appendChild(strong); meta.appendChild(dateSpan); meta.appendChild(delBtn);
-          const body = document.createElement("div");
-          body.className = "cmt-body";
-          body.innerHTML = esc(c.body).replace(/\n/g, "<br>");
-          item.appendChild(meta); item.appendChild(body);
-          list.appendChild(item);
+      const q=query(collection(db,"posts",pid,"comments"),orderBy("createdAt","asc"));
+      onSnapshot(q, snap=>{
+        const ce=document.getElementById("cmt-count"); if(ce) ce.textContent="("+snap.size+")";
+        const list=document.getElementById("comment-list"); if(!list)return;
+        list.innerHTML="";
+        if(snap.empty){list.innerHTML="<p class='no-comment'>아직 댓글이 없습니다.</p>";return;}
+        snap.docs.forEach(cd=>{
+          const c=cd.data(); const cdate=c.createdAt?c.createdAt.toDate().toLocaleString("ko-KR"):"";
+          const item=document.createElement("div"); item.className="comment-item";
+          const meta=document.createElement("div"); meta.className="cmt-meta";
+          const strong=document.createElement("strong"); strong.textContent=c.authorName||"익명";
+          const ds=document.createElement("span"); ds.textContent=cdate;
+          const db3=document.createElement("button"); db3.className="bb bb-xs bb-danger"; db3.textContent="삭제";
+          db3.onclick=()=>deleteComment(pid,cd.id,c.authorUid||"",c.password||"");
+          meta.appendChild(strong); meta.appendChild(ds); meta.appendChild(db3);
+          const body=document.createElement("div"); body.className="cmt-body";
+          body.innerHTML=esc(c.body).replace(/\n/g,"<br>");
+          item.appendChild(meta); item.appendChild(body); list.appendChild(item);
         });
       });
     }
 
     async function submitComment(pid) {
-      const name = document.getElementById("c-name").value.trim() || "익명";
-      const pass = document.getElementById("c-pass").value;
-      const body = document.getElementById("c-body").value.trim();
-      if (!body) { alert("댓글 내용을 입력해주세요."); return; }
+      const name=document.getElementById("c-name").value.trim()||"익명";
+      const pass=document.getElementById("c-pass").value;
+      const body=document.getElementById("c-body").value.trim();
+      if(!body){alert("댓글 내용을 입력해주세요.");return;}
       try {
-        await addDoc(collection(db, "posts", pid, "comments"), {
-          authorName: name, authorUid: currentUser ? currentUser.uid : null,
-          password: pass || null, body, createdAt: serverTimestamp()
-        });
-        const pr = doc(db, "posts", pid);
-        const ps = await getDoc(pr);
-        await updateDoc(pr, { commentCount: (ps.data().commentCount || 0) + 1 });
-        document.getElementById("c-body").value = "";
-      } catch(e) { alert("댓글 등록 실패: " + e.message); }
+        await addDoc(collection(db,"posts",pid,"comments"),{authorName:name,authorUid:currentUser?currentUser.uid:null,password:pass||null,body,createdAt:serverTimestamp()});
+        const pr=doc(db,"posts",pid); const ps=await getDoc(pr);
+        await updateDoc(pr,{commentCount:(ps.data().commentCount||0)+1});
+        document.getElementById("c-body").value="";
+      } catch(e){alert("댓글 등록 실패: "+e.message);}
     }
 
-    async function deleteComment(pid, cid, auid, pw) {
-      const canDel = currentUser && (currentUser.uid === auid || isAdmin());
-      if (!canDel) {
-        const p = prompt("비밀번호를 입력하세요");
-        if (p !== pw) { alert("비밀번호가 틀립니다."); return; }
-      }
-      if (!confirm("댓글을 삭제하시겠습니까?")) return;
+    async function deleteComment(pid,cid,auid,pw) {
+      const canDel=currentUser&&(currentUser.uid===auid||isAdmin());
+      if(!canDel){const p=prompt("비밀번호를 입력하세요"); if(p!==pw){alert("비밀번호가 틀립니다.");return;}}
+      if(!confirm("댓글을 삭제하시겠습니까?"))return;
       try {
-        await deleteDoc(doc(db, "posts", pid, "comments", cid));
-        const pr  = doc(db, "posts", pid);
-        const ps  = await getDoc(pr);
-        const cnt = (ps.data().commentCount || 1) - 1;
-        await updateDoc(pr, { commentCount: cnt < 0 ? 0 : cnt });
-      } catch(e) { alert("댓글 삭제 실패: " + e.message); }
+        await deleteDoc(doc(db,"posts",pid,"comments",cid));
+        const pr=doc(db,"posts",pid); const ps=await getDoc(pr);
+        const cnt=(ps.data().commentCount||1)-1;
+        await updateDoc(pr,{commentCount:cnt<0?0:cnt});
+      } catch(e){alert("댓글 삭제 실패: "+e.message);}
     }
 
-    const goList = () => { currentPostId = null; renderPostList(); };
-
-    renderAuthBar();
-    renderPostList();
+    const goList=()=>{currentPostId=null;renderPostList();};
+    renderAuthBar(); renderPostList();
   </script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: "Noto Sans KR", sans-serif; background: #f5f6fa; color: #222; }
-    .site-header { background: #2d6a4f; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
-    .site-header h1 { font-size: 1.2rem; font-weight: 700; }
-    #auth-bar { display: flex; align-items: center; gap: 10px; }
-    .auth-user { font-size: .9rem; opacity: .85; }
-    .badge-admin { background: #f4a261; color: #fff; font-size: .72rem; padding: 2px 7px; border-radius: 10px; margin-right: 4px; }
-    .container { max-width: 900px; margin: 30px auto; padding: 0 16px; }
-    .btn { padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer; font-size: .92rem; background: #2d6a4f; color: #fff; transition: background .2s; }
-    .btn:hover { background: #1b4332; }
-    .btn-outline { background: #fff; color: #2d6a4f; border: 1.5px solid #2d6a4f; }
-    .btn-outline:hover { background: #e9f5ee; }
-    .btn-sm { padding: 5px 13px; font-size: .85rem; }
-    .btn-xs { padding: 2px 8px; font-size: .78rem; }
-    .btn-danger { background: #e63946; }
-    .btn-danger:hover { background: #c1121f; }
-    .btn-back { margin-bottom: 14px; }
-    .loading { text-align: center; padding: 40px; color: #888; }
-    .empty-state { text-align: center; padding: 40px 20px; color: #888; }
-    .empty-state p { margin-bottom: 16px; }
-    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .list-header h2 { font-size: 1.3rem; }
-    .post-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-    .post-table thead tr { background: #2d6a4f; color: #fff; }
-    .post-table th, .post-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
-    .post-table th { font-weight: 600; font-size: .9rem; }
-    .post-row { cursor: pointer; transition: background .15s; }
-    .post-row:hover { background: #f0faf4; }
-    .post-title-cell { font-weight: 500; white-space: normal; }
-    .comment-count { color: #2d6a4f; font-size: .85rem; margin-left: 6px; }
-    .tc { text-align: center !important; white-space: nowrap; }
-    .form-card, .detail-card { background: #fff; border-radius: 10px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 24px; }
-    .form-card h2, .detail-card h2 { margin-bottom: 20px; font-size: 1.2rem; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: .88rem; color: #555; margin-bottom: 5px; }
-    .input { width: 100%; padding: 9px 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: .95rem; }
-    .input:focus { outline: none; border-color: #2d6a4f; }
-    .textarea { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 6px; font-size: .95rem; resize: vertical; }
-    .textarea:focus { outline: none; border-color: #2d6a4f; }
-    .form-actions { display: flex; gap: 10px; margin-top: 8px; }
-    .detail-header { border-bottom: 1px solid #eee; margin-bottom: 18px; padding-bottom: 14px; }
-    .detail-header h2 { font-size: 1.3rem; margin-bottom: 8px; }
-    .detail-meta { display: flex; gap: 18px; color: #888; font-size: .88rem; flex-wrap: wrap; }
-    .detail-body { line-height: 1.8; font-size: .97rem; white-space: pre-wrap; }
-    .detail-actions { margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; }
-    .comment-section { background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-    .comment-section h3 { margin-bottom: 16px; font-size: 1.05rem; }
-    .comment-item { border-bottom: 1px solid #f0f0f0; padding: 14px 0; }
-    .comment-item:last-child { border-bottom: none; }
-    .cmt-meta { display: flex; align-items: center; gap: 12px; font-size: .85rem; color: #888; margin-bottom: 6px; flex-wrap: wrap; }
-    .cmt-meta strong { color: #333; }
-    .cmt-body { font-size: .95rem; line-height: 1.7; }
-    .no-comment { text-align: center; color: #aaa; padding: 20px 0; font-size: .9rem; }
-    .comment-form { margin-top: 20px; padding-top: 18px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 8px; }
-    .comment-form .btn { align-self: flex-start; }
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
-    .modal { background: #fff; border-radius: 12px; padding: 32px 28px; width: 360px; max-width: 95vw; position: relative; }
-    .modal h3 { margin-bottom: 20px; font-size: 1.1rem; }
-    .modal .form-group { margin-bottom: 14px; }
-    .modal .form-actions { margin-top: 4px; }
-    .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #888; }
-    small { color: #aaa; font-size: .78rem; }
-  </style>
-</head>
-<body>
-  <header class="site-header">
-    <h1>📋 공지게시판</h1>
-    <div id="auth-bar"></div>
-  </header>
-  <div class="container">
-    <div id="main-content"></div>
-  </div>
-  <div id="modal-login" class="modal-overlay">
-    <div class="modal">
-      <button class="modal-close" onclick="closeLoginModal()">✕</button>
-      <h3>로그인</h3>
-      <div class="form-group"><label>이메일</label><input id="login-email" type="email" class="input" placeholder="이메일 입력"></div>
-      <div class="form-group"><label>비밀번호</label><input id="login-pw" type="password" class="input" placeholder="비밀번호 입력"></div>
-      <div class="form-actions">
-        <button onclick="doLogin()" class="btn">로그인</button>
-        <button onclick="closeLoginModal()" class="btn btn-outline">취소</button>
-      </div>
-    </div>
-  </div>
-  <div id="modal-register" class="modal-overlay">
-    <div class="modal">
-      <button class="modal-close" onclick="closeRegisterModal()">✕</button>
-      <h3>회원가입</h3>
-      <div class="form-group"><label>닉네임 <small>(선택)</small></label><input id="reg-name" type="text" class="input" placeholder="표시될 이름"></div>
-      <div class="form-group"><label>이메일</label><input id="reg-email" type="email" class="input" placeholder="이메일 입력"></div>
-      <div class="form-group"><label>비밀번호</label><input id="reg-pw" type="password" class="input" placeholder="6자 이상"></div>
-      <div class="form-actions">
-        <button onclick="doRegister()" class="btn">가입하기</button>
-        <button onclick="closeRegisterModal()" class="btn btn-outline">취소</button>
-      </div>
-    </div>
-  </div>
+
+  <script>
+    // 모바일 햄버거 메뉴
+    (function(){
+      const btn=document.getElementById("hamburgerBtn");
+      const overlay=document.getElementById("drawerOverlay");
+      const drawer=document.getElementById("drawer");
+      const closeBtn=document.getElementById("drawerClose");
+      if(!btn)return;
+      function open(){drawer.classList.add("open");overlay.classList.add("open");document.body.style.overflow="hidden";}
+      function close(){drawer.classList.remove("open");overlay.classList.remove("open");document.body.style.overflow="";}
+      btn.addEventListener("click",open); closeBtn.addEventListener("click",close); overlay.addEventListener("click",close);
+    })();
+    // active 상태
+    (function(){
+      const path=location.pathname;
+      document.querySelectorAll(".bottom-nav-item[data-nav], .drawer a[data-nav], #menu a[data-nav]").forEach(el=>{
+        if(el.dataset.nav==="notice"&&path.includes("/notice/")) el.classList.add("is-active");
+      });
+    })();
+  </script>
 </body>
 </html>
