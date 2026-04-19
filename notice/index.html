@@ -27,15 +27,14 @@
     };
 
     const ADMIN_UIDS = ["ADMIN_UID_HERE"];
-    const app = initializeApp(firebaseConfig);
-    const db  = getFirestore(app);
+    const app  = initializeApp(firebaseConfig);
+    const db   = getFirestore(app);
     const auth = getAuth(app);
 
-    let currentUser = null;
-    let currentView = "list";
+    let currentUser   = null;
+    let currentView   = "list";
     let currentPostId = null;
 
-    /* ── 인증 ─────────────────────────────── */
     onAuthStateChanged(auth, user => {
       currentUser = user;
       renderAuthBar();
@@ -43,126 +42,154 @@
       if (currentView === "detail" && currentPostId) viewDetail(currentPostId);
     });
 
-    function isAdmin() { return currentUser && ADMIN_UIDS.includes(currentUser.uid); }
-    function canEdit(uid) { return currentUser && (currentUser.uid === uid || isAdmin()); }
-    function esc(s) {
-      if (!s) return "";
-      return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-    }
+    const isAdmin  = () => currentUser && ADMIN_UIDS.includes(currentUser.uid);
+    const canEdit  = uid => currentUser && (currentUser.uid === uid || isAdmin());
+    const esc      = s => s ? s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") : "";
+    const showModal = id => { document.getElementById(id).style.display = "flex"; };
+    const hideModal = id => { document.getElementById(id).style.display = "none"; };
 
-    /* ── Auth UI ──────────────────────────── */
-    function renderAuthBar() {
-      const bar = document.getElementById("auth-bar");
-      if (currentUser) {
-        bar.innerHTML =
-          (isAdmin() ? "<span class='badge-admin'>관리자</span>" : "") +
-          "<span class='auth-user'>" + currentUser.email + "</span>" +
-          "<button id='btn-logout' class='btn btn-sm btn-outline'>로그아웃</button>";
-        document.getElementById("btn-logout").onclick = () => signOut(auth);
-      } else {
-        bar.innerHTML =
-          "<button id='btn-login' class='btn btn-sm'>로그인</button>" +
-          "<button id='btn-register' class='btn btn-sm btn-outline'>회원가입</button>";
-        document.getElementById("btn-login").onclick = () => showModal("modal-login");
-        document.getElementById("btn-register").onclick = () => showModal("modal-register");
-      }
-    }
-
-    function showModal(id) { document.getElementById(id).style.display = "flex"; }
-    function hideModal(id) { document.getElementById(id).style.display = "none"; }
     window.closeLoginModal    = () => hideModal("modal-login");
     window.closeRegisterModal = () => hideModal("modal-register");
 
+    function renderAuthBar() {
+      const bar = document.getElementById("auth-bar");
+      bar.innerHTML = "";
+      if (currentUser) {
+        if (isAdmin()) {
+          const badge = document.createElement("span");
+          badge.className = "badge-admin"; badge.textContent = "관리자";
+          bar.appendChild(badge);
+        }
+        const em = document.createElement("span");
+        em.className = "auth-user"; em.textContent = currentUser.email;
+        bar.appendChild(em);
+        const btn = document.createElement("button");
+        btn.className = "btn btn-sm btn-outline"; btn.textContent = "로그아웃";
+        btn.onclick = () => signOut(auth);
+        bar.appendChild(btn);
+      } else {
+        const b1 = document.createElement("button");
+        b1.className = "btn btn-sm"; b1.textContent = "로그인";
+        b1.onclick = () => showModal("modal-login");
+        bar.appendChild(b1);
+        const b2 = document.createElement("button");
+        b2.className = "btn btn-sm btn-outline"; b2.textContent = "회원가입";
+        b2.onclick = () => showModal("modal-register");
+        bar.appendChild(b2);
+      }
+    }
+
     window.doLogin = async () => {
-      const email = document.getElementById("login-email").value.trim();
-      const pw    = document.getElementById("login-pw").value;
-      try { await signInWithEmailAndPassword(auth, email, pw); hideModal("modal-login"); }
-      catch (e) { alert("로그인 실패: " + e.message); }
-    };
-    window.doRegister = async () => {
-      const email = document.getElementById("reg-email").value.trim();
-      const pw    = document.getElementById("reg-pw").value;
-      try { await createUserWithEmailAndPassword(auth, email, pw); hideModal("modal-register"); alert("가입 완료!"); }
-      catch (e) { alert("회원가입 실패: " + e.message); }
+      try {
+        await signInWithEmailAndPassword(auth,
+          document.getElementById("login-email").value.trim(),
+          document.getElementById("login-pw").value);
+        hideModal("modal-login");
+      } catch(e) { alert("로그인 실패: " + e.message); }
     };
 
-    /* ── 글 목록 ──────────────────────────── */
+    window.doRegister = async () => {
+      try {
+        await createUserWithEmailAndPassword(auth,
+          document.getElementById("reg-email").value.trim(),
+          document.getElementById("reg-pw").value);
+        hideModal("modal-register");
+        alert("가입 완료!");
+      } catch(e) { alert("회원가입 실패: " + e.message); }
+    };
+
+    /* ── 글 목록 ─────────────────────────── */
     async function renderPostList() {
       currentView = "list";
       const main = document.getElementById("main-content");
       main.innerHTML = "<p class='loading'>불러오는 중...</p>";
-
       const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
       onSnapshot(q, snap => {
+        main.innerHTML = "";
+
+        const header = document.createElement("div");
+        header.className = "list-header";
+        header.innerHTML = "<h2>공지사항</h2>";
+        const newBtn = document.createElement("button");
+        newBtn.className = "btn"; newBtn.textContent = "✏️ 새 글 작성";
+        newBtn.onclick = () => showWriteForm();
+        header.appendChild(newBtn);
+        main.appendChild(header);
+
         if (snap.empty) {
-          main.innerHTML =
-            "<div class='empty-state'><p>등록된 공지가 없습니다.</p>" +
-            "<button class='btn' id='btn-first-write'>첫 글 작성하기</button></div>";
-          document.getElementById("btn-first-write").onclick = () => showWriteForm();
+          const emp = document.createElement("div");
+          emp.className = "empty-state";
+          emp.innerHTML = "<p>등록된 공지가 없습니다.</p>";
+          const firstBtn = document.createElement("button");
+          firstBtn.className = "btn"; firstBtn.textContent = "첫 글 작성하기";
+          firstBtn.onclick = () => showWriteForm();
+          emp.appendChild(firstBtn);
+          main.appendChild(emp);
           return;
         }
-        let rows = "";
+
+        const table = document.createElement("table");
+        table.className = "post-table";
+        table.innerHTML =
+          "<thead><tr>" +
+          "<th class='tc' style='width:50px'>번호</th>" +
+          "<th>제목</th>" +
+          "<th class='tc' style='width:120px'>작성자</th>" +
+          "<th class='tc' style='width:120px'>날짜</th>" +
+          "</tr></thead>";
+        const tbody = document.createElement("tbody");
         snap.docs.forEach((d, i) => {
-          const dt = d.data();
+          const dt   = d.data();
           const date = dt.createdAt ? dt.createdAt.toDate().toLocaleDateString("ko-KR") : "-";
-          rows +=
-            "<tr class='post-row' data-id='" + d.id + "'>" +
+          const tr   = document.createElement("tr");
+          tr.className = "post-row";
+          tr.innerHTML =
             "<td class='tc'>" + (snap.size - i) + "</td>" +
             "<td class='post-title-cell'>" +
               (dt.isPinned ? "📌 " : "") + esc(dt.title) +
               (dt.commentCount > 0 ? "<span class='comment-count'>[" + dt.commentCount + "]</span>" : "") +
             "</td>" +
             "<td class='tc'>" + esc(dt.authorName || "익명") + "</td>" +
-            "<td class='tc'>" + date + "</td>" +
-            "</tr>";
+            "<td class='tc'>" + date + "</td>";
+          tr.onclick = () => viewDetail(d.id);
+          tbody.appendChild(tr);
         });
-        main.innerHTML =
-          "<div class='list-header'><h2>공지사항</h2><button class='btn' id='btn-new-post'>✏️ 새 글 작성</button></div>" +
-          "<table class='post-table'><thead><tr>" +
-          "<th style='width:50px'>번호</th><th>제목</th><th style='width:120px'>작성자</th><th style='width:120px'>날짜</th>" +
-          "</tr></thead><tbody>" + rows + "</tbody></table>";
-        document.getElementById("btn-new-post").onclick = () => showWriteForm();
-        main.querySelectorAll(".post-row").forEach(row => {
-          row.onclick = () => viewDetail(row.dataset.id);
-        });
+        table.appendChild(tbody);
+        main.appendChild(table);
       });
     }
 
-    /* ── 글 작성 / 수정 폼 ────────────────── */
+    /* ── 글 작성/수정 폼 ─────────────────── */
     function showWriteForm(editData) {
       currentView = "write";
       const main   = document.getElementById("main-content");
       const isEdit = !!editData;
-      const defName = currentUser
-        ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
+      const defName = currentUser ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
 
-      main.innerHTML =
-        "<div class='form-card'>" +
-          "<h2>" + (isEdit ? "✏️ 글 수정" : "✏️ 새 글 작성") + "</h2>" +
-          "<div class='form-group'><label>작성자 이름</label>" +
-            "<input id='w-name' type='text' class='input' placeholder='익명' value='" +
-            esc(isEdit ? editData.authorName || "" : defName) + "' /></div>" +
-          "<div class='form-group'><label>비밀번호 <small>(비로그인 시 수정/삭제에 사용)</small></label>" +
-            "<input id='w-pass' type='password' class='input' placeholder='비밀번호 입력' " +
-            (isEdit ? "disabled" : "") + " /></div>" +
-          "<div class='form-group'><label>제목 *</label>" +
-            "<input id='w-title' type='text' class='input' placeholder='제목을 입력하세요' value='" +
-            esc(isEdit ? editData.title : "") + "' /></div>" +
-          "<div class='form-group'><label>내용 *</label>" +
-            "<textarea id='w-body' class='textarea' rows='10' placeholder='내용을 입력하세요...'>" +
-            esc(isEdit ? editData.body : "") + "</textarea></div>" +
-          "<div class='form-actions'>" +
-            "<button class='btn' id='btn-submit-write'>" + (isEdit ? "수정 완료" : "등록하기") + "</button>" +
-            "<button class='btn btn-outline' id='btn-cancel-write'>취소</button>" +
-          "</div>" +
-        "</div>";
+      main.innerHTML = "";
+      const card = document.createElement("div");
+      card.className = "form-card";
+      card.innerHTML =
+        "<h2>" + (isEdit ? "✏️ 글 수정" : "✏️ 새 글 작성") + "</h2>" +
+        "<div class='form-group'><label>작성자 이름</label>" +
+          "<input id='w-name' type='text' class='input' placeholder='익명'></div>" +
+        "<div class='form-group'><label>비밀번호 <small>(비로그인 시 수정/삭제에 사용)</small></label>" +
+          "<input id='w-pass' type='password' class='input' placeholder='비밀번호 입력'" + (isEdit ? " disabled" : "") + "></div>" +
+        "<div class='form-group'><label>제목 *</label>" +
+          "<input id='w-title' type='text' class='input' placeholder='제목을 입력하세요'></div>" +
+        "<div class='form-group'><label>내용 *</label>" +
+          "<textarea id='w-body' class='textarea' rows='10' placeholder='내용을 입력하세요...'></textarea></div>" +
+        "<div class='form-actions'>" +
+          "<button class='btn' id='btn-submit'>" + (isEdit ? "수정 완료" : "등록하기") + "</button>" +
+          "<button class='btn btn-outline' id='btn-cancel'>취소</button></div>";
+      main.appendChild(card);
 
-      document.getElementById("btn-submit-write").onclick = isEdit
-        ? () => submitEdit(editData.id)
-        : () => submitPost();
-      document.getElementById("btn-cancel-write").onclick = isEdit
-        ? () => viewDetail(editData.id)
-        : () => goList();
+      document.getElementById("w-name").value  = esc(isEdit ? editData.authorName || "" : defName);
+      document.getElementById("w-title").value = esc(isEdit ? editData.title : "");
+      if (isEdit) document.getElementById("w-body").value = isEdit ? editData.body : "";
+
+      document.getElementById("btn-submit").onclick = isEdit ? () => submitEdit(editData.id) : submitPost;
+      document.getElementById("btn-cancel").onclick = isEdit ? () => viewDetail(editData.id) : goList;
     }
 
     async function submitPost() {
@@ -174,13 +201,13 @@
       try {
         await addDoc(collection(db, "posts"), {
           title, body, authorName: name,
-          authorUid:   currentUser ? currentUser.uid   : null,
+          authorUid: currentUser ? currentUser.uid : null,
           authorEmail: currentUser ? currentUser.email : null,
           password: pass || null, commentCount: 0, isPinned: false,
           createdAt: serverTimestamp(), updatedAt: serverTimestamp()
         });
         alert("글이 등록되었습니다."); goList();
-      } catch (e) { alert("등록 실패: " + e.message); }
+      } catch(e) { alert("등록 실패: " + e.message); }
     }
 
     async function submitEdit(pid) {
@@ -190,60 +217,66 @@
       try {
         await updateDoc(doc(db, "posts", pid), { title, body, updatedAt: serverTimestamp() });
         alert("수정되었습니다."); viewDetail(pid);
-      } catch (e) { alert("수정 실패: " + e.message); }
+      } catch(e) { alert("수정 실패: " + e.message); }
     }
 
-    /* ── 글 상세 ──────────────────────────── */
+    /* ── 글 상세 ─────────────────────────── */
     async function viewDetail(pid) {
       currentView = "detail"; currentPostId = pid;
       const main = document.getElementById("main-content");
       main.innerHTML = "<p class='loading'>불러오는 중...</p>";
-
       const ps = await getDoc(doc(db, "posts", pid));
       if (!ps.exists()) { alert("삭제된 글입니다."); goList(); return; }
       const d    = ps.data();
       const date = d.createdAt ? d.createdAt.toDate().toLocaleString("ko-KR") : "-";
-      const upd  = (d.updatedAt && d.updatedAt.seconds !== d.createdAt.seconds)
+      const upd  = d.updatedAt && d.updatedAt.seconds !== d.createdAt.seconds
         ? " (수정됨: " + d.updatedAt.toDate().toLocaleString("ko-KR") + ")" : "";
-      const dcn  = currentUser
-        ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
+      const dcn  = currentUser ? (currentUser.displayName || currentUser.email.split("@")[0]) : "";
 
-      main.innerHTML =
-        "<button class='btn btn-outline btn-back' id='btn-back'>← 목록으로</button>" +
-        "<div class='detail-card'>" +
-          "<div class='detail-header'>" +
-            "<h2>" + (d.isPinned ? "📌 " : "") + esc(d.title) + "</h2>" +
-            "<div class='detail-meta'>" +
-              "<span>작성자: <strong>" + esc(d.authorName || "익명") + "</strong></span>" +
-              "<span>" + date + upd + "</span>" +
-            "</div>" +
-          "</div>" +
-          "<div class='detail-body'>" + esc(d.body).replace(/\n/g, "<br>") + "</div>" +
-          (canEdit(d.authorUid)
-            ? "<div class='detail-actions'>" +
-                "<button class='btn btn-sm' id='btn-edit-post'>수정</button>" +
-                "<button class='btn btn-sm btn-danger' id='btn-del-post'>삭제</button>" +
-              "</div>"
-            : "") +
-        "</div>" +
-        "<div class='comment-section'>" +
-          "<h3>💬 댓글 <span id='cmt-count'></span></h3>" +
-          "<div id='comment-list'></div>" +
-          "<div class='comment-form'>" +
-            "<input id='c-name' type='text' class='input' placeholder='이름 (익명)' value='" + esc(dcn) + "' />" +
-            "<input id='c-pass' type='password' class='input' placeholder='비밀번호 (선택)' />" +
-            "<textarea id='c-body' class='textarea' rows='3' placeholder='댓글을 입력하세요...'></textarea>" +
-            "<button class='btn' id='btn-submit-cmt'>댓글 등록</button>" +
-          "</div>" +
-        "</div>";
+      main.innerHTML = "";
 
-      document.getElementById("btn-back").onclick = () => goList();
-      document.getElementById("btn-submit-cmt").onclick = () => submitComment(pid);
+      const backBtn = document.createElement("button");
+      backBtn.className = "btn btn-outline btn-back"; backBtn.textContent = "← 목록으로";
+      backBtn.onclick = goList; main.appendChild(backBtn);
 
+      const card = document.createElement("div");
+      card.className = "detail-card";
+      card.innerHTML =
+        "<div class='detail-header'>" +
+          "<h2>" + (d.isPinned ? "📌 " : "") + esc(d.title) + "</h2>" +
+          "<div class='detail-meta'>" +
+            "<span>작성자: <strong>" + esc(d.authorName || "익명") + "</strong></span>" +
+            "<span>" + date + upd + "</span>" +
+          "</div></div>" +
+        "<div class='detail-body'>" + esc(d.body).replace(/\n/g, "<br>") + "</div>";
       if (canEdit(d.authorUid)) {
-        document.getElementById("btn-edit-post").onclick = () => startEdit(pid);
-        document.getElementById("btn-del-post").onclick  = () => deletePost(pid, d.authorUid, d.password);
+        const actions = document.createElement("div");
+        actions.className = "detail-actions";
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn btn-sm"; editBtn.textContent = "수정";
+        editBtn.onclick = () => startEdit(pid);
+        const delBtn = document.createElement("button");
+        delBtn.className = "btn btn-sm btn-danger"; delBtn.textContent = "삭제";
+        delBtn.onclick = () => deletePost(pid, d.authorUid, d.password);
+        actions.appendChild(editBtn); actions.appendChild(delBtn);
+        card.appendChild(actions);
       }
+      main.appendChild(card);
+
+      const cmtSection = document.createElement("div");
+      cmtSection.className = "comment-section";
+      cmtSection.innerHTML =
+        "<h3>💬 댓글 <span id='cmt-count'></span></h3>" +
+        "<div id='comment-list'></div>" +
+        "<div class='comment-form'>" +
+          "<input id='c-name' type='text' class='input' placeholder='이름 (익명)'>" +
+          "<input id='c-pass' type='password' class='input' placeholder='비밀번호 (선택)'>" +
+          "<textarea id='c-body' class='textarea' rows='3' placeholder='댓글을 입력하세요...'></textarea>" +
+          "<button class='btn' id='btn-submit-cmt'>댓글 등록</button>" +
+        "</div>";
+      main.appendChild(cmtSection);
+      document.getElementById("c-name").value = dcn;
+      document.getElementById("btn-submit-cmt").onclick = () => submitComment(pid);
       loadComments(pid);
     }
 
@@ -269,10 +302,10 @@
         for (const c of cs.docs) await deleteDoc(c.ref);
         await deleteDoc(doc(db, "posts", pid));
         alert("삭제되었습니다."); goList();
-      } catch (e) { alert("삭제 실패: " + e.message); }
+      } catch(e) { alert("삭제 실패: " + e.message); }
     }
 
-    /* ── 댓글 ─────────────────────────────── */
+    /* ── 댓글 ────────────────────────────── */
     function loadComments(pid) {
       const q = query(collection(db, "posts", pid, "comments"), orderBy("createdAt", "asc"));
       onSnapshot(q, snap => {
@@ -280,31 +313,31 @@
         if (ce) ce.textContent = "(" + snap.size + ")";
         const list = document.getElementById("comment-list");
         if (!list) return;
-        if (snap.empty) { list.innerHTML = "<p class='no-comment'>아직 댓글이 없습니다.</p>"; return; }
-
         list.innerHTML = "";
+        if (snap.empty) {
+          list.innerHTML = "<p class='no-comment'>아직 댓글이 없습니다.</p>";
+          return;
+        }
         snap.docs.forEach(cd => {
           const c     = cd.data();
           const cdate = c.createdAt ? c.createdAt.toDate().toLocaleString("ko-KR") : "";
           const item  = document.createElement("div");
           item.className = "comment-item";
-          item.innerHTML =
-            "<div class='cmt-meta'>" +
-              "<strong>" + esc(c.authorName || "익명") + "</strong>" +
-              "<span>" + cdate + "</span>" +
-              "<button class='btn btn-xs btn-danger cmt-del-btn' " +
-                "data-pid='" + pid + "' data-cid='" + cd.id + "' " +
-                "data-auid='" + (c.authorUid || "") + "' data-pw='" + esc(c.password || "") + "'>삭제</button>" +
-            "</div>" +
-            "<div class='cmt-body'>" + esc(c.body).replace(/\n/g, "<br>") + "</div>";
+          const meta = document.createElement("div");
+          meta.className = "cmt-meta";
+          const strong = document.createElement("strong");
+          strong.textContent = c.authorName || "익명";
+          const dateSpan = document.createElement("span");
+          dateSpan.textContent = cdate;
+          const delBtn = document.createElement("button");
+          delBtn.className = "btn btn-xs btn-danger"; delBtn.textContent = "삭제";
+          delBtn.onclick = () => deleteComment(pid, cd.id, c.authorUid || "", c.password || "");
+          meta.appendChild(strong); meta.appendChild(dateSpan); meta.appendChild(delBtn);
+          const body = document.createElement("div");
+          body.className = "cmt-body";
+          body.innerHTML = esc(c.body).replace(/\n/g, "<br>");
+          item.appendChild(meta); item.appendChild(body);
           list.appendChild(item);
-        });
-
-        list.querySelectorAll(".cmt-del-btn").forEach(btn => {
-          btn.onclick = () => deleteComment(
-            btn.dataset.pid, btn.dataset.cid,
-            btn.dataset.auid, btn.dataset.pw
-          );
         });
       });
     }
@@ -323,7 +356,7 @@
         const ps = await getDoc(pr);
         await updateDoc(pr, { commentCount: (ps.data().commentCount || 0) + 1 });
         document.getElementById("c-body").value = "";
-      } catch (e) { alert("댓글 등록 실패: " + e.message); }
+      } catch(e) { alert("댓글 등록 실패: " + e.message); }
     }
 
     async function deleteComment(pid, cid, auid, pw) {
@@ -339,12 +372,11 @@
         const ps  = await getDoc(pr);
         const cnt = (ps.data().commentCount || 1) - 1;
         await updateDoc(pr, { commentCount: cnt < 0 ? 0 : cnt });
-      } catch (e) { alert("댓글 삭제 실패: " + e.message); }
+      } catch(e) { alert("댓글 삭제 실패: " + e.message); }
     }
 
-    function goList() { currentPostId = null; renderPostList(); }
+    const goList = () => { currentPostId = null; renderPostList(); };
 
-    /* ── 초기 실행 ────────────────────────── */
     renderAuthBar();
     renderPostList();
   </script>
@@ -367,7 +399,7 @@
     .btn-danger:hover { background: #c1121f; }
     .btn-back { margin-bottom: 14px; }
     .loading { text-align: center; padding: 40px; color: #888; }
-    .empty-state { text-align: center; padding: 60px 20px; color: #888; }
+    .empty-state { text-align: center; padding: 40px 20px; color: #888; }
     .empty-state p { margin-bottom: 16px; }
     .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .list-header h2 { font-size: 1.3rem; }
@@ -421,44 +453,25 @@
   <div class="container">
     <div id="main-content"></div>
   </div>
-
-  <!-- 로그인 모달 -->
   <div id="modal-login" class="modal-overlay">
     <div class="modal">
       <button class="modal-close" onclick="closeLoginModal()">✕</button>
       <h3>로그인</h3>
-      <div class="form-group">
-        <label>이메일</label>
-        <input id="login-email" type="email" class="input" placeholder="이메일 입력" />
-      </div>
-      <div class="form-group">
-        <label>비밀번호</label>
-        <input id="login-pw" type="password" class="input" placeholder="비밀번호 입력" />
-      </div>
+      <div class="form-group"><label>이메일</label><input id="login-email" type="email" class="input" placeholder="이메일 입력"></div>
+      <div class="form-group"><label>비밀번호</label><input id="login-pw" type="password" class="input" placeholder="비밀번호 입력"></div>
       <div class="form-actions">
         <button onclick="doLogin()" class="btn">로그인</button>
         <button onclick="closeLoginModal()" class="btn btn-outline">취소</button>
       </div>
     </div>
   </div>
-
-  <!-- 회원가입 모달 -->
   <div id="modal-register" class="modal-overlay">
     <div class="modal">
       <button class="modal-close" onclick="closeRegisterModal()">✕</button>
       <h3>회원가입</h3>
-      <div class="form-group">
-        <label>닉네임 <small>(선택)</small></label>
-        <input id="reg-name" type="text" class="input" placeholder="표시될 이름" />
-      </div>
-      <div class="form-group">
-        <label>이메일</label>
-        <input id="reg-email" type="email" class="input" placeholder="이메일 입력" />
-      </div>
-      <div class="form-group">
-        <label>비밀번호</label>
-        <input id="reg-pw" type="password" class="input" placeholder="6자 이상" />
-      </div>
+      <div class="form-group"><label>닉네임 <small>(선택)</small></label><input id="reg-name" type="text" class="input" placeholder="표시될 이름"></div>
+      <div class="form-group"><label>이메일</label><input id="reg-email" type="email" class="input" placeholder="이메일 입력"></div>
+      <div class="form-group"><label>비밀번호</label><input id="reg-pw" type="password" class="input" placeholder="6자 이상"></div>
       <div class="form-actions">
         <button onclick="doRegister()" class="btn">가입하기</button>
         <button onclick="closeRegisterModal()" class="btn btn-outline">취소</button>
