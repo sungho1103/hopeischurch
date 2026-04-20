@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>게시판 — 희망은교회</title>
+  <title>ê²ìí â í¬ë§ìêµí</title>
   <link rel="stylesheet" href="/assets/common.css?v=20260411-01">
   <style>
     .notice-wrap { max-width: 900px; margin: 0 auto; }
 
-    /* 버튼 */
+    /* ë²í¼ */
     .bb { display:inline-block; padding:7px 16px; border-radius:6px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; background:#111; color:#fff; transition:background .15s; }
     .bb:hover { background:#333; }
     .bb-outline { background:#fff; color:#111; border:1.5px solid #333; }
@@ -23,7 +23,7 @@
     .board-auth-bar .auth-email { font-size:.82rem; color:#666; }
     .badge-admin { background:#e63946; color:#fff; font-size:.7rem; padding:2px 7px; border-radius:10px; }
 
-    /* 목록 */
+    /* ëª©ë¡ */
     .list-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
     .list-header h2 { font-size:1.25rem; font-weight:700; }
     .loading-msg { text-align:center; padding:40px; color:#888; }
@@ -40,7 +40,7 @@
     .col-actions { white-space:nowrap; text-align:right !important; }
     .col-actions .bb { margin-left:4px; }
 
-    /* 폼 */
+    /* í¼ */
     .form-card, .detail-card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 2px 8px rgba(0,0,0,.06); margin-bottom:20px; }
     .form-card h2, .detail-card h2 { margin-bottom:18px; font-size:1.1rem; }
     .fg { margin-bottom:14px; }
@@ -52,14 +52,14 @@
     .fa { display:flex; gap:8px; margin-top:8px; }
     .btn-back { margin-bottom:12px; }
 
-    /* 상세 */
+    /* ìì¸ */
     .detail-header { border-bottom:1px solid #eee; margin-bottom:16px; padding-bottom:12px; }
     .detail-header h2 { font-size:1.2rem; margin-bottom:7px; }
     .detail-meta { display:flex; gap:16px; color:#999; font-size:.83rem; flex-wrap:wrap; }
     .detail-body { line-height:1.85; font-size:.95rem; white-space:pre-wrap; }
     .detail-actions { margin-top:18px; display:flex; gap:7px; justify-content:flex-end; }
 
-    /* 댓글 */
+    /* ëê¸ */
     .comment-section { background:#fff; border-radius:10px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
     .comment-section h3 { margin-bottom:14px; font-size:1rem; }
     .comment-item { border-bottom:1px solid #f0f0f0; padding:12px 0; }
@@ -70,7 +70,7 @@
     .no-comment { text-align:center; color:#bbb; padding:16px 0; font-size:.88rem; }
     .comment-form { margin-top:18px; padding-top:16px; border-top:1px solid #eee; display:flex; flex-direction:column; gap:7px; }
 
-    /* 모달 */
+    /* ëª¨ë¬ */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:center; justify-content:center; }
     .modal-overlay.show { display:flex; }
     .modal { background:#fff; border-radius:12px; padding:28px 24px; width:340px; max-width:94vw; position:relative; }
@@ -79,40 +79,44 @@
     small { color:#bbb; font-size:.75rem; }
 
     @media(max-width:768px){
-      .post-table th, .post-table td { padding:8px 8px; font-size:.82rem; }
+      .post-table th, .post-table td { padding:6px 6px; font-size:.80rem; }
+      .post-table th:nth-child(1), .post-table td:nth-child(1) { width:30px !important; }
+      .post-table th:nth-child(3), .post-table td:nth-child(3) { display:none; }
+      .post-table th:nth-child(4), .post-table td:nth-child(4) { width:72px !important; font-size:.72rem; }
+      .post-table th:nth-child(5), .post-table td:nth-child(5) { width:60px !important; }
       .form-card, .detail-card, .comment-section { padding:16px; }
     }
   </style>
 </head>
 <body>
-  <!-- 모바일 Sticky Header -->
+  <!-- ëª¨ë°ì¼ Sticky Header -->
   <header class="mobile-header">
-    <a href="/" class="mobile-brand">희망은교회</a>
-    <button class="hamburger" id="hamburgerBtn" aria-label="메뉴 열기">
+    <a href="/" class="mobile-brand">í¬ë§ìêµí</a>
+    <button class="hamburger" id="hamburgerBtn" aria-label="ë©ë´ ì´ê¸°">
       <span></span><span></span><span></span>
     </button>
   </header>
 
   <div class="drawer-overlay" id="drawerOverlay"></div>
   <nav class="drawer" id="drawer">
-    <button class="drawer-close" id="drawerClose" aria-label="메뉴 닫기">×</button>
-    <a href="/" data-nav="home">홈</a>
-    <a href="/bulletin/" data-nav="bulletin">주보</a>
-    <a href="/sermon/" data-nav="sermon">주일설교</a>
-    <a href="/notice/" data-nav="notice">게시판</a>
-    <a href="/#map" data-nav="map">찾아오는 길</a>
+    <button class="drawer-close" id="drawerClose" aria-label="ë©ë´ ë«ê¸°">Ã</button>
+    <a href="/" data-nav="home">í</a>
+    <a href="/bulletin/" data-nav="bulletin">ì£¼ë³´</a>
+    <a href="/sermon/" data-nav="sermon">ì£¼ì¼ì¤êµ</a>
+    <a href="/notice/" data-nav="notice">ê²ìí</a>
+    <a href="/#map" data-nav="map">ì°¾ìì¤ë ê¸¸</a>
     <img src="/menu_m_slogan.jpg" alt="" style="margin-top:auto;padding-top:24px;width:100%;border-radius:8px;object-fit:contain;">
   </nav>
 
   <div class="wrap">
     <aside>
-      <div class="brand"><a href="/" style="color:inherit;">희망은교회</a></div>
+      <div class="brand"><a href="/" style="color:inherit;">í¬ë§ìêµí</a></div>
       <nav id="menu">
-        <a href="/" data-nav="home">홈</a>
-        <a href="/bulletin/" data-nav="bulletin">주보</a>
-        <a href="/sermon/" data-nav="sermon">주일설교</a>
-        <a href="/notice/" data-nav="notice">게시판</a>
-        <a href="/#map" data-nav="map">찾아오는 길</a>
+        <a href="/" data-nav="home">í</a>
+        <a href="/bulletin/" data-nav="bulletin">ì£¼ë³´</a>
+        <a href="/sermon/" data-nav="sermon">ì£¼ì¼ì¤êµ</a>
+        <a href="/notice/" data-nav="notice">ê²ìí</a>
+        <a href="/#map" data-nav="map">ì°¾ìì¤ë ê¸¸</a>
       </nav>
       <div class="board-auth-bar" id="auth-bar"></div>
     </aside>
@@ -124,54 +128,54 @@
     </main>
   </div>
 
-  <!-- 모바일 하단 탭바 -->
+  <!-- ëª¨ë°ì¼ íë¨ í­ë° -->
   <nav class="bottom-nav">
     <a href="/" class="bottom-nav-item" data-nav="home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-      <span>홈</span>
+      <span>í</span>
     </a>
     <a href="/bulletin/" class="bottom-nav-item" data-nav="bulletin">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
-      <span>주보</span>
+      <span>ì£¼ë³´</span>
     </a>
     <a href="/sermon/" class="bottom-nav-item" data-nav="sermon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-      <span>설교</span>
+      <span>ì¤êµ</span>
     </a>
     <a href="/notice/" class="bottom-nav-item" data-nav="notice">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-      <span>게시판</span>
+      <span>ê²ìí</span>
     </a>
     <a href="/#map" class="bottom-nav-item" data-nav="map">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-      <span>위치</span>
+      <span>ìì¹</span>
     </a>
   </nav>
 
-  <!-- 로그인 모달 -->
+  <!-- ë¡ê·¸ì¸ ëª¨ë¬ -->
   <div id="modal-login" class="modal-overlay">
     <div class="modal">
-      <button class="modal-close" id="closeLogin">✕</button>
-      <h3>로그인</h3>
-      <div class="fg"><label>이메일</label><input id="login-email" type="email" class="bi" placeholder="이메일 입력"></div>
-      <div class="fg"><label>비밀번호</label><input id="login-pw" type="password" class="bi" placeholder="비밀번호 입력"></div>
+      <button class="modal-close" id="closeLogin">â</button>
+      <h3>ë¡ê·¸ì¸</h3>
+      <div class="fg"><label>ì´ë©ì¼</label><input id="login-email" type="email" class="bi" placeholder="ì´ë©ì¼ ìë ¥"></div>
+      <div class="fg"><label>ë¹ë°ë²í¸</label><input id="login-pw" type="password" class="bi" placeholder="ë¹ë°ë²í¸ ìë ¥"></div>
       <div class="fa">
-        <button id="btn-do-login" class="bb">로그인</button>
-        <button id="btn-cancel-login" class="bb bb-outline">취소</button>
+        <button id="btn-do-login" class="bb">ë¡ê·¸ì¸</button>
+        <button id="btn-cancel-login" class="bb bb-outline">ì·¨ì</button>
       </div>
     </div>
   </div>
 
-  <!-- 회원가입 모달 -->
+  <!-- íìê°ì ëª¨ë¬ -->
   <div id="modal-register" class="modal-overlay">
     <div class="modal">
-      <button class="modal-close" id="closeRegister">✕</button>
-      <h3>회원가입</h3>
-      <div class="fg"><label>이메일</label><input id="reg-email" type="email" class="bi" placeholder="이메일 입력"></div>
-      <div class="fg"><label>비밀번호</label><input id="reg-pw" type="password" class="bi" placeholder="6자 이상"></div>
+      <button class="modal-close" id="closeRegister">â</button>
+      <h3>íìê°ì</h3>
+      <div class="fg"><label>ì´ë©ì¼</label><input id="reg-email" type="email" class="bi" placeholder="ì´ë©ì¼ ìë ¥"></div>
+      <div class="fg"><label>ë¹ë°ë²í¸</label><input id="reg-pw" type="password" class="bi" placeholder="6ì ì´ì"></div>
       <div class="fa">
-        <button id="btn-do-register" class="bb">가입하기</button>
-        <button id="btn-cancel-register" class="bb bb-outline">취소</button>
+        <button id="btn-do-register" class="bb">ê°ìíê¸°</button>
+        <button id="btn-cancel-register" class="bb bb-outline">ì·¨ì</button>
       </div>
     </div>
   </div>
@@ -213,13 +217,13 @@
       try {
         await signInWithEmailAndPassword(auth, document.getElementById("login-email").value.trim(), document.getElementById("login-pw").value);
         hideModal("modal-login");
-      } catch(e) { alert("로그인 실패: " + e.message); }
+      } catch(e) { alert("ë¡ê·¸ì¸ ì¤í¨: " + e.message); }
     };
     document.getElementById("btn-do-register").onclick = async () => {
       try {
         await createUserWithEmailAndPassword(auth, document.getElementById("reg-email").value.trim(), document.getElementById("reg-pw").value);
-        hideModal("modal-register"); alert("가입 완료!");
-      } catch(e) { alert("회원가입 실패: " + e.message); }
+        hideModal("modal-register"); alert("ê°ì ìë£!");
+      } catch(e) { alert("íìê°ì ì¤í¨: " + e.message); }
     };
 
     onAuthStateChanged(auth, user => {
@@ -233,39 +237,39 @@
       const bar = document.getElementById("auth-bar");
       bar.innerHTML = "";
       if (currentUser) {
-        if (isAdmin()) { const b = document.createElement("span"); b.className="badge-admin"; b.textContent="관리자"; bar.appendChild(b); }
+        if (isAdmin()) { const b = document.createElement("span"); b.className="badge-admin"; b.textContent="ê´ë¦¬ì"; bar.appendChild(b); }
         const em = document.createElement("span"); em.className="auth-email"; em.textContent=currentUser.email; bar.appendChild(em);
-        const btn = document.createElement("button"); btn.className="bb bb-sm bb-outline"; btn.textContent="로그아웃"; btn.onclick=()=>signOut(auth); bar.appendChild(btn);
+        const btn = document.createElement("button"); btn.className="bb bb-sm bb-outline"; btn.textContent="ë¡ê·¸ìì"; btn.onclick=()=>signOut(auth); bar.appendChild(btn);
       } else {
-        const b1 = document.createElement("button"); b1.className="bb bb-sm"; b1.textContent="로그인"; b1.onclick=()=>showModal("modal-login"); bar.appendChild(b1);
-        const b2 = document.createElement("button"); b2.className="bb bb-sm bb-outline"; b2.textContent="회원가입"; b2.onclick=()=>showModal("modal-register"); bar.appendChild(b2);
+        const b1 = document.createElement("button"); b1.className="bb bb-sm"; b1.textContent="ë¡ê·¸ì¸"; b1.onclick=()=>showModal("modal-login"); bar.appendChild(b1);
+        const b2 = document.createElement("button"); b2.className="bb bb-sm bb-outline"; b2.textContent="íìê°ì"; b2.onclick=()=>showModal("modal-register"); bar.appendChild(b2);
       }
     }
 
-    /* ── 글 목록 ── */
+    /* ââ ê¸ ëª©ë¡ ââ */
     function renderPostList() {
       currentView = "list";
       const main = document.getElementById("main-content");
-      main.innerHTML = "<p class='loading-msg'>불러오는 중...</p>";
+      main.innerHTML = "<p class='loading-msg'>ë¶ë¬ì¤ë ì¤...</p>";
       const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
       onSnapshot(q, snap => {
         main.innerHTML = "";
         const header = document.createElement("div");
         header.className = "list-header";
-        header.innerHTML = "<h2>공지사항</h2>";
+        header.innerHTML = "<h2>ê³µì§ì¬í­</h2>";
         const newBtn = document.createElement("button");
-        newBtn.className = "bb"; newBtn.textContent = "✏️ 새 글 작성";
+        newBtn.className = "bb"; newBtn.textContent = "âï¸ ì ê¸ ìì±";
         newBtn.onclick = () => showWriteForm();
         header.appendChild(newBtn);
         main.appendChild(header);
         if (snap.empty) {
           const emp = document.createElement("div"); emp.className = "empty-state";
-          emp.innerHTML = "<p>등록된 공지가 없습니다.</p>";
-          const fb = document.createElement("button"); fb.className="bb"; fb.textContent="첫 글 작성하기"; fb.onclick=()=>showWriteForm();
+          emp.innerHTML = "<p>ë±ë¡ë ê³µì§ê° ììµëë¤.</p>";
+          const fb = document.createElement("button"); fb.className="bb"; fb.textContent="ì²« ê¸ ìì±íê¸°"; fb.onclick=()=>showWriteForm();
           emp.appendChild(fb); main.appendChild(emp); return;
         }
         const table = document.createElement("table"); table.className = "post-table";
-        table.innerHTML = "<thead><tr><th class='tc' style='width:48px'>번호</th><th>제목</th><th class='tc' style='width:90px'>작성자</th><th class='tc' style='width:100px'>날짜</th><th style='width:80px'></th></tr></thead>";
+        table.innerHTML = "<thead><tr><th class='tc' style='width:48px'>ë²í¸</th><th>ì ëª©</th><th class='tc' style='width:90px'>ìì±ì</th><th class='tc' style='width:100px'>ë ì§</th><th style='width:80px'></th></tr></thead>";
         const tbody = document.createElement("tbody");
         snap.docs.forEach((d, i) => {
           const dt = d.data();
@@ -273,14 +277,14 @@
           const tr = document.createElement("tr"); tr.className = "post-row";
           const numTd = document.createElement("td"); numTd.className="tc"; numTd.textContent = snap.size - i;
           const titleTd = document.createElement("td"); titleTd.className="col-title";
-          titleTd.innerHTML = (dt.isPinned?"📌 ":"") + esc(dt.title) + (dt.commentCount>0?"<span class='comment-count'>["+dt.commentCount+"]</span>":"");
-          const nameTd = document.createElement("td"); nameTd.className="tc"; nameTd.textContent = dt.authorName||"익명";
+          titleTd.innerHTML = (dt.isPinned?"ð ":"") + esc(dt.title) + (dt.commentCount>0?"<span class='comment-count'>["+dt.commentCount+"]</span>":"");
+          const nameTd = document.createElement("td"); nameTd.className="tc"; nameTd.textContent = dt.authorName||"ìµëª";
           const dateTd = document.createElement("td"); dateTd.className="tc"; dateTd.textContent = date;
           const actionTd = document.createElement("td"); actionTd.className="col-actions";
           if (canEdit(dt.authorUid)) {
-            const editBtn = document.createElement("button"); editBtn.className="bb bb-xs bb-outline"; editBtn.textContent="수정";
+            const editBtn = document.createElement("button"); editBtn.className="bb bb-xs bb-outline"; editBtn.textContent="ìì ";
             editBtn.onclick = e => { e.stopPropagation(); startEdit(d.id); };
-            const delBtn = document.createElement("button"); delBtn.className="bb bb-xs bb-danger"; delBtn.textContent="삭제";
+            const delBtn = document.createElement("button"); delBtn.className="bb bb-xs bb-danger"; delBtn.textContent="ì­ì ";
             delBtn.onclick = e => { e.stopPropagation(); deletePost(d.id, dt.authorUid, dt.password); };
             actionTd.appendChild(editBtn); actionTd.appendChild(delBtn);
           }
@@ -292,7 +296,7 @@
       });
     }
 
-    /* ── 글 작성/수정 폼 ── */
+    /* ââ ê¸ ìì±/ìì  í¼ ââ */
     function showWriteForm(editData) {
       currentView = "write";
       const main = document.getElementById("main-content");
@@ -300,12 +304,12 @@
       const defName = currentUser ? (currentUser.displayName||currentUser.email.split("@")[0]) : "";
       main.innerHTML = "";
       const card = document.createElement("div"); card.className="form-card";
-      card.innerHTML = "<h2>"+(isEdit?"✏️ 글 수정":"✏️ 새 글 작성")+"</h2>"+
-        "<div class='fg'><label>작성자 이름</label><input id='w-name' type='text' class='bi' placeholder='익명'></div>"+
-        "<div class='fg'><label>비밀번호 <small>(비로그인 시 수정/삭제에 사용)</small></label><input id='w-pass' type='password' class='bi' placeholder='비밀번호 입력'"+(isEdit?" disabled":"")+" ></div>"+
-        "<div class='fg'><label>제목 *</label><input id='w-title' type='text' class='bi' placeholder='제목을 입력하세요'></div>"+
-        "<div class='fg'><label>내용 *</label><textarea id='w-body' class='bta' rows='9' placeholder='내용을 입력하세요...'></textarea></div>"+
-        "<div class='fa'><button class='bb' id='btn-submit'>"+(isEdit?"수정 완료":"등록하기")+"</button><button class='bb bb-outline' id='btn-cancel'>취소</button></div>";
+      card.innerHTML = "<h2>"+(isEdit?"âï¸ ê¸ ìì ":"âï¸ ì ê¸ ìì±")+"</h2>"+
+        "<div class='fg'><label>ìì±ì ì´ë¦</label><input id='w-name' type='text' class='bi' placeholder='ìµëª'></div>"+
+        "<div class='fg'><label>ë¹ë°ë²í¸ <small>(ë¹ë¡ê·¸ì¸ ì ìì /ì­ì ì ì¬ì©)</small></label><input id='w-pass' type='password' class='bi' placeholder='ë¹ë°ë²í¸ ìë ¥'"+(isEdit?" disabled":"")+" ></div>"+
+        "<div class='fg'><label>ì ëª© *</label><input id='w-title' type='text' class='bi' placeholder='ì ëª©ì ìë ¥íì¸ì'></div>"+
+        "<div class='fg'><label>ë´ì© *</label><textarea id='w-body' class='bta' rows='9' placeholder='ë´ì©ì ìë ¥íì¸ì...'></textarea></div>"+
+        "<div class='fa'><button class='bb' id='btn-submit'>"+(isEdit?"ìì  ìë£":"ë±ë¡íê¸°")+"</button><button class='bb bb-outline' id='btn-cancel'>ì·¨ì</button></div>";
       main.appendChild(card);
       document.getElementById("w-name").value = isEdit?(editData.authorName||""):defName;
       document.getElementById("w-title").value = isEdit?editData.title:"";
@@ -317,48 +321,48 @@
     async function submitPost() {
       const title=document.getElementById("w-title").value.trim();
       const body=document.getElementById("w-body").value.trim();
-      const name=document.getElementById("w-name").value.trim()||"익명";
+      const name=document.getElementById("w-name").value.trim()||"ìµëª";
       const pass=document.getElementById("w-pass").value;
-      if (!title||!body){alert("제목과 내용을 입력해주세요.");return;}
+      if (!title||!body){alert("ì ëª©ê³¼ ë´ì©ì ìë ¥í´ì£¼ì¸ì.");return;}
       try {
         await addDoc(collection(db,"posts"),{title,body,authorName:name,authorUid:currentUser?currentUser.uid:null,authorEmail:currentUser?currentUser.email:null,password:pass||null,commentCount:0,isPinned:false,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
-        alert("글이 등록되었습니다."); goList();
-      } catch(e){alert("등록 실패: "+e.message);}
+        alert("ê¸ì´ ë±ë¡ëììµëë¤."); goList();
+      } catch(e){alert("ë±ë¡ ì¤í¨: "+e.message);}
     }
 
     async function submitEdit(pid) {
       const title=document.getElementById("w-title").value.trim();
       const body=document.getElementById("w-body").value.trim();
-      if(!title||!body){alert("제목과 내용을 입력해주세요.");return;}
-      try { await updateDoc(doc(db,"posts",pid),{title,body,updatedAt:serverTimestamp()}); alert("수정되었습니다."); viewDetail(pid); }
-      catch(e){alert("수정 실패: "+e.message);}
+      if(!title||!body){alert("ì ëª©ê³¼ ë´ì©ì ìë ¥í´ì£¼ì¸ì.");return;}
+      try { await updateDoc(doc(db,"posts",pid),{title,body,updatedAt:serverTimestamp()}); alert("ìì ëììµëë¤."); viewDetail(pid); }
+      catch(e){alert("ìì  ì¤í¨: "+e.message);}
     }
 
-    /* ── 글 상세 ── */
+    /* ââ ê¸ ìì¸ ââ */
     async function viewDetail(pid) {
       currentView="detail"; currentPostId=pid;
       const main=document.getElementById("main-content");
-      main.innerHTML="<p class='loading-msg'>불러오는 중...</p>";
+      main.innerHTML="<p class='loading-msg'>ë¶ë¬ì¤ë ì¤...</p>";
       const ps=await getDoc(doc(db,"posts",pid));
-      if(!ps.exists()){alert("삭제된 글입니다.");goList();return;}
+      if(!ps.exists()){alert("ì­ì ë ê¸ìëë¤.");goList();return;}
       const d=ps.data();
       const date=d.createdAt?d.createdAt.toDate().toLocaleString("ko-KR"):"-";
-      const upd=d.updatedAt&&d.updatedAt.seconds!==d.createdAt.seconds?" (수정됨: "+d.updatedAt.toDate().toLocaleString("ko-KR")+")":"";
+      const upd=d.updatedAt&&d.updatedAt.seconds!==d.createdAt.seconds?" (ìì ë¨: "+d.updatedAt.toDate().toLocaleString("ko-KR")+")":"";
       const dcn=currentUser?(currentUser.displayName||currentUser.email.split("@")[0]):"";
       main.innerHTML="";
-      const backBtn=document.createElement("button"); backBtn.className="bb bb-outline btn-back"; backBtn.textContent="← 목록으로"; backBtn.onclick=goList;
+      const backBtn=document.createElement("button"); backBtn.className="bb bb-outline btn-back"; backBtn.textContent="â ëª©ë¡ì¼ë¡"; backBtn.onclick=goList;
       main.appendChild(backBtn);
       const card=document.createElement("div"); card.className="detail-card";
-      card.innerHTML="<div class='detail-header'><h2>"+(d.isPinned?"📌 ":"")+esc(d.title)+"</h2><div class='detail-meta'><span>작성자: <strong>"+esc(d.authorName||"익명")+"</strong></span><span>"+date+upd+"</span></div></div><div class='detail-body'>"+esc(d.body).replace(/\n/g,"<br>")+"</div>";
+      card.innerHTML="<div class='detail-header'><h2>"+(d.isPinned?"ð ":"")+esc(d.title)+"</h2><div class='detail-meta'><span>ìì±ì: <strong>"+esc(d.authorName||"ìµëª")+"</strong></span><span>"+date+upd+"</span></div></div><div class='detail-body'>"+esc(d.body).replace(/\n/g,"<br>")+"</div>";
       if(canEdit(d.authorUid)){
         const actions=document.createElement("div"); actions.className="detail-actions";
-        const eb=document.createElement("button"); eb.className="bb bb-sm"; eb.textContent="수정"; eb.onclick=()=>startEdit(pid);
-        const db2=document.createElement("button"); db2.className="bb bb-sm bb-danger"; db2.textContent="삭제"; db2.onclick=()=>deletePost(pid,d.authorUid,d.password);
+        const eb=document.createElement("button"); eb.className="bb bb-sm"; eb.textContent="ìì "; eb.onclick=()=>startEdit(pid);
+        const db2=document.createElement("button"); db2.className="bb bb-sm bb-danger"; db2.textContent="ì­ì "; db2.onclick=()=>deletePost(pid,d.authorUid,d.password);
         actions.appendChild(eb); actions.appendChild(db2); card.appendChild(actions);
       }
       main.appendChild(card);
       const cmtSection=document.createElement("div"); cmtSection.className="comment-section";
-      cmtSection.innerHTML="<h3>💬 댓글 <span id='cmt-count'></span></h3><div id='comment-list'></div><div class='comment-form'><input id='c-name' type='text' class='bi' placeholder='이름 (익명)'><input id='c-pass' type='password' class='bi' placeholder='비밀번호 (선택)'><textarea id='c-body' class='bta' rows='3' placeholder='댓글을 입력하세요...'></textarea><button class='bb' id='btn-submit-cmt'>댓글 등록</button></div>";
+      cmtSection.innerHTML="<h3>ð¬ ëê¸ <span id='cmt-count'></span></h3><div id='comment-list'></div><div class='comment-form'><input id='c-name' type='text' class='bi' placeholder='ì´ë¦ (ìµëª)'><input id='c-pass' type='password' class='bi' placeholder='ë¹ë°ë²í¸ (ì í)'><textarea id='c-body' class='bta' rows='3' placeholder='ëê¸ì ìë ¥íì¸ì...'></textarea><button class='bb' id='btn-submit-cmt'>ëê¸ ë±ë¡</button></div>";
       main.appendChild(cmtSection);
       document.getElementById("c-name").value=dcn;
       document.getElementById("btn-submit-cmt").onclick=()=>submitComment(pid);
@@ -368,35 +372,35 @@
     async function startEdit(pid) {
       const ps=await getDoc(doc(db,"posts",pid)); if(!ps.exists())return;
       const d=ps.data();
-      if(!canEdit(d.authorUid)){const pw=prompt("비밀번호를 입력하세요"); if(pw!==d.password){alert("비밀번호가 틀립니다.");return;}}
+      if(!canEdit(d.authorUid)){const pw=prompt("ë¹ë°ë²í¸ë¥¼ ìë ¥íì¸ì"); if(pw!==d.password){alert("ë¹ë°ë²í¸ê° íë¦½ëë¤.");return;}}
       showWriteForm({id:pid,...d});
     }
 
     async function deletePost(pid,authorUid,savedPw) {
-      if(!canEdit(authorUid)){const pw=prompt("비밀번호를 입력하세요"); if(pw!==savedPw){alert("비밀번호가 틀립니다.");return;}}
-      if(!confirm("정말 삭제하시겠습니까?"))return;
+      if(!canEdit(authorUid)){const pw=prompt("ë¹ë°ë²í¸ë¥¼ ìë ¥íì¸ì"); if(pw!==savedPw){alert("ë¹ë°ë²í¸ê° íë¦½ëë¤.");return;}}
+      if(!confirm("ì ë§ ì­ì íìê² ìµëê¹?"))return;
       try {
         const cs=await getDocs(collection(db,"posts",pid,"comments"));
         for(const c of cs.docs) await deleteDoc(c.ref);
-        await deleteDoc(doc(db,"posts",pid)); alert("삭제되었습니다."); goList();
-      } catch(e){alert("삭제 실패: "+e.message);}
+        await deleteDoc(doc(db,"posts",pid)); alert("ì­ì ëììµëë¤."); goList();
+      } catch(e){alert("ì­ì  ì¤í¨: "+e.message);}
     }
 
-    /* ── 댓글 ── */
+    /* ââ ëê¸ ââ */
     function loadComments(pid) {
       const q=query(collection(db,"posts",pid,"comments"),orderBy("createdAt","asc"));
       onSnapshot(q, snap=>{
         const ce=document.getElementById("cmt-count"); if(ce) ce.textContent="("+snap.size+")";
         const list=document.getElementById("comment-list"); if(!list)return;
         list.innerHTML="";
-        if(snap.empty){list.innerHTML="<p class='no-comment'>아직 댓글이 없습니다.</p>";return;}
+        if(snap.empty){list.innerHTML="<p class='no-comment'>ìì§ ëê¸ì´ ììµëë¤.</p>";return;}
         snap.docs.forEach(cd=>{
           const c=cd.data(); const cdate=c.createdAt?c.createdAt.toDate().toLocaleString("ko-KR"):"";
           const item=document.createElement("div"); item.className="comment-item";
           const meta=document.createElement("div"); meta.className="cmt-meta";
-          const strong=document.createElement("strong"); strong.textContent=c.authorName||"익명";
+          const strong=document.createElement("strong"); strong.textContent=c.authorName||"ìµëª";
           const ds=document.createElement("span"); ds.textContent=cdate;
-          const db3=document.createElement("button"); db3.className="bb bb-xs bb-danger"; db3.textContent="삭제";
+          const db3=document.createElement("button"); db3.className="bb bb-xs bb-danger"; db3.textContent="ì­ì ";
           db3.onclick=()=>deleteComment(pid,cd.id,c.authorUid||"",c.password||"");
           meta.appendChild(strong); meta.appendChild(ds); meta.appendChild(db3);
           const body=document.createElement("div"); body.className="cmt-body";
@@ -407,28 +411,28 @@
     }
 
     async function submitComment(pid) {
-      const name=document.getElementById("c-name").value.trim()||"익명";
+      const name=document.getElementById("c-name").value.trim()||"ìµëª";
       const pass=document.getElementById("c-pass").value;
       const body=document.getElementById("c-body").value.trim();
-      if(!body){alert("댓글 내용을 입력해주세요.");return;}
+      if(!body){alert("ëê¸ ë´ì©ì ìë ¥í´ì£¼ì¸ì.");return;}
       try {
         await addDoc(collection(db,"posts",pid,"comments"),{authorName:name,authorUid:currentUser?currentUser.uid:null,password:pass||null,body,createdAt:serverTimestamp()});
         const pr=doc(db,"posts",pid); const ps=await getDoc(pr);
         await updateDoc(pr,{commentCount:(ps.data().commentCount||0)+1});
         document.getElementById("c-body").value="";
-      } catch(e){alert("댓글 등록 실패: "+e.message);}
+      } catch(e){alert("ëê¸ ë±ë¡ ì¤í¨: "+e.message);}
     }
 
     async function deleteComment(pid,cid,auid,pw) {
       const canDel=currentUser&&(currentUser.uid===auid||isAdmin());
-      if(!canDel){const p=prompt("비밀번호를 입력하세요"); if(p!==pw){alert("비밀번호가 틀립니다.");return;}}
-      if(!confirm("댓글을 삭제하시겠습니까?"))return;
+      if(!canDel){const p=prompt("ë¹ë°ë²í¸ë¥¼ ìë ¥íì¸ì"); if(p!==pw){alert("ë¹ë°ë²í¸ê° íë¦½ëë¤.");return;}}
+      if(!confirm("ëê¸ì ì­ì íìê² ìµëê¹?"))return;
       try {
         await deleteDoc(doc(db,"posts",pid,"comments",cid));
         const pr=doc(db,"posts",pid); const ps=await getDoc(pr);
         const cnt=(ps.data().commentCount||1)-1;
         await updateDoc(pr,{commentCount:cnt<0?0:cnt});
-      } catch(e){alert("댓글 삭제 실패: "+e.message);}
+      } catch(e){alert("ëê¸ ì­ì  ì¤í¨: "+e.message);}
     }
 
     const goList=()=>{currentPostId=null;renderPostList();};
@@ -436,7 +440,7 @@
   </script>
 
   <script>
-    // 모바일 햄버거 메뉴
+    // ëª¨ë°ì¼ íë²ê±° ë©ë´
     (function(){
       const btn=document.getElementById("hamburgerBtn");
       const overlay=document.getElementById("drawerOverlay");
@@ -447,7 +451,7 @@
       function close(){drawer.classList.remove("open");overlay.classList.remove("open");document.body.style.overflow="";}
       btn.addEventListener("click",open); closeBtn.addEventListener("click",close); overlay.addEventListener("click",close);
     })();
-    // active 상태
+    // active ìí
     (function(){
       const path=location.pathname;
       document.querySelectorAll(".bottom-nav-item[data-nav], .drawer a[data-nav], #menu a[data-nav]").forEach(el=>{
