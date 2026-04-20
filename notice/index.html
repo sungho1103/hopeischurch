@@ -77,6 +77,27 @@
     .modal h3 { margin-bottom:18px; font-size:1.05rem; }
     .modal-close { position:absolute; top:12px; right:14px; background:none; border:none; font-size:1.3rem; cursor:pointer; color:#999; }
     small { color:#bbb; font-size:.75rem; }
+    /* 파일 업로드 */
+    .file-upload-area { border:2px dashed #ddd; border-radius:8px; padding:18px; text-align:center; cursor:pointer; transition:border-color .2s, background .2s; margin-bottom:4px; }
+    .file-upload-area:hover, .file-upload-area.dragover { border-color:#111; background:#f7f7f7; }
+    .file-upload-area input[type=file] { display:none; }
+    .file-upload-area .upload-hint { color:#aaa; font-size:.82rem; margin-top:6px; }
+    .file-preview-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .file-preview-item { position:relative; display:inline-block; }
+    .file-preview-item img { width:80px; height:80px; object-fit:cover; border-radius:6px; border:1px solid #eee; }
+    .file-preview-item .file-icon { width:80px; height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f3f5f9; border-radius:6px; border:1px solid #eee; font-size:.7rem; color:#555; gap:4px; }
+    .file-preview-item .remove-btn { position:absolute; top:-6px; right:-6px; background:#e63946; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:.7rem; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; }
+    .upload-progress { margin-top:8px; font-size:.82rem; color:#666; }
+    .attach-section { margin-top:16px; padding-top:14px; border-top:1px solid #eee; }
+    .attach-section h4 { font-size:.9rem; font-weight:600; margin-bottom:10px; color:#333; }
+    .attach-list { display:flex; flex-wrap:wrap; gap:10px; }
+    .attach-img { max-width:100%; border-radius:8px; margin-top:8px; cursor:pointer; }
+    .attach-img-thumb { width:120px; height:120px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid #eee; }
+    .attach-file-link { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:#f3f5f9; border-radius:6px; font-size:.85rem; color:#333; text-decoration:none; border:1px solid #e0e0e0; }
+    .attach-file-link:hover { background:#e8eaf0; text-decoration:none; }
+    .img-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:900; align-items:center; justify-content:center; cursor:pointer; }
+    .img-modal-overlay.show { display:flex; }
+    .img-modal-overlay img { max-width:92vw; max-height:92vh; border-radius:8px; }
 
     @media(max-width:768px){
       .post-table th, .post-table td { padding:8px 8px; font-size:.85rem; }
@@ -185,6 +206,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTS7eCGaNcuo9dKX-nYF-flNUlAC4dopM",
@@ -200,6 +222,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+  const storage = getStorage(app);
     let currentUser = null;
     let currentView = "list";
     let currentPostId = null;
@@ -298,25 +321,134 @@
     }
 
     /* ── 글 작성/수정 폼 ── */
+    /* ── 글 작성/수정 폼 ── */
+    let pendingFiles = [];
+
     function showWriteForm(editData) {
       currentView = "write";
+      pendingFiles = [];
       const main = document.getElementById("main-content");
       const isEdit = !!editData;
       const defName = currentUser ? (currentUser.displayName||currentUser.email.split("@")[0]) : "";
       main.innerHTML = "";
-      const card = document.createElement("div"); card.className="form-card";
+      const card = document.createElement("div");
+      card.className="form-card";
       card.innerHTML = "<h2>"+(isEdit?"✏️ 글 수정":"✏️ 새 글 작성")+"</h2>"+
         "<div class='fg'><label>작성자 이름</label><input id='w-name' type='text' class='bi' placeholder='익명'></div>"+
         "<div class='fg'><label>비밀번호 <small>(비로그인 시 수정/삭제에 사용)</small></label><input id='w-pass' type='password' class='bi' placeholder='비밀번호 입력'"+(isEdit?" disabled":"")+" ></div>"+
         "<div class='fg'><label>제목 *</label><input id='w-title' type='text' class='bi' placeholder='제목을 입력하세요'></div>"+
         "<div class='fg'><label>내용 *</label><textarea id='w-body' class='bta' rows='9' placeholder='내용을 입력하세요...'></textarea></div>"+
+        "<div class='fg'><label>📎 사진 / 파일 첨부</label>"+
+          "<div class='file-upload-area' id='upload-area'>"+
+            "<input type='file' id='file-input' multiple accept='image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.hwp,.zip'>"+
+            "<div>📁 클릭하거나 파일을 드래그해서 첨부</div>"+
+            "<div class='upload-hint'>이미지, PDF, Word, Excel, PPT, HWP, ZIP 지원 · 최대 20MB</div>"+
+          "</div>"+
+          "<div class='file-preview-list' id='file-preview'></div>"+
+        "</div>"+
+        "<div class='upload-progress' id='upload-progress'></div>"+
         "<div class='fa'><button class='bb' id='btn-submit'>"+(isEdit?"수정 완료":"등록하기")+"</button><button class='bb bb-outline' id='btn-cancel'>취소</button></div>";
       main.appendChild(card);
       document.getElementById("w-name").value = isEdit?(editData.authorName||""):defName;
       document.getElementById("w-title").value = isEdit?editData.title:"";
       if (isEdit) document.getElementById("w-body").value = editData.body||"";
+
+      if (isEdit && editData.attachments && editData.attachments.length > 0) {
+        window._existingAttachments = editData.attachments.map(a => ({...a}));
+        renderExistingAttachments(window._existingAttachments);
+      } else {
+        window._existingAttachments = [];
+      }
+
+      const fileInput = document.getElementById("file-input");
+      const uploadArea = document.getElementById("upload-area");
+      uploadArea.addEventListener("click", () => fileInput.click());
+      uploadArea.addEventListener("dragover", e => { e.preventDefault(); uploadArea.classList.add("dragover"); });
+      uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("dragover"));
+      uploadArea.addEventListener("drop", e => {
+        e.preventDefault(); uploadArea.classList.remove("dragover"); addFiles(e.dataTransfer.files);
+      });
+      fileInput.addEventListener("change", e => addFiles(e.target.files));
       document.getElementById("btn-submit").onclick = isEdit?()=>submitEdit(editData.id):submitPost;
       document.getElementById("btn-cancel").onclick = isEdit?()=>viewDetail(editData.id):goList;
+    }
+
+    function addFiles(fileList) {
+      Array.from(fileList).forEach(file => {
+        if (file.size > 20 * 1024 * 1024) { alert(file.name + " 파일이 20MB를 초과합니다."); return; }
+        pendingFiles.push({ file, previewUrl: file.type.startsWith("image/") ? URL.createObjectURL(file) : null, name: file.name, type: file.type });
+      });
+      renderPendingFiles();
+    }
+
+    function renderPendingFiles() {
+      const container = document.getElementById("file-preview");
+      if (!container) return;
+      const existing = document.getElementById("existing-files");
+      container.innerHTML = "";
+      if (existing) container.appendChild(existing);
+      pendingFiles.forEach((pf, idx) => {
+        const item = document.createElement("div");
+        item.className = "file-preview-item";
+        if (pf.previewUrl) {
+          item.innerHTML = `<img src="${pf.previewUrl}" alt="${pf.name}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #eee"><button class="remove-btn" type="button">✕</button>`;
+        } else {
+          const ext = pf.name.split(".").pop().toUpperCase();
+          item.innerHTML = `<div class="file-icon"><span style="font-size:1.4rem">📄</span><span>${ext}</span><span style="font-size:.62rem;word-break:break-all;max-width:70px;text-align:center">${pf.name.length>12?pf.name.slice(0,10)+"..":pf.name}</span></div><button class="remove-btn" type="button">✕</button>`;
+        }
+        item.querySelector(".remove-btn").onclick = e => { e.stopPropagation(); pendingFiles.splice(idx,1); renderPendingFiles(); };
+        container.appendChild(item);
+      });
+    }
+
+    function renderExistingAttachments(attachments) {
+      let container = document.getElementById("file-preview");
+      if (!container) return;
+      let existingDiv = document.getElementById("existing-files");
+      if (existingDiv) existingDiv.remove();
+      if (!attachments || attachments.length === 0) return;
+      existingDiv = document.createElement("div");
+      existingDiv.id = "existing-files";
+      existingDiv.style.cssText = "width:100%;margin-bottom:6px;";
+      existingDiv.innerHTML = "<div style='font-size:.8rem;color:#888;margin-bottom:4px;'>기존 첨부파일</div><div class='file-preview-list' id='existing-list'></div>";
+      const list = existingDiv.querySelector("#existing-list");
+      attachments.forEach((att, idx) => {
+        const item = document.createElement("div");
+        item.className = "file-preview-item";
+        if (att.type && att.type.startsWith("image/")) {
+          item.innerHTML = `<img src="${att.url}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #eee"><button class="remove-btn" type="button">✕</button>`;
+        } else {
+          const ext = att.name.split(".").pop().toUpperCase();
+          item.innerHTML = `<div class="file-icon"><span style="font-size:1.4rem">📄</span><span>${ext}</span></div><button class="remove-btn" type="button">✕</button>`;
+        }
+        item.querySelector(".remove-btn").onclick = e => {
+          e.stopPropagation();
+          window._existingAttachments.splice(idx,1);
+          renderExistingAttachments(window._existingAttachments);
+        };
+        list.appendChild(item);
+      });
+      container.insertBefore(existingDiv, container.firstChild);
+    }
+
+    async function uploadFiles(postId) {
+      const results = [];
+      for (let i = 0; i < pendingFiles.length; i++) {
+        const pf = pendingFiles[i];
+        const prog = document.getElementById("upload-progress");
+        if (prog) prog.textContent = `⏳ 파일 업로드 중... (${i+1}/${pendingFiles.length}) ${pf.name}`;
+        const path = `posts/${postId}/${Date.now()}_${pf.name}`;
+        const ref = storageRef(storage, path);
+        const snap = await new Promise((resolve, reject) => {
+          const task = uploadBytesResumable(ref, pf.file);
+          task.on("state_changed", null, reject, () => resolve(task.snapshot));
+        });
+        const url = await getDownloadURL(snap.ref);
+        results.push({ name: pf.name, url, type: pf.type, path });
+      }
+      const prog = document.getElementById("upload-progress");
+      if (prog) prog.textContent = "";
+      return results;
     }
 
     async function submitPost() {
@@ -325,18 +457,36 @@
       const name=document.getElementById("w-name").value.trim()||"익명";
       const pass=document.getElementById("w-pass").value;
       if (!title||!body){alert("제목과 내용을 입력해주세요.");return;}
+      const btn = document.getElementById("btn-submit");
+      btn.disabled = true; btn.textContent = "등록 중...";
       try {
-        await addDoc(collection(db,"posts"),{title,body,authorName:name,authorUid:currentUser?currentUser.uid:null,authorEmail:currentUser?currentUser.email:null,password:pass||null,commentCount:0,isPinned:false,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
-        alert("글이 등록되었습니다."); goList();
-      } catch(e){alert("등록 실패: "+e.message);}
+        const docRef = await addDoc(collection(db,"posts"),{title,body,authorName:name,authorUid:currentUser?currentUser.uid:null,authorEmail:currentUser?currentUser.email:null,password:pass||null,commentCount:0,isPinned:false,attachments:[],createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+        let attachments = [];
+        if (pendingFiles.length > 0) {
+          attachments = await uploadFiles(docRef.id);
+          await updateDoc(doc(db,"posts",docRef.id), {attachments});
+        }
+        alert("글이 등록되었습니다.");
+        goList();
+      } catch(e){btn.disabled=false;btn.textContent="등록하기";alert("등록 실패: "+e.message);}
     }
 
     async function submitEdit(pid) {
       const title=document.getElementById("w-title").value.trim();
       const body=document.getElementById("w-body").value.trim();
       if(!title||!body){alert("제목과 내용을 입력해주세요.");return;}
-      try { await updateDoc(doc(db,"posts",pid),{title,body,updatedAt:serverTimestamp()}); alert("수정되었습니다."); viewDetail(pid); }
-      catch(e){alert("수정 실패: "+e.message);}
+      const btn = document.getElementById("btn-submit");
+      btn.disabled = true; btn.textContent = "수정 중...";
+      try {
+        let attachments = [...(window._existingAttachments||[])];
+        if (pendingFiles.length > 0) {
+          const newFiles = await uploadFiles(pid);
+          attachments = attachments.concat(newFiles);
+        }
+        await updateDoc(doc(db,"posts",pid),{title,body,attachments,updatedAt:serverTimestamp()});
+        alert("수정되었습니다.");
+        viewDetail(pid);
+      } catch(e){btn.disabled=false;btn.textContent="수정 완료";alert("수정 실패: "+e.message);}
     }
 
     /* ── 글 상세 ── */
@@ -355,6 +505,23 @@
       main.appendChild(backBtn);
       const card=document.createElement("div"); card.className="detail-card";
       card.innerHTML="<div class='detail-header'><h2>"+(d.isPinned?"📌 ":"")+esc(d.title)+"</h2><div class='detail-meta'><span>작성자: <strong>"+esc(d.authorName||"익명")+"</strong></span><span>"+date+upd+"</span></div></div><div class='detail-body'>"+esc(d.body).replace(/\n/g,"<br>")+"</div>";
+    // 첨부파일 표시
+    if (d.attachments && d.attachments.length > 0) {
+      const attachDiv = document.createElement("div");
+      attachDiv.className = "attach-section";
+      const imgs = d.attachments.filter(a => a.type && a.type.startsWith("image/"));
+      const files = d.attachments.filter(a => !a.type || !a.type.startsWith("image/"));
+      let html = "<h4>📎 첨부파일</h4><div class='attach-list'>";
+      imgs.forEach(a => {
+        html += `<img src="${a.url}" class="attach-img-thumb" alt="${esc(a.name)}" data-url="${a.url}" onclick="showImgModal(this.dataset.url)">`;
+      });
+      files.forEach(a => {
+        html += `<a href="${a.url}" class="attach-file-link" target="_blank" download="${esc(a.name)}"><span>📄</span>${esc(a.name)}</a>`;
+      });
+      html += "</div>";
+      attachDiv.innerHTML = html;
+      card.appendChild(attachDiv);
+    }
             if(canEdit(d.authorUid) || d.password){
         const actions=document.createElement("div"); actions.className="detail-actions";
         const eb=document.createElement("button"); eb.className="bb bb-sm"; eb.textContent="수정"; eb.onclick=()=>startEdit(pid);
@@ -378,16 +545,23 @@
     }
 
     async function deletePost(pid,authorUid,savedPw) {
-      if(!canEdit(authorUid)){const pw=prompt("비밀번호를 입력하세요"); if(pw!==savedPw){alert("비밀번호가 틀립니다.");return;}}
-      if(!confirm("정말 삭제하시겠습니까?"))return;
-      try {
-        const cs=await getDocs(collection(db,"posts",pid,"comments"));
-        for(const c of cs.docs) await deleteDoc(c.ref);
-        await deleteDoc(doc(db,"posts",pid)); alert("삭제되었습니다."); goList();
-      } catch(e){alert("삭제 실패: "+e.message);}
-    }
+    if(!canEdit(authorUid)){const pw=prompt("비밀번호를 입력하세요"); if(pw!==savedPw){alert("비밀번호가 틀립니다.");return;}}
+    if(!confirm("정말 삭제하시겠습니까?"))return;
+    try {
+      const ps = await getDoc(doc(db,"posts",pid));
+      if (ps.exists() && ps.data().attachments) {
+        for (const att of ps.data().attachments) {
+          try { await deleteObject(storageRef(storage, att.path)); } catch(e2) {}
+        }
+      }
+      const cs=await getDocs(collection(db,"posts",pid,"comments"));
+      for(const c of cs.docs) await deleteDoc(c.ref);
+      await deleteDoc(doc(db,"posts",pid));
+      alert("삭제되었습니다."); goList();
+    } catch(e){alert("삭제 실패: "+e.message);}
+  }
 
-    /* ── 댓글 ── */
+  /* ── 댓글 ── */
     function loadComments(pid) {
       const q=query(collection(db,"posts",pid,"comments"),orderBy("createdAt","asc"));
       onSnapshot(q, snap=>{
@@ -437,6 +611,21 @@
     }
 
     const goList=()=>{currentPostId=null;renderPostList();};
+
+  // 이미지 전체화면 모달
+  window.showImgModal = function(url) {
+    let ov = document.getElementById("img-modal-overlay");
+    if (!ov) {
+      ov = document.createElement("div");
+      ov.id = "img-modal-overlay";
+      ov.className = "img-modal-overlay";
+      ov.innerHTML = "<img id='img-modal-img' src='' alt=''>";
+      ov.onclick = () => ov.classList.remove("show");
+      document.body.appendChild(ov);
+    }
+    document.getElementById("img-modal-img").src = url;
+    ov.classList.add("show");
+  };
     renderAuthBar(); renderPostList();
   </script>
 
