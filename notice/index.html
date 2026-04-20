@@ -282,7 +282,7 @@
           const nameTd = document.createElement("td"); nameTd.className="tc"; nameTd.textContent = dt.authorName||"익명";
           const dateTd = document.createElement("td"); dateTd.className="tc"; dateTd.textContent = date;
           const actionTd = document.createElement("td"); actionTd.className="col-actions";
-                    if (canEdit(dt.authorUid) || dt.password) {}
+                              if (canEdit(dt.authorUid) || dt.password) {
             const editBtn = document.createElement("button"); editBtn.className="bb bb-xs bb-outline"; editBtn.textContent="수정";
             editBtn.onclick = e => { e.stopPropagation(); startEdit(d.id); };
             const delBtn = document.createElement("button"); delBtn.className="bb bb-xs bb-danger"; delBtn.textContent="삭제";
@@ -355,7 +355,7 @@
       main.appendChild(backBtn);
       const card=document.createElement("div"); card.className="detail-card";
       card.innerHTML="<div class='detail-header'><h2>"+(d.isPinned?"📌 ":"")+esc(d.title)+"</h2><div class='detail-meta'><span>작성자: <strong>"+esc(d.authorName||"익명")+"</strong></span><span>"+date+upd+"</span></div></div><div class='detail-body'>"+esc(d.body).replace(/\n/g,"<br>")+"</div>";
-            if(canEdit(d.authorUid) || d.password){}
+            if(canEdit(d.authorUid) || d.password){
         const actions=document.createElement("div"); actions.className="detail-actions";
         const eb=document.createElement("button"); eb.className="bb bb-sm"; eb.textContent="수정"; eb.onclick=()=>startEdit(pid);
         const db2=document.createElement("button"); db2.className="bb bb-sm bb-danger"; db2.textContent="삭제"; db2.onclick=()=>deletePost(pid,d.authorUid,d.password);
