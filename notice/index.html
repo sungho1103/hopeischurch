@@ -206,7 +206,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTS7eCGaNcuo9dKX-nYF-flNUlAC4dopM",
@@ -222,7 +221,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-  const storage = getStorage(app);
     let currentUser = null;
     let currentView = "list";
     let currentPostId = null;
@@ -432,19 +430,21 @@
     }
 
     async function uploadFiles(postId) {
+      const CLOUD_NAME = "hopeischurch";
+      const UPLOAD_PRESET = "notice_upload";
       const results = [];
       for (let i = 0; i < pendingFiles.length; i++) {
         const pf = pendingFiles[i];
         const prog = document.getElementById("upload-progress");
-        if (prog) prog.textContent = `⏳ 파일 업로드 중... (${i+1}/${pendingFiles.length}) ${pf.name}`;
-        const path = `posts/${postId}/${Date.now()}_${pf.name}`;
-        const ref = storageRef(storage, path);
-        const snap = await new Promise((resolve, reject) => {
-          const task = uploadBytesResumable(ref, pf.file);
-          task.on("state_changed", null, reject, () => resolve(task.snapshot));
-        });
-        const url = await getDownloadURL(snap.ref);
-        results.push({ name: pf.name, url, type: pf.type, path });
+        if (prog) prog.textContent = `⏳ 업로드 중... (${i+1}/${pendingFiles.length}) ${pf.name}`;
+        const fd = new FormData();
+        fd.append("file", pf.file);
+        fd.append("upload_preset", UPLOAD_PRESET);
+        fd.append("folder", `posts/${postId}`);
+        const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method:"POST", body:fd });
+        if (!resp.ok) throw new Error("업로드 실패: " + pf.name);
+        const data = await resp.json();
+        results.push({ name: pf.name, url: data.secure_url, type: pf.type, publicId: data.public_id });
       }
       const prog = document.getElementById("upload-progress");
       if (prog) prog.textContent = "";
@@ -548,13 +548,7 @@
     if(!canEdit(authorUid)){const pw=prompt("비밀번호를 입력하세요"); if(pw!==savedPw){alert("비밀번호가 틀립니다.");return;}}
     if(!confirm("정말 삭제하시겠습니까?"))return;
     try {
-      const ps = await getDoc(doc(db,"posts",pid));
-      if (ps.exists() && ps.data().attachments) {
-        for (const att of ps.data().attachments) {
-          try { await deleteObject(storageRef(storage, att.path)); } catch(e2) {}
-        }
-      }
-      const cs=await getDocs(collection(db,"posts",pid,"comments"));
+const cs=await getDocs(collection(db,"posts",pid,"comments"));
       for(const c of cs.docs) await deleteDoc(c.ref);
       await deleteDoc(doc(db,"posts",pid));
       alert("삭제되었습니다."); goList();
