@@ -429,7 +429,7 @@
   </div>
 
   <footer style="border-top:1px solid #e8e8e8;margin-top:0;padding:28px 20px;text-align:center;font-size:.8rem;color:#aaa;line-height:1.4;">
-    <a href="/admin/" style="color:#aaa;">HOPEISCHURCH</a>, Korea.<br>
+    <a href="/admin/" style="color:#aaa;">HOPEISCHURCH</a>, Korea. &nbsp;|&nbsp; Hits: <span id="visitor-hit-count" style="font-variant-numeric:tabular-nums;">…</span><br>
     Copyright&copy; 2025-2026 <a href="https://sungho1103.github.io/" style="color:#aaa;">https://www.hopeischurch.com</a> All rights reserved. Designed by sungho.
     <a href="mailto:galtensh@gmail.com" style="color:#aaa;vertical-align:middle;margin-left:6px;display:inline-flex;align-items:center;" title="메일 보내기">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
@@ -648,6 +648,33 @@
       alert('홈화면 추가:\niOS Safari → 공유 버튼 → "홈 화면에 추가"\nAndroid Chrome → 브라우저 메뉴 → "홈 화면에 추가"');
     }
   }
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTS7eCGaNcuo9dKX-nYF-flNUlAC4dopM",
+      authDomain: "hopeischurch-sermon.firebaseapp.com",
+      databaseURL: "https://hopeischurch-sermon-default-rtdb.firebaseio.com",
+      projectId: "hopeischurch-sermon",
+      storageBucket: "hopeischurch-sermon.firebasestorage.app",
+      messagingSenderId: "423981952872",
+      appId: "1:423981952872:web:6c7a337334a42c4bde30dd"
+    };
+    const app = initializeApp(firebaseConfig, "visitor-counter");
+    const db = getFirestore(app);
+    (async () => {
+      try {
+        const ref = doc(db, "stats", "visitors");
+        const snap = await getDoc(ref);
+        if (!snap.exists()) { await setDoc(ref, { count: 1 }); }
+        else { await updateDoc(ref, { count: increment(1) }); }
+        const updated = await getDoc(ref);
+        const el = document.getElementById("visitor-hit-count");
+        if (el) el.textContent = updated.data().count.toLocaleString();
+      } catch(e) { console.warn("visitor counter error:", e); }
+    })();
   </script>
 </body>
 </html>
