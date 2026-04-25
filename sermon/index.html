@@ -17,7 +17,7 @@
        - 이 페이지에서만 적용되도록 .page-sermon로 스코프
     ================================================== */
 
-    body.page-sermon .wrap{ padding-top:0; }
+    body.page-sermon .wrap{ padding-to
     body.page-sermon main{ padding:0; }
     body.page-sermon .container{ padding:48px 20px 0; }
 
@@ -152,12 +152,10 @@
       top:0; left:0;
       width:100%; height:100%;
       border:0;
-      filter:grayscale(100%);
-      transition:filter .4s ease;
+      
+      
     }
-    .sermon-video-wrap:hover iframe{
-      filter:grayscale(0%);
-    }
+
 
     /* 댓글 */
     .page-sermon .comments{
@@ -327,7 +325,7 @@
             <div id="sermonVideo" style="display:none;">
               <div class="sermon-video-wrap">
                 <iframe id="sermonVideoEl" src=""
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope">
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen>
                 </iframe>
               </div>
             </div>
@@ -465,7 +463,7 @@
   function youtubeEmbedUrl(url){
     if(!url) return '';
     const m = url.match(/(?:youtube\.com\/watch\?.*v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-    return m ? `https://www.youtube.com/embed/${m[1]}?fs=0` : '';
+    return m ? `https://www.youtube.com/embed/${m[1]}?fs=1` : '';
   }
 
   function parseSermonTxt(txt){
