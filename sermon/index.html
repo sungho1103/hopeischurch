@@ -391,15 +391,28 @@
   }
 
   function extractSummary(text) {
-    // 헤더 정보(제목, 본문, 설교자 등) 건너뛰고 실제 설교 본문만 추출
-    var bodyStart = text.indexOf('사랑하는 성도');
-    if (bodyStart < 0) bodyStart = text.indexOf('\n\n');
-    if (bodyStart < 0) bodyStart = 0;
-    var body = text.substring(bodyStart).replace(/\r\n/g, ' ').replace(/\n/g, ' ').trim();
-    // 마침표/느낌표/물음표로 끝나는 문장 분리
-    var sentences = body.split(/(?<=다\.|니다\.|입니다\.|합니다\.)\s+/)
-      .map(function(s){ return s.trim(); })
-      .filter(function(s){ return s.length > 20; });
+    // txt 헤더(제목:, 본문:, 설교자:, 날짜:, 동영상: 한 줄) 이후 실제 설교 본문 추출
+    var body = text;
+    // 개행 2개 이상 이후가 본문이거나, 동영상: URL 다음이 본문
+    var youtubeIdx = body.indexOf('youtu');
+    if (youtubeIdx > 0) {
+      // youtu.be/xxx 이후 공백 이후 본문 시작
+      var afterYt = body.indexOf(' ', youtubeIdx + 10);
+      if (afterYt > 0) body = body.substring(afterYt).trim();
+    }
+    body = body.replace(/\r\n/g, ' ').replace(/\n/g, ' ').trim();
+    // 마침표류로 끝나는 문장 분리 (한국어)
+    var parts = body.split('.');
+    var sentences = [];
+    var cur = '';
+    for (var i = 0; i < parts.length; i++) {
+      cur += parts[i];
+      if (cur.trim().length > 20) {
+        sentences.push(cur.trim() + '.');
+        cur = '';
+        if (sentences.length >= 3) break;
+      }
+    }
     return sentences.slice(0, 3);
   }
   function fetchLatestVideo() {
