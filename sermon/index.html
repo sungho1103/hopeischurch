@@ -423,7 +423,11 @@
         var m = text.match(/youtu\.be\/([A-Za-z0-9_-]{11})/) ||
                 text.match(/youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})/);
         if (!m) throw new Error('no videoId in txt');
-        return { videoId: m[1], title: null, published: null, fullText: text };
+        // 제목 파싱
+        var titleMatch = text.match(/^제목[:：]\s*(.+)/m);
+        var parsedTitle = titleMatch ? titleMatch[1].trim() : null;
+        // 날짜 파싱 (txtFile에서 추출하므로 별도 파싱 불필요)
+        return { videoId: m[1], title: parsedTitle, published: null, fullText: text };
       });
   }
 
@@ -453,14 +457,14 @@
   }
 
   function renderHero() {
-    var heroEl  = document.getElementById('hero-latest');
+    var heroEl  = document.getElementById('hero-sermon');
     var bgEl    = document.getElementById('hero-bg');
     var titleEl = document.getElementById('hero-title');
     var metaEl  = document.getElementById('hero-meta');
     var iframe  = document.getElementById('hero-iframe');
-    var loadTxt = document.getElementById('hero-loading');
+    var loadTxt = document.getElementById('hero-video-loading');
     var summBox = document.getElementById('hero-summary');
-    var summList= document.getElementById('hero-summ-list');
+    var summList= document.getElementById('hero-summary-list');
 
     var txtFile = getLatestTxtFile();
 
@@ -485,7 +489,7 @@
         titleEl.textContent = ytTitle;
         metaEl.innerHTML = '<span>📅 ' + dateLabel + '</span>' +
           '<span class="dot"></span>' +
-          '<span>일요일 목사</span>' +
+          '<span>이일례 목사</span>' +
           '<span class="dot"></span>' +
           '<span>희망은교회</span>';
 
@@ -509,7 +513,7 @@
 
         iframe.src = 'https://www.youtube.com/embed/' + videoId + '?rel=0&modestbranding=1&color=white';
         iframe.style.display = 'block';
-        loadTxt.style.display = 'none';
+        if (loadTxt) loadTxt.style.display = 'none';
       });
   }
 
