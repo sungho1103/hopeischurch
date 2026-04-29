@@ -345,7 +345,7 @@
   .sermon-summary-label { font-size:0.7rem; font-weight:700; color:#fbbf24; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.8rem; }
   .sermon-summary-hero ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.65rem; }
   .sermon-summary-hero ul li { color:rgba(255,255,255,0.86); font-size:0.88rem; line-height:1.7; padding-left:1rem; position:relative; }
-  .sermon-summary-hero ul li::before { content:"›"; position:absolute; left:0; color:#fbbf24; font-weight:700; font-size:1.1rem; }
+  .sermon-summary-hero ul li::before { content:"\203A"; position:absolute; left:0; color:#fbbf24; font-weight:700; font-size:1.1rem; }
   .hero-video-wrap iframe { width:100%; aspect-ratio:16/9; border-radius:0.9rem; box-shadow:0 20px 50px rgba(0,0,0,0.55); border:1px solid rgba(255,255,255,0.1); }
   .hero-loading-txt { color:rgba(255,255,255,0.5); font-size:0.88rem; text-align:center; padding:3rem 1rem; }
   @keyframes heroUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
@@ -391,13 +391,17 @@
   }
 
   function extractSummary(text) {
-    var clean = text.replace(/\r\n/g, '\n').replace(/\n{2,}/g, ' ');
-    var sentences = clean.split(/[.!?]\s+/)
+    // 헤더 정보(제목, 본문, 설교자 등) 건너뛰고 실제 설교 본문만 추출
+    var bodyStart = text.indexOf('사랑하는 성도');
+    if (bodyStart < 0) bodyStart = text.indexOf('\n\n');
+    if (bodyStart < 0) bodyStart = 0;
+    var body = text.substring(bodyStart).replace(/\r\n/g, ' ').replace(/\n/g, ' ').trim();
+    // 마침표/느낌표/물음표로 끝나는 문장 분리
+    var sentences = body.split(/(?<=다\.|니다\.|입니다\.|합니다\.)\s+/)
       .map(function(s){ return s.trim(); })
-      .filter(function(s){ return s.length > 25; });
+      .filter(function(s){ return s.length > 20; });
     return sentences.slice(0, 3);
   }
-
   function fetchLatestVideo() {
     return fetch(PROXY_URL)
       .then(function(res){ return res.json(); })
