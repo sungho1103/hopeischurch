@@ -293,6 +293,190 @@
     </aside>
 
     <main>
+
+<!-- ============================================================
+     HERO SERMON SECTION - hopeischurch.com
+     YouTube 채널(UCA_BZv-LRo4miwSnJH6J7pA) 최신 영상 자동 감지
+     ============================================================ -->
+<style>
+  #hero-sermon {
+    position: relative;
+    min-height: 88vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: #0f172a;
+    margin-bottom: 0;
+  }
+  #hero-sermon .hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+  }
+  #hero-sermon::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(20,18,60,0.93) 0%, rgba(10,20,40,0.85) 50%, rgba(20,18,60,0.78) 100%);
+    z-index: 1;
+  }
+  #hero-sermon .hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6.5rem 2rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+    align-items: center;
+  }
+  .hero-badges { display:flex; align-items:center; gap:0.65rem; margin-bottom:1.1rem; }
+  .badge-ai { display:inline-flex; align-items:center; gap:0.4rem; background:rgba(251,191,36,0.18); border:1px solid rgba(251,191,36,0.5); color:#fbbf24; font-size:0.76rem; font-weight:700; padding:0.32rem 0.75rem; border-radius:9999px; animation:pulse-badge 2.5s ease-in-out infinite; }
+  @keyframes pulse-badge { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
+  .badge-latest { display:inline-flex; align-items:center; background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.28); color:#fff; font-size:0.76rem; font-weight:600; padding:0.32rem 0.75rem; border-radius:9999px; }
+  #hero-title { font-size:clamp(1.7rem,3.5vw,2.8rem); font-weight:800; color:#fff; line-height:1.25; margin:0 0 0.9rem; letter-spacing:-0.02em; }
+  .hero-meta { display:flex; align-items:center; gap:0.5rem; color:rgba(255,255,255,0.72); font-size:0.9rem; margin-bottom:1.6rem; flex-wrap:wrap; }
+  .hero-meta .dot { width:3px; height:3px; border-radius:50%; background:rgba(255,255,255,0.38); flex-shrink:0; }
+  .sermon-summary-hero { background:rgba(255,255,255,0.07); border-left:3px solid #fbbf24; border-radius:0 0.6rem 0.6rem 0; padding:1.1rem 1.4rem; backdrop-filter:blur(6px); }
+  .sermon-summary-label { font-size:0.7rem; font-weight:700; color:#fbbf24; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.8rem; }
+  .sermon-summary-hero ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.65rem; }
+  .sermon-summary-hero ul li { color:rgba(255,255,255,0.86); font-size:0.88rem; line-height:1.7; padding-left:1rem; position:relative; }
+  .sermon-summary-hero ul li::before { content:"\u203A"; position:absolute; left:0; color:#fbbf24; font-weight:700; font-size:1.1rem; }
+  .hero-video-wrap iframe { width:100%; aspect-ratio:16/9; border-radius:0.9rem; box-shadow:0 20px 50px rgba(0,0,0,0.55); border:1px solid rgba(255,255,255,0.1); }
+  .hero-loading-txt { color:rgba(255,255,255,0.5); font-size:0.88rem; text-align:center; padding:3rem 1rem; }
+  @keyframes heroUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+  .hero-left { animation:heroUp 0.65s ease forwards; }
+  .hero-right { animation:heroUp 0.65s ease 0.18s forwards; opacity:0; }
+  @media (max-width:768px) { #hero-sermon .hero-inner { grid-template-columns:1fr; gap:2rem; padding:5rem 1.25rem 2.5rem; } #hero-sermon { min-height:auto; } }
+</style>
+
+<section id="hero-sermon">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badges">
+        <span class="badge-ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> AI 자동 업데이트</span>
+        <span class="badge-latest">최신 설교</span>
+      </div>
+      <h2 id="hero-title">불러오는 중…</h2>
+      <div class="hero-meta" id="hero-meta"></div>
+      <div class="sermon-summary-hero" id="hero-summary" style="display:none">
+        <div class="sermon-summary-label">✦ 설교 요약</div>
+        <ul id="hero-summary-list"></ul>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-video-wrap">
+        <div class="hero-loading-txt" id="hero-video-loading">영상을 불러오는 중…</div>
+        <iframe id="hero-iframe" style="display:none" src="" title="최신 설교 영상" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var CHANNEL_ID = 'UCA_BZv-LRo4miwSnJH6J7pA';
+  var RSS_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + CHANNEL_ID;
+  var PROXY_URL = 'https://api.allorigins.win/get?url=' + encodeURIComponent(RSS_URL);
+
+  function getLatestTxtFile() {
+    var sel = document.querySelector('select');
+    if (!sel || !sel.options.length) return null;
+    return sel.options[0].value;
+  }
+
+  function extractSummary(text) {
+    var clean = text.replace(/\r\n/g, '\n').replace(/\n{2,}/g, ' ');
+    var sentences = clean.split(/[.!?]\s+/)
+      .map(function(s){ return s.trim(); })
+      .filter(function(s){ return s.length > 25; });
+    return sentences.slice(0, 3);
+  }
+
+  function fetchLatestVideo() {
+    return fetch(PROXY_URL)
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(data.contents, 'application/xml');
+        var entry = doc.querySelector('entry');
+        if (!entry) throw new Error('no entry');
+        var rawId = '';
+        var vidEl = entry.querySelector('videoId');
+        if (vidEl) {
+          rawId = vidEl.textContent;
+        } else {
+          var linkEl = entry.querySelector('link');
+          var href = linkEl ? (linkEl.getAttribute('href') || '') : '';
+          var m = href.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+          rawId = m ? m[1] : '';
+        }
+        var title = (entry.querySelector('title') || {textContent: ''}).textContent;
+        var pub = ((entry.querySelector('published') || {textContent: ''}).textContent).substring(0, 10);
+        return { videoId: rawId, title: title, published: pub };
+      })
+      .catch(function(e){ console.warn('[hero] RSS 실패:', e.message); return null; });
+  }
+
+  function renderHero() {
+    var titleEl  = document.getElementById('hero-title');
+    var metaEl   = document.getElementById('hero-meta');
+    var summBox  = document.getElementById('hero-summary');
+    var summList = document.getElementById('hero-summary-list');
+    var iframe   = document.getElementById('hero-iframe');
+    var loadTxt  = document.getElementById('hero-video-loading');
+    var bgEl     = document.getElementById('hero-bg');
+
+    fetchLatestVideo().then(function(yt){
+      var videoId = (yt && yt.videoId) ? yt.videoId : 'CKw2qJn6cW0';
+      var ytTitle = (yt && yt.title && yt.title.length > 2) ? yt.title : '최신 주일 설교';
+      var ytDate  = (yt && yt.published) ? yt.published : '2026-04-26';
+
+      bgEl.style.backgroundImage = 'url(https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg)';
+
+      var txtFile = getLatestTxtFile();
+      var dateLabel = txtFile ? txtFile.replace('.txt', '') : ytDate;
+
+      titleEl.textContent = ytTitle;
+      metaEl.innerHTML = '<span>📅 ' + dateLabel + '</span>' +
+        '<span class="dot"></span>' +
+        '<span>이일레 목사</span>' +
+        '<span class="dot"></span>' +
+        '<span>희망은교회</span>';
+
+      if (txtFile) {
+        fetch('/sermon/texts/' + txtFile)
+          .then(function(r){ if (!r.ok) throw new Error(); return r.text(); })
+          .then(function(fullText){
+            var lines = extractSummary(fullText);
+            if (lines.length) {
+              summList.innerHTML = lines.map(function(l){ return '<li>' + l + '</li>'; }).join('');
+              summBox.style.display = 'block';
+            }
+          })
+          .catch(function(){});
+      }
+
+      iframe.src = 'https://www.youtube.com/embed/' + videoId + '?rel=0&modestbranding=1&color=white';
+      iframe.style.display = 'block';
+      loadTxt.style.display = 'none';
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderHero);
+  } else {
+    renderHero();
+  }
+})();
+</script>
+<!-- ============================================================ HERO 끝 -->
+
       <div class="container">
         <div class="sermon-top">
           <div>
