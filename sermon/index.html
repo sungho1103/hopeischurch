@@ -423,10 +423,8 @@
         var m = text.match(/youtu\.be\/([A-Za-z0-9_-]{11})/) ||
                 text.match(/youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})/);
         if (!m) throw new Error('no videoId in txt');
-        // 제목 파싱
         var titleMatch = text.match(/^제목[:：]\s*(.+)/m);
         var parsedTitle = titleMatch ? titleMatch[1].trim() : null;
-        // 날짜 파싱 (txtFile에서 추출하므로 별도 파싱 불필요)
         return { videoId: m[1], title: parsedTitle, published: null, fullText: text };
       });
   }
@@ -456,8 +454,39 @@
       .catch(function(e){ console.warn('[hero] RSS 실패:', e.message); return null; });
   }
 
+  function waitForValidTxtFile() {
+    return new Promise(function(resolve) {
+      function check() {
+        var sel = document.querySelector('select');
+        if (sel && sel.options.length > 0) {
+          var val = sel.options[0].value;
+          if (val && /^\d{4}-\d{2}-\d{2}\.txt$/.test(val)) {
+            resolve(val);
+            return true;
+          }
+        }
+        return false;
+      }
+      if (check()) return;
+      var obs = new MutationObserver(function() {
+        if (check()) obs.disconnect();
+      });
+      var sel = document.querySelector('select');
+      if (sel) {
+        obs.observe(sel, { childList: true });
+      } else {
+        // select 자체가 없으면 body 관찰
+        obs.observe(document.body, { childList: true, subtree: true });
+      }
+      // 5초 후 타임아웃
+      setTimeout(function() {
+        obs.disconnect();
+        resolve(null);
+      }, 5000);
+    });
+  }
+
   function renderHero() {
-    var heroEl  = document.getElementById('hero-sermon');
     var bgEl    = document.getElementById('hero-bg');
     var titleEl = document.getElementById('hero-title');
     var metaEl  = document.getElementById('hero-meta');
@@ -466,55 +495,53 @@
     var summBox = document.getElementById('hero-summary');
     var summList= document.getElementById('hero-summary-list');
 
-    var txtFile = getLatestTxtFile();
+    waitForValidTxtFile().then(function(txtFile) {
+      fetchLatestVideoFromTxt(txtFile)
+        .catch(function(){ return null; })
+        .then(function(yt){
+          if (!yt || !yt.videoId) {
+            return fetchLatestVideoFromRSS();
+          }
+          return yt;
+        })
+        .then(function(yt){
+          var videoId = (yt && yt.videoId) ? yt.videoId : 'CKw2qJn6cW0';
+          var ytTitle = (yt && yt.title && yt.title.length > 2) ? yt.title : '최신 설교';
+          var ytDate  = (yt && yt.published) ? yt.published : '2026-04-26';
 
-    fetchLatestVideoFromTxt(txtFile)
-      .catch(function(){ return null; })
-      .then(function(yt){
-        if (!yt || !yt.videoId) {
-          // txt에서 못 얻으면 RSS 폴백
-          return fetchLatestVideoFromRSS();
-        }
-        return yt;
-      })
-      .then(function(yt){
-        var videoId = (yt && yt.videoId) ? yt.videoId : 'CKw2qJn6cW0';
-        var ytTitle = (yt && yt.title && yt.title.length > 2) ? yt.title : '최신 설교';
-        var ytDate  = (yt && yt.published) ? yt.published : '2026-04-26';
+          bgEl.style.backgroundImage = 'url(https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg)';
 
-        bgEl.style.backgroundImage = 'url(https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg)';
+          var dateLabel = txtFile ? txtFile.replace('.txt', '') : ytDate;
 
-        var dateLabel = txtFile ? txtFile.replace('.txt', '') : ytDate;
+          titleEl.textContent = ytTitle;
+          metaEl.innerHTML = '<span>📅 ' + dateLabel + '</span>' +
+            '<span class="dot"></span>' +
+            '<span>이일례 목사</span>' +
+            '<span class="dot"></span>' +
+            '<span>희망은교회</span>';
 
-        titleEl.textContent = ytTitle;
-        metaEl.innerHTML = '<span>📅 ' + dateLabel + '</span>' +
-          '<span class="dot"></span>' +
-          '<span>이일례 목사</span>' +
-          '<span class="dot"></span>' +
-          '<span>희망은교회</span>';
+          if (txtFile) {
+            var textPromise = (yt && yt.fullText)
+              ? Promise.resolve(yt.fullText)
+              : fetch('/sermon/texts/' + txtFile)
+                  .then(function(r){ if (!r.ok) throw new Error(); return r.text(); });
 
-        // 설교 요약 - txt에서 이미 fullText가 있으면 재사용, 없으면 새로 fetch
-        if (txtFile) {
-          var textPromise = (yt && yt.fullText)
-            ? Promise.resolve(yt.fullText)
-            : fetch('/sermon/texts/' + txtFile)
-                .then(function(r){ if (!r.ok) throw new Error(); return r.text(); });
+            textPromise
+              .then(function(fullText){
+                var lines = extractSummary(fullText);
+                if (lines.length) {
+                  summList.innerHTML = lines.map(function(l){ return '<li>' + l + '</li>'; }).join('');
+                  summBox.style.display = 'block';
+                }
+              })
+              .catch(function(){});
+          }
 
-          textPromise
-            .then(function(fullText){
-              var lines = extractSummary(fullText);
-              if (lines.length) {
-                summList.innerHTML = lines.map(function(l){ return '<li>' + l + '</li>'; }).join('');
-                summBox.style.display = 'block';
-              }
-            })
-            .catch(function(){});
-        }
-
-        iframe.src = 'https://www.youtube.com/embed/' + videoId + '?rel=0&modestbranding=1&color=white';
-        iframe.style.display = 'block';
-        if (loadTxt) loadTxt.style.display = 'none';
-      });
+          iframe.src = 'https://www.youtube.com/embed/' + videoId + '?rel=0&modestbranding=1&color=white';
+          iframe.style.display = 'block';
+          if (loadTxt) loadTxt.style.display = 'none';
+        });
+    });
   }
 
   if (document.readyState === 'loading') {
