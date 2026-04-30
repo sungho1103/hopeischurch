@@ -484,21 +484,36 @@
         return false;
       }
       if (check()) return;
+      // select가 없거나 아직 로딩 중이면 index.json에서 즉시 가져오기
+      var hasSel = !!document.querySelector('select');
+      if (!hasSel) {
+        // 메인 페이지 등 select가 없는 경우 index.json 사용
+        fetch('/sermon/texts/index.json', { cache: 'no-store' })
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            var files = (data.files || []).filter(function(f){ return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
+            resolve(files.length ? files[0] : null);
+          })
+          .catch(function(){ resolve(null); });
+        return;
+      }
+      // select가 있으면 MutationObserver로 기다림
       var obs = new MutationObserver(function() {
         if (check()) obs.disconnect();
       });
-      var sel = document.querySelector('select');
-      if (sel) {
-        obs.observe(sel, { childList: true });
-      } else {
-        // select 자체가 없으면 body 관찰
-        obs.observe(document.body, { childList: true, subtree: true });
-      }
+      obs.observe(document.querySelector('select'), { childList: true });
       // 5초 후 타임아웃
       setTimeout(function() {
         obs.disconnect();
-        resolve(null);
-      }, 5000);
+        // 타임아웃 시에도 index.json 시도
+        fetch('/sermon/texts/index.json', { cache: 'no-store' })
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            var files = (data.files || []).filter(function(f){ return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
+            resolve(files.length ? files[0] : null);
+          })
+          .catch(function(){ resolve(null); });
+      }, 3000);
     });
   }
 
