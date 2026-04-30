@@ -359,8 +359,7 @@
   <div class="hero-inner">
     <div class="hero-left">
       <div class="hero-badges">
-        <span class="badge-ai"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> AI 자동 업데이트</span>
-        <span class="badge-latest">최신 설교</span>
+        <span class="badge-latest">희망은 주일설교</span>
       </div>
       <h2 id="hero-title">불러오는 중…</h2>
       <div class="hero-meta" id="hero-meta"></div>
@@ -455,13 +454,41 @@
   }
 
   function waitForValidTxtFile() {
+    // 주일설교 키워드 확인 함수
+    function isJuilSermon(txtText) {
+      var titleMatch = txtText.match(/^제목[:：]\s*(.+)/m);
+      if (!titleMatch) return false;
+      var title = titleMatch[1].toLowerCase();
+      return title.includes('주일메시지') || title.includes('주일설교') || title.includes('sermon');
+    }
+    // index.json에서 최신 주일설교 파일 찾기
+    function findLatestJuilFromJson() {
+      return fetch('/sermon/texts/index.json', { cache: 'no-store' })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          var files = (data.files || []).filter(function(f){ return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
+          files.sort(function(a,b){ return b.localeCompare(a); });
+          var candidates = files.slice(0, 10);
+          return candidates.reduce(function(chain, file) {
+            return chain.then(function(found) {
+              if (found) return found;
+              return fetch('/sermon/texts/' + file)
+                .then(function(r){ return r.ok ? r.text() : ''; })
+                .then(function(txt){ return isJuilSermon(txt) ? file : null; })
+                .catch(function(){ return null; });
+            });
+          }, Promise.resolve(null));
+        })
+        .then(function(found){ return found || null; })
+        .catch(function(){ return null; });
+    }
     return new Promise(function(resolve) {
       function check() {
         var sel = document.querySelector('select');
         if (sel && sel.options.length > 0) {
           var val = sel.options[0].value;
           if (val && /^\d{4}-\d{2}-\d{2}\.txt$/.test(val)) {
-            resolve(val);
+            findLatestJuilFromJson().then(resolve);
             return true;
           }
         }
@@ -470,36 +497,22 @@
       if (check()) return;
       var hasSel = !!document.querySelector('select');
       if (!hasSel) {
-        // select 없는 경우 index.json에서 즉시 가져오기
-        fetch('/sermon/texts/index.json', { cache: 'no-store' })
-          .then(function(r){ return r.json(); })
-          .then(function(data){
-            var files = (data.files || []).filter(function(f){ return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
-            resolve(files.length ? files[0] : null);
-          })
-          .catch(function(){ resolve(null); });
+        findLatestJuilFromJson().then(resolve);
         return;
       }
       var obs = new MutationObserver(function() {
         if (check()) obs.disconnect();
       });
       obs.observe(document.querySelector('select'), { childList: true });
-      // 3초 타임아웃 - index.json 폴백
       setTimeout(function() {
         obs.disconnect();
         if (check()) return;
-        fetch('/sermon/texts/index.json', { cache: 'no-store' })
-          .then(function(r){ return r.json(); })
-          .then(function(data){
-            var files = (data.files || []).filter(function(f){ return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
-            resolve(files.length ? files[0] : null);
-          })
-          .catch(function(){ resolve(null); });
+        findLatestJuilFromJson().then(resolve);
       }, 3000);
     });
   }
 
-  function renderHero() {
+    function renderHero() {
     var bgEl    = document.getElementById('hero-bg');
     var titleEl = document.getElementById('hero-title');
     var metaEl  = document.getElementById('hero-meta');
