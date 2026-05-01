@@ -470,52 +470,32 @@
   }
 
   function waitForValidTxtFile() {
-    // 주일설교 키워드 확인 함수
-    function isJuilSermon(txtText) {
-      var titleMatch = txtText.match(/^제목[:：]\s*(.+)/m);
-      if (!titleMatch) return false;
-      var title = titleMatch[1].toLowerCase();
-      return title.includes('주일메시지') || title.includes('주일설교') || title.includes('sermon');
-    }
-    // index.json에서 최신 주일설교 파일 찾기
-    function findLatestJuilFromJson() {
-      return fetch('/sermon/texts/index.json', { cache: 'no-store' })
-        .then(function(r){ return r.json(); })
-        .then(function(data){
-          var files = (data.files || []).filter(function(f){ return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
-          files.sort(function(a,b){ return b.localeCompare(a); });
-          var candidates = files.slice(0, 10);
-          return candidates.reduce(function(chain, file) {
-            return chain.then(function(found) {
-              if (found) return found;
-              return fetch('/sermon/texts/' + file)
-                .then(function(r){ return r.ok ? r.text() : ''; })
-                .then(function(txt){ return isJuilSermon(txt) ? file : null; })
-                .catch(function(){ return null; });
-            });
-          }, Promise.resolve(null));
-        })
-        .then(function(found){ return found || null; })
-        .catch(function(){ return null; });
-    }
     return new Promise(function(resolve) {
+      var hasSel = !!document.querySelector('select');
+      if (!hasSel) {
+        // 메인 페이지: select 없음 → index.json 첫 번째 파일 즉시 사용 (가장 빠른 경로)
+        fetch('/sermon/texts/index.json', { cache: 'no-store' })
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            var files = (data.files || []).filter(function(f){ return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
+            resolve(files.length ? files[0] : null);
+          })
+          .catch(function(){ resolve(null); });
+        return;
+      }
+      // 설교 페이지: select가 있으면 MutationObserver로 대기
       function check() {
         var sel = document.querySelector('select');
         if (sel && sel.options.length > 0) {
           var val = sel.options[0].value;
           if (val && /^\d{4}-\d{2}-\d{2}\.txt$/.test(val)) {
-            findLatestJuilFromJson().then(resolve);
+            resolve(val);
             return true;
           }
         }
         return false;
       }
       if (check()) return;
-      var hasSel = !!document.querySelector('select');
-      if (!hasSel) {
-        findLatestJuilFromJson().then(resolve);
-        return;
-      }
       var obs = new MutationObserver(function() {
         if (check()) obs.disconnect();
       });
@@ -523,7 +503,13 @@
       setTimeout(function() {
         obs.disconnect();
         if (check()) return;
-        findLatestJuilFromJson().then(resolve);
+        fetch('/sermon/texts/index.json', { cache: 'no-store' })
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            var files = (data.files || []).filter(function(f){ return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
+            resolve(files.length ? files[0] : null);
+          })
+          .catch(function(){ resolve(null); });
       }, 3000);
     });
   }
