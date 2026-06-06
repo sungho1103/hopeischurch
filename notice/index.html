@@ -9,16 +9,16 @@
     .notice-wrap { max-width: 900px; margin: 0 auto; }
 
     /* 버튼 */
-    .bb { display:inline-block; padding:7px 16px; border-radius:6px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; background:#111; color:#fff; transition:background .15s; }
+    .bb { display:inline-block; padding:7x 16px; border-radius:6px; border:none; cursor:pointer; font-size:.88rem; font-weight:600; background:#111; color:#fff; transition:background .15s; }
     .bb:hover { background:#333; }
     .bb-outline { background:#fff; color:#111; border:1.5px solid #333; }
     .bb-outline:hover { background:#f3f5f9; }
     .bb-sm { padding:4px 10px; font-size:.78rem; }
     .bb-xs { padding:2px 7px; font-size:.72rem; border-radius:4px; }
-            .bb-danger { background:#888; color:#fff; border:none; }
+            .bb-danger { background:#888color:#fff; border:none; }
             .bb-danger:hover { background:#666; }
 
-    /* auth bar */
+    /* auth bar *
     .board-auth-bar { display:flex; align-items:center; gap:8px; margin-left:auto; }
     .board-auth-bar .auth-email { font-size:.82rem; color:#666; }
     .badge-admin { background:#e63946; color:#fff; font-size:.7rem; padding:2px 7px; border-radius:10px; }
@@ -279,7 +279,7 @@
         main.innerHTML = "";
         const header = document.createElement("div");
         header.className = "list-header";
-        header.innerHTML = "<h2>공지사항</h2>";
+        header.innerHTML = "<h2>게시판</h2>";
         const newBtn = document.createElement("button");
         newBtn.className = "bb"; newBtn.textContent = "✏️ 새 글 작성";
         newBtn.onclick = () => showWriteForm();
