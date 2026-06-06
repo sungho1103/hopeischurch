@@ -263,10 +263,6 @@
         if (isAdmin()) { const b = document.createElement("span"); b.className="badge-admin"; b.textContent="관리자"; bar.appendChild(b); }
         const em = document.createElement("span"); em.className="auth-email"; em.textContent=currentUser.email; bar.appendChild(em);
         const btn = document.createElement("button"); btn.className="bb bb-sm bb-outline"; btn.textContent="로그아웃"; btn.onclick=()=>signOut(auth); bar.appendChild(btn);
-      } else {
-        const b1 = document.createElement("button"); b1.className="bb bb-sm"; b1.textContent="로그인"; b1.onclick=()=>showModal("modal-login"); bar.appendChild(b1);
-        const b2 = document.createElement("button"); b2.className="bb bb-sm bb-outline"; b2.textContent="회원가입"; b2.onclick=()=>showModal("modal-register"); bar.appendChild(b2);
-      }
     }
 
     /* ── 글 목록 ── */
@@ -275,9 +271,9 @@
       const main = document.getElementById("main-content");
       main.innerHTML = "<p class='loading-msg'>불러오는 중...</p>";
       const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-      onSnapshot(q, snap => {
+      onSnapshot(q, snap => 
         main.innerHTML = "";
-        const header = document.createElement("div");
+        const header = document.createElement("dv");
         header.className = "list-header";
         header.innerHTML = "<h2>게시판</h2>";
         const newBtn = document.createElement("button");
