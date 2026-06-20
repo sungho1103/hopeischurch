@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>설교 YouTube 업로더 | 희망은교회</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+      font-size: 14px; background: #f5f5f5; color: #111; line-height: 1.6;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: #111; color: #fff; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 52px; position: sticky; top: 0; z-index: 100;
+    }
+    .header-brand { font-weight: 700; font-size: .95rem; }
+    .header-right  { display: flex; gap: 10px; align-items: center; }
+    .auth-badge {
+      font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600;
+    }
+    .auth-badge.ok  { background: #166534; color: #bbf7d0; }
+    .auth-badge.no  { background: #7f1d1d; color: #fecaca; }
+
+    /* ── Layout ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 32px 20px 80px; }
+
+    /* ── Setup banner ── */
+    .setup-banner {
+      background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px;
+      padding: 16px 20px; margin-bottom: 24px; font-size: 13px; line-height: 1.8;
+    }
+    .setup-banner strong { color: #c2410c; }
+    .setup-banner code {
+      background: #fef3c7; padding: 1px 6px; border-radius: 4px; font-size: 12px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff; border: 1px solid #e4e4e4; border-radius: 12px;
+      padding: 24px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: .95rem; font-weight: 700; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title .step {
+      background: #111; color: #fff; border-radius: 50%;
+      width: 22px; height: 22px; display: inline-flex;
+      align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
+    }
+
+    /* ── Form ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block; font-size: 11px; font-weight: 600; color: #555;
+      margin-bottom: 5px; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .form-group input, .form-group select {
+      width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 13px; font-family: inherit; outline: none; background: #fff;
+    }
+    .form-group input:focus { border-color: #555; }
+    .form-group input[type="file"] {
+      padding: 7px 10px; background: #fafafa; cursor: pointer;
+    }
+    .form-group .hint { font-size: 11px; color: #888; margin-top: 4px; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 11px 24px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; transition: background .15s, opacity .15s;
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary   { background: #111; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #333; }
+    .btn-secondary { background: #f0f0f0; color: #333; border: 1px solid #ddd; }
+    .btn-secondary:hover:not(:disabled) { background: #e4e4e4; }
+    .btn-youtube   { background: #ff0000; color: #fff; }
+    .btn-youtube:hover:not(:disabled) { background: #cc0000; }
+    .btn-google    { background: #fff; color: #333; border: 1px solid #ddd; }
+    .btn-google:hover { background: #f5f5f5; }
+    .btn-sm { padding: 7px 14px; font-size: 12px; }
+    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 20px; }
+
+    /* ── Progress ── */
+    .progress-wrap { margin-top: 16px; display: none; }
+    .progress-wrap.show { display: block; }
+    .progress-label { font-size: 12px; color: #555; margin-bottom: 6px; font-weight: 600; }
+    .progress-bar-bg { background: #eee; border-radius: 6px; height: 8px; overflow: hidden; }
+    .progress-bar    { background: #111; height: 100%; width: 0%; transition: width .4s; border-radius: 6px; }
+    .progress-bar.uploading { background: #ff0000; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+    .progress-bar.done { background: #16a34a; }
+
+    /* ── Status message ── */
+    .status-msg {
+      margin-top: 12px; padding: 12px 14px; border-radius: 8px;
+      font-size: 13px; display: none;
+    }
+    .status-msg.show { display: block; }
+    .status-msg.ok   { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .status-msg.err  { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .status-msg.info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+
+    /* ── Preview ── */
+    .preview-section { display: none; }
+    .preview-section.show { display: block; }
+    .thumbnail-preview {
+      width: 100%; max-width: 640px; border-radius: 8px;
+      border: 1px solid #e4e4e4; display: block;
+    }
+    .result-links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .result-link {
+      padding: 7px 14px; background: #f5f5f5; border: 1px solid #ddd;
+      border-radius: 6px; font-size: 12px; text-decoration: none; color: #333;
+      font-weight: 600;
+    }
+    .result-link:hover { background: #e4e4e4; }
+    .result-link.yt { background: #fff1f1; border-color: #fca5a5; color: #b91c1c; }
+    .result-link.yt:hover { background: #fee2e2; }
+
+    /* ── Upload result ── */
+    .upload-result {
+      display: none; background: #f0fdf4; border: 1px solid #bbf7d0;
+      border-radius: 10px; padding: 20px; text-align: center;
+    }
+    .upload-result.show { display: block; }
+    .upload-result h3 { font-size: 1rem; font-weight: 700; color: #166534; margin-bottom: 8px; }
+    .upload-result a {
+      display: inline-block; margin-top: 10px; padding: 10px 24px;
+      background: #ff0000; color: #fff; border-radius: 8px; font-size: 13px;
+      font-weight: 600; text-decoration: none;
+    }
+    .upload-result a:hover { background: #cc0000; }
+
+    /* ── Separator ── */
+    .sep { border: none; border-top: 1px solid #e4e4e4; margin: 4px 0 20px; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; padding: 10px 18px;
+      border-radius: 8px; font-size: 13px; font-weight: 600;
+      background: #111; color: #fff; opacity: 0; pointer-events: none;
+      transition: opacity .2s; z-index: 999;
+    }
+    .toast.show  { opacity: 1; }
+    .toast.err   { background: #c00; }
+    .toast.green { background: #166534; }
+
+    @media (max-width: 600px) {
+      .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════ Header ════════ -->
+<header class="header">
+  <span class="header-brand">희망은교회 — 설교 YouTube 업로더</span>
+  <div class="header-right">
+    <span id="authBadge" class="auth-badge {{ 'ok' if is_authed else 'no' }}">
+      {{ '✓ YouTube 인증됨' if is_authed else '✗ 미인증' }}
+    </span>
+    {% if is_authed %}
+      <button class="btn btn-sm btn-secondary" onclick="revokeAuth()">인증 해제</button>
+    {% else %}
+      <a href="/auth/start" class="btn btn-sm btn-google">🔗 YouTube 연결</a>
+    {% endif %}
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ════════ Setup Guide ════════ -->
+  {% if not has_secret %}
+  <div class="setup-banner">
+    <strong>⚠️ 초기 설정 필요</strong><br>
+    Google Cloud Console에서 YouTube Data API v3를 활성화하고 OAuth 2.0 클라이언트 ID를 만드세요.<br>
+    다운로드한 JSON 파일을 <code>youtube-uploader/client_secret.json</code>으로 저장 후 앱을 재시작하세요.<br>
+    <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">→ Google Cloud Console 바로가기</a>
+  </div>
+  {% endif %}
+
+  {% if request.args.get('authed') %}
+  <div class="status-msg ok show" style="margin-bottom:20px;">
+    ✅ YouTube 인증이 완료되었습니다! 이제 영상을 업로드할 수 있습니다.
+  </div>
+  {% endif %}
+
+  <!-- ════════ Step 1: 메타데이터 + 파일 입력 ════════ -->
+  <div class="card">
+    <div class="card-title"><span class="step">1</span> 설교 정보 입력</div>
+
+    <div class="form-grid-3">
+      <div class="form-group">
+        <label>날짜</label>
+        <input id="date" type="date" value="{{ today }}">
+      </div>
+      <div class="form-group">
+        <label>교회명</label>
+        <input id="churchName" type="text" value="희망은교회" placeholder="희망은교회">
+      </div>
+      <div class="form-group">
+        <label>설교자</label>
+        <input id="preacher" type="text" placeholder="이일례목사">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>설교 제목</label>
+      <input id="sermonTitle" type="text" placeholder="설교 제목을 입력하세요">
+    </div>
+
+    <div class="form-group">
+      <label>음성 파일 (m4a)</label>
+      <input id="audioFile" type="file" accept=".m4a,audio/*">
+      <div class="hint">m4a 파일을 선택하면 자동으로 영상과 썸네일이 생성됩니다.</div>
+    </div>
+
+    <!-- 공개 여부 -->
+    <div class="form-group" style="max-width:200px;">
+      <label>YouTube 공개 설정</label>
+      <select id="privacy">
+        <option value="public">공개</option>
+        <option value="unlisted">링크 공개</option>
+        <option value="private">비공개</option>
+      </select>
+    </div>
+
+    <!-- 진행 상태 (생성) -->
+    <div id="generateProgress" class="progress-wrap">
+      <div class="progress-label" id="generateLabel">썸네일 및 영상 생성 중…</div>
+      <div class="progress-bar-bg">
+        <div id="generateBar" class="progress-bar"></div>
+      </div>
+    </div>
+
+    <div id="generateStatus" class="status-msg"></div>
+
+    <div class="btn-row">
+      <button id="generateBtn" class="btn btn-primary" onclick="generate()">
+        🎬 썸네일 &amp; 영상 생성
+      </button>
+    </div>
+  </div>
+
+  <!-- ════════ Step 2: 미리보기 + 다운로드 ════════ -->
+  <div id="previewCard" class="card preview-section">
+    <div class="card-title"><span class="step">2</span> 미리보기 &amp; 다운로드</div>
+
+    <img id="thumbnailImg" class="thumbnail-preview" src="" alt="썸네일 미리보기">
+
+    <div class="result-links" id="resultLinks"></div>
+  </div>
+
+  <!-- ════════ Step 3: YouTube 업로드 ════════ -->
+  <div id="uploadCard" class="card preview-section">
+    <div class="card-title"><span class="step">3</span> YouTube 업로드</div>
+
+    {% if not is_authed %}
+    <div class="status-msg info show" style="margin-bottom:16px;">
+      ℹ️ YouTube에 업로드하려면 오른쪽 상단의 <strong>YouTube 연결</strong> 버튼으로 먼저 인증하세요.
+    </div>
+    {% endif %}
+
+    <!-- 진행 상태 (업로드) -->
+    <div id="uploadProgress" class="progress-wrap">
+      <div class="progress-label" id="uploadLabel">YouTube에 업로드 중… (파일 크기에 따라 수 분이 걸릴 수 있습니다)</div>
+      <div class="progress-bar-bg">
+        <div id="uploadBar" class="progress-bar uploading"></div>
+      </div>
+    </div>
+
+    <div id="uploadStatus" class="status-msg"></div>
+
+    <div id="uploadResult" class="upload-result">
+      <h3>🎉 업로드 완료!</h3>
+      <p id="uploadResultText" style="font-size:13px;color:#555;"></p>
+      <a id="uploadResultLink" href="#" target="_blank" rel="noopener">YouTube에서 보기 →</a>
+    </div>
+
+    <div class="btn-row">
+      <button id="uploadBtn" class="btn btn-youtube" onclick="upload()" {% if not is_authed %}disabled{% endif %}>
+        ▶ YouTube에 업로드
+      </button>
+      {% if not is_authed %}
+      <a href="/auth/start" class="btn btn-google">🔗 YouTube 연결하기</a>
+      {% endif %}
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ════════ Toast ════════ -->
+<div id="toast" class="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// 상태
+// ─────────────────────────────────────────────
+let currentSlug = null;
+let currentMeta = {};
+
+// ─────────────────────────────────────────────
+// 유틸
+// ─────────────────────────────────────────────
+function toast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type === 'err' ? ' err' : type === 'green' ? ' green' : '');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.className = 'toast', 3000);
+}
+
+function setStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = `status-msg ${type} show`;
+}
+
+function clearStatus(id) {
+  const el = document.getElementById(id);
+  el.className = 'status-msg';
+  el.textContent = '';
+}
+
+function animateBar(barId, duration, cls = '') {
+  const bar = document.getElementById(barId);
+  bar.style.width = '0%';
+  if (cls) bar.classList.add(cls);
+  let start = null;
+  function step(ts) {
+    if (!start) start = ts;
+    const p = Math.min(((ts - start) / duration) * 90, 90); // 90%까지만 자동 진행
+    bar.style.width = p + '%';
+    if (p < 90) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function finishBar(barId) {
+  const bar = document.getElementById(barId);
+  bar.style.width = '100%';
+  bar.classList.remove('uploading');
+  bar.classList.add('done');
+}
+
+// ─────────────────────────────────────────────
+// Step 1 – 영상 생성
+// ─────────────────────────────────────────────
+async function generate() {
+  const sermonTitle = document.getElementById('sermonTitle').value.trim();
+  const preacher    = document.getElementById('preacher').value.trim();
+  const date        = document.getElementById('date').value.trim();
+  const churchName  = document.getElementById('churchName').value.trim() || '희망은교회';
+  const audioFile   = document.getElementById('audioFile').files[0];
+
+  if (!sermonTitle) { toast('설교 제목을 입력하세요.', 'err'); return; }
+  if (!preacher)    { toast('설교자를 입력하세요.', 'err'); return; }
+  if (!date)        { toast('날짜를 선택하세요.', 'err'); return; }
+  if (!audioFile)   { toast('음성 파일(m4a)을 선택하세요.', 'err'); return; }
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  clearStatus('generateStatus');
+
+  // 진행 바 표시
+  const prog = document.getElementById('generateProgress');
+  prog.classList.add('show');
+  animateBar('generateBar', 25000); // ~25초 예상
+
+  const fd = new FormData();
+  fd.append('sermonTitle', sermonTitle);
+  fd.append('preacher',    preacher);
+  fd.append('date',        date);
+  fd.append('churchName',  churchName);
+  fd.append('audioFile',   audioFile);
+
+  try {
+    const res  = await fetch('/generate', { method: 'POST', body: fd });
+    const data = await res.json();
+
+    finishBar('generateBar');
+
+    if (!res.ok || data.error) {
+      setStatus('generateStatus', '❌ ' + (data.error || '알 수 없는 오류'), 'err');
+      btn.disabled = false;
+      return;
+    }
+
+    currentSlug = data.slug;
+    currentMeta = { sermonTitle, preacher, date, churchName };
+
+    // 미리보기 카드 표시
+    document.getElementById('thumbnailImg').src = data.thumbnailUrl + '?t=' + Date.now();
+    document.getElementById('resultLinks').innerHTML = `
+      <a class="result-link" href="${data.thumbnailUrl}" download>⬇ 썸네일 다운로드</a>
+      <a class="result-link" href="${data.videoUrl}" download>⬇ 영상 다운로드 (mp4)</a>
+    `;
+    document.getElementById('previewCard').classList.add('show');
+    document.getElementById('uploadCard').classList.add('show');
+
+    setStatus('generateStatus', '✅ 썸네일과 영상이 생성되었습니다!', 'ok');
+    toast('생성 완료!', 'green');
+
+  } catch (err) {
+    finishBar('generateBar');
+    setStatus('generateStatus', '❌ 네트워크 오류: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─────────────────────────────────────────────
+// Step 3 – YouTube 업로드
+// ─────────────────────────────────────────────
+async function upload() {
+  if (!currentSlug) {
+    toast('먼저 영상을 생성하세요.', 'err');
+    return;
+  }
+
+  const privacy = document.getElementById('privacy').value;
+  const btn     = document.getElementById('uploadBtn');
+  btn.disabled  = true;
+  clearStatus('uploadStatus');
+  document.getElementById('uploadResult').classList.remove('show');
+
+  // 진행 바
+  const prog = document.getElementById('uploadProgress');
+  prog.classList.add('show');
+  animateBar('uploadBar', 120000); // ~2분 예상
+
+  try {
+    const res  = await fetch('/upload', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ slug: currentSlug, meta: currentMeta, privacy }),
+    });
+    const data = await res.json();
+
+    finishBar('uploadBar');
+
+    if (!res.ok || data.error) {
+      setStatus('uploadStatus', '❌ ' + (data.error || '업로드 실패'), 'err');
+      btn.disabled = false;
+      return;
+    }
+
+    // 성공
+    document.getElementById('uploadResultText').textContent =
+      `영상 ID: ${data.videoId}`;
+    document.getElementById('uploadResultLink').href = data.videoUrl;
+    document.getElementById('uploadResult').classList.add('show');
+    toast('업로드 완료!', 'green');
+
+  } catch (err) {
+    finishBar('uploadBar');
+    setStatus('uploadStatus', '❌ 네트워크 오류: ' + err.message, 'err');
+    btn.disabled = false;
+  }
+}
+
+// ─────────────────────────────────────────────
+// 인증 해제
+// ─────────────────────────────────────────────
+async function revokeAuth() {
+  if (!confirm('YouTube 인증을 해제하시겠습니까?')) return;
+  await fetch('/auth/revoke', { method: 'POST' });
+  location.reload();
+}
+
+// ─────────────────────────────────────────────
+// 날짜 기본값
+// ─────────────────────────────────────────────
+(function() {
+  const d  = document.getElementById('date');
+  if (!d.value) {
+    const now = new Date();
+    d.value = now.toISOString().slice(0, 10);
+  }
+})();
+</script>
+</body>
+</html>
