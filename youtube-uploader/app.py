@@ -177,9 +177,12 @@ def generate_thumbnail(
     # ── 하단: 설교자 | 날짜 ──
     font_meta = _find_korean_font(38)
 
-    # 설교자 (왼쪽)
-    preacher_text = f"✝  {preacher}"
-    draw.text((56, H - 108), preacher_text, font=font_meta, fill=(196, 181, 253))  # violet-300
+    # 설교자 (왼쪽) – 십자가 아이콘은 폰트 글리프 대신 직접 그림
+    cross_color = (196, 181, 253)  # violet-300
+    cx, cy = 70, H - 90
+    draw.line([(cx, cy - 18), (cx, cy + 18)], fill=cross_color, width=5)
+    draw.line([(cx - 12, cy - 6), (cx + 12, cy - 6)], fill=cross_color, width=5)
+    draw.text((100, H - 108), preacher, font=font_meta, fill=cross_color)
 
     # 날짜 (오른쪽)
     bbox_date = draw.textbbox((0, 0), date, font=font_meta)
