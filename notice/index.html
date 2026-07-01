@@ -263,6 +263,7 @@
         if (isAdmin()) { const b = document.createElement("span"); b.className="badge-admin"; b.textContent="관리자"; bar.appendChild(b); }
         const em = document.createElement("span"); em.className="auth-email"; em.textContent=currentUser.email; bar.appendChild(em);
         const btn = document.createElement("button"); btn.className="bb bb-sm bb-outline"; btn.textContent="로그아웃"; btn.onclick=()=>signOut(auth); bar.appendChild(btn);
+      }
     }
 
     /* ── 글 목록 ── */
