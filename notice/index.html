@@ -271,9 +271,9 @@
       const main = document.getElementById("main-content");
       main.innerHTML = "<p class='loading-msg'>불러오는 중...</p>";
       const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-      onSnapshot(q, snap => 
+      onSnapshot(q, snap => {
         main.innerHTML = "";
-        const header = document.createElement("dv");
+        const header = document.createElement("div");
         header.className = "list-header";
         header.innerHTML = "<h2>게시판</h2>";
         const newBtn = document.createElement("button");
