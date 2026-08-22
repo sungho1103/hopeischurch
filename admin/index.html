@@ -664,12 +664,11 @@ let _noticeSha = null;
 
 async function loadNotice() {
   try {
-    const { text, sha } = await ghGet('data/notice.json');
-    _noticeSha = sha;
-    const n = JSON.parse(text);
+    const res = await fetch('/data/notice.json?_=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    const n = await res.json();
     renderNoticeItems(n.items || []);
   } catch(e) {
-    _noticeSha = null;
     renderNoticeItems([]);
   }
 }
@@ -737,9 +736,9 @@ let _committeeData = [];
 
 async function loadCommittee() {
   try {
-    const { text, sha } = await ghGet('bulletin/data/committee.json');
-    _committeeSha  = sha;
-    _committeeData = JSON.parse(text);
+    const res = await fetch('/bulletin/data/committee.json?_=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    _committeeData = await res.json();
     renderCommitteeTable();
   } catch(e) {
     toast('예배위원 로드 실패: ' + e.message, 'err');
@@ -811,9 +810,9 @@ let _currentBulletinSha = null;
 
 async function loadBulletinIndex() {
   try {
-    const { text, sha } = await ghGet('bulletin/data/index.json');
-    _bulletinIndexSha = sha;
-    _bulletinIndex    = JSON.parse(text);
+    const res = await fetch('/bulletin/data/index.json?_=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    _bulletinIndex = await res.json();
     const sel = document.getElementById('bulletinWeekSelect');
     sel.innerHTML = '<option value="">— 주차 선택 —</option>' +
       _bulletinIndex.map(w =>
@@ -827,9 +826,9 @@ async function loadBulletinIndex() {
 async function loadBulletinWeek(weekId) {
   if (!weekId) { document.getElementById('bulletinForm').style.display = 'none'; return; }
   try {
-    const { text, sha } = await ghGet(`bulletin/data/${weekId}.json`);
-    _currentBulletinSha = sha;
-    fillBulletinForm(JSON.parse(text));
+    const res = await fetch(`/bulletin/data/${weekId}.json?_=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    fillBulletinForm(await res.json());
     document.getElementById('bulletinForm').style.display = '';
   } catch(e) {
     toast('주보 로드 실패: ' + e.message, 'err');
@@ -1011,9 +1010,10 @@ async function saveBulletin() {
 
 async function loadSermonIndex() {
   try {
-    const { text, sha } = await ghGet('sermon/texts/index.json');
-    _sermonIndexSha = sha;
-    _sermonFiles = (JSON.parse(text).files || [])
+    const res = await fetch('/sermon/texts/index.json?_=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    _sermonFiles = (data.files || [])
       .filter(f => /\.txt$/i.test(f))
       .sort((a, b) => b.localeCompare(a));
     const sel = document.getElementById('sermonFileSelect');
@@ -1033,10 +1033,10 @@ async function loadSermonIndex() {
 async function loadSermon(filename) {
   if (!filename) { document.getElementById('sermonForm').style.display = 'none'; return; }
   try {
-    const { text, sha } = await ghGet(`sermon/texts/${filename}`);
+    const res = await fetch(`/sermon/texts/${filename}?_=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
     _currentSermonFile = filename;
-    _currentSermonSha  = sha;
-    fillSermonForm(filename, text);
+    fillSermonForm(filename, await res.text());
     document.getElementById('sermonForm').style.display = '';
   } catch(e) {
     toast('설교 로드 실패: ' + e.message, 'err');
