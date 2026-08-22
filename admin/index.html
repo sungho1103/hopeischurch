@@ -864,7 +864,13 @@ async function newBulletinWeek() {
 
   // 예배위원 데이터에서 해당 날짜 담당자 자동 기입
   const roleToStep = { '기도': '기도', '찬양': '특송', '헌금위원': '헌금' };
-  let committeeMap = {};  // step → name
+  const nameToTitle = {
+    '김영인': '김영인목사', '이일례': '이일례목사',
+    '권성호': '권성호전도사',
+    '임문진': '임문진권사', '윤희정': '윤희정권사',
+    '류옥진': '류옥진집사', '김민영': '김민영집사', '원지애': '원지애집사'
+  };
+  let committeeMap = {};  // step → name(직분 포함)
   try {
     const cRes = await fetch('/bulletin/data/committee.json?_=' + Date.now(), { cache: 'no-store' });
     if (cRes.ok) {
@@ -873,7 +879,9 @@ async function newBulletinWeek() {
         .filter(c => c.week_id === weekId);
       matched.forEach(c => {
         const step = roleToStep[c.role];
-        if (step && c.name) committeeMap[step] = c.name;
+        if (step && c.name) {
+          committeeMap[step] = nameToTitle[c.name] || c.name;
+        }
       });
     }
   } catch(e) {
@@ -889,7 +897,7 @@ async function newBulletinWeek() {
       }
       return item;
     });
-    const filled = Object.keys(committeeMap).join(', ');
+    const filled = Object.keys(committeeMap).map(k => committeeMap[k]).join(', ');
     toast('예배위원 자동 기입: ' + filled);
   }
 
