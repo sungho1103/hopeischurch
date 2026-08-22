@@ -862,6 +862,37 @@ async function newBulletinWeek() {
     }
   }
 
+  // 예배위원 데이터에서 해당 날짜 담당자 자동 기입
+  const roleToStep = { '기도': '기도', '찬양': '특송', '헌금위원': '헌금' };
+  let committeeMap = {};  // step → name
+  try {
+    const cRes = await fetch('/bulletin/data/committee.json?_=' + Date.now(), { cache: 'no-store' });
+    if (cRes.ok) {
+      const committeeAll = await cRes.json();
+      const matched = (Array.isArray(committeeAll) ? committeeAll : [])
+        .filter(c => c.week_id === weekId);
+      matched.forEach(c => {
+        const step = roleToStep[c.role];
+        if (step && c.name) committeeMap[step] = c.name;
+      });
+    }
+  } catch(e) {
+    console.warn('예배위원 자동 기입용 데이터 로드 실패:', e);
+  }
+
+  // worship_order에 예배위원 담당자 반영
+  let worshipOrder = prev.worship_order || [];
+  if (Object.keys(committeeMap).length > 0) {
+    worshipOrder = worshipOrder.map(item => {
+      if (committeeMap[item.step]) {
+        return { ...item, person: committeeMap[item.step] };
+      }
+      return item;
+    });
+    const filled = Object.keys(committeeMap).join(', ');
+    toast('예배위원 자동 기입: ' + filled);
+  }
+
   // 호수 자동 증가 (예: "26-33" → "26-34")
   let nextIssue = '';
   const lastEntry = (_bulletinIndex || []).find(w => w.issue);
@@ -877,7 +908,7 @@ async function newBulletinWeek() {
 
   fillBulletinForm({
     week: { week_id: weekId, date: weekId.replace(/-/g, '.'), issue: nextIssue, title: '주일예배' },
-    worship_order: prev.worship_order || [],
+    worship_order: worshipOrder,
     memory_verse:  prev.memory_verse  || [],
     news:          prev.news          || []
   });
