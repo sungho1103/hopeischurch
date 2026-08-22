@@ -6,16 +6,14 @@
 
   <title>주일 설교 | 희망은교회</title>
 
-  <!-- ✅ 모든 페이지 공통 레이아웃 -->
-<link rel="stylesheet" href="/assets/common.css?v=20260411-01">
+  <!-- Pretendard 폰트 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 
-  <!-- ✅ 설교 페이지 전용 스타일: 반드시 page scope로 격리 -->
+  <!-- ✅ 모든 페이지 공통 레이아웃 -->
+  <link rel="stylesheet" href="/assets/common.css?v=20260822-3">
+
+  <!-- 설교 페이지 전용 스타일 -->
   <style>
-    /* ==================================================
-       Sermon Page (Scoped)
-       - 공통 헤더/상단메뉴/기본 스타일 깨짐 방지
-       - 이 페이지에서만 적용되도록 .page-sermon로 스코프
-    ================================================== */
 
     body.page-sermon .wrap{ padding-top:0; }
     body.page-sermon main{ padding:0; }
@@ -35,218 +33,109 @@
       flex-wrap:wrap;
     }
 
-    .page-sermon .muted{
-      color:#666;
-      font-size:0.9rem;
-      line-height:1.7;
-    }
+    .page-sermon .muted{ color:var(--c-text-sub); font-size:0.9rem; line-height:1.7; }
+    .page-sermon main h1{ margin:0; font-size:var(--fs-h1,2.4rem); font-weight:800; letter-spacing:-.03em; }
 
-    /* ❌ h1 전역 금지 → ✅ 설교 페이지 main 제목만 */
-    .page-sermon main h1{
-      margin:0;
-      font-size:1.85rem;
-      letter-spacing:-.02em;
-    }
-
-    .page-sermon .grid{
-      display:grid;
-      grid-template-columns: 320px 1fr;
-      gap:16px;
-    }
+    .page-sermon .grid{ display:grid; grid-template-columns:320px 1fr; gap:16px; }
 
     .page-sermon .panel{
-      border:1px solid #eee;
-      border-radius:16px;
-      padding:14px;
-      background:#fff;
+      border:1px solid var(--c-border);
+      border-radius:var(--radius-md);
+      padding:16px;
+      background:var(--c-bg);
+      transition:transform var(--dur-normal,0.3s) var(--ease-out), box-shadow var(--dur-normal,0.3s) var(--ease-out);
     }
+    .page-sermon .panel:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
 
     .page-sermon .select{
       width:100%;
       padding:10px 12px;
-      border:2px solid #111;
-      border-radius:12px;
+      border:1.5px solid var(--c-accent);
+      border-radius:var(--radius-sm);
       font-size:0.9rem;
-      background:#111;
+      background:var(--c-accent);
       color:#fff;
-    }
-
-    .page-sermon .badge{
-      display:inline-block;
-      padding:4px 10px;
-      border:1px solid #e6e6e6;
-      border-radius:999px;
-      color:#555;
-      font-size:0.75rem;
-      background:#fff;
     }
 
     .page-sermon .sermon-title{
       font-size:2.1rem;
-      font-weight:300;
+      font-weight:400;
       margin:0 0 10px;
       letter-spacing:-.03em;
     }
 
-    .page-sermon .meta-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin:0 0 12px;
-    }
+    .page-sermon .meta-row{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; }
 
     .page-sermon pre{
-      margin:0;
-      white-space:pre-wrap;
-      word-break:break-word;
-      font-size:0.9rem;
-      line-height:1.8;
-      font-family:inherit;
-      transition:font-size .2s;
+      margin:0; white-space:pre-wrap; word-break:break-word;
+      font-size:0.9rem; line-height:1.85; font-family:inherit; transition:font-size .2s;
     }
-    .font-size-ctrl{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      flex-shrink:0;
-    }
+    .font-size-ctrl{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
     .sermon-title-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin:0 0 10px;
-      gap:12px;
+      display:flex; justify-content:space-between; align-items:center; margin:0 0 10px; gap:12px;
     }
     .sermon-title-row .sermon-title{ margin:0; }
     .font-size-ctrl button{
-      background:none;
-      border:1px solid #ccc;
-      border-radius:6px;
-      padding:3px 9px;
-      font-size:0.78rem;
-      cursor:pointer;
-      color:#111;
-      line-height:1.4;
+      background:none; border:1px solid var(--c-border); border-radius:8px;
+      padding:3px 9px; font-size:0.78rem; cursor:pointer; color:var(--c-text); line-height:1.4;
     }
-    .font-size-ctrl button:hover:not(:disabled){ background:#f3f3f3; }
+    .font-size-ctrl button:hover:not(:disabled){ background:var(--c-bg-subtle); }
     .font-size-ctrl button:disabled{ opacity:.35; cursor:default; }
-    .font-size-ctrl .fs-label{ font-size:0.72rem; color:#111; }
-    #fsPlus{ background:#111; color:#fff; border-color:#111; }
-    #fsPlus:hover:not(:disabled){ background:#333; }
+    .font-size-ctrl .fs-label{ font-size:0.72rem; color:var(--c-text); }
+    #fsPlus{ background:var(--c-accent); color:#fff; border-color:var(--c-accent); }
+    #fsPlus:hover:not(:disabled){ background:var(--c-accent-hover); }
 
-    @media (max-width: 980px){
-      .page-sermon .grid{ grid-template-columns: 1fr; }
-    }
+    @media(max-width:980px){ .page-sermon .grid{ grid-template-columns:1fr; } }
 
     /* 동영상 */
     .sermon-video-wrap{
-      position:relative;
-      padding-bottom:56.25%;
-      height:0;
-      margin-top:16px;
-      border-radius:10px;
-      overflow:hidden;
+      position:relative; padding-bottom:56.25%; height:0;
+      margin-top:16px; border-radius:var(--radius-sm); overflow:hidden;
     }
     .sermon-video-wrap iframe{
-      position:absolute;
-      top:0; left:0;
-      width:100%; height:100%;
-      border:0;
-      
-      
+      position:absolute; top:0; left:0; width:100%; height:100%; border:0;
     }
-
 
     /* 댓글 */
-    .page-sermon .comments{
-      margin-top:32px;
-      padding-top:24px;
-      border-top:1px solid #eee;
-    }
-    .page-sermon .comment-list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-bottom:18px;
-    }
-    .page-sermon .comment-item{
-      padding:10px 14px;
-      background:#f8f8f8;
-      border-radius:10px;
-    }
-    .page-sermon .comment-meta{
-      font-size:0.72rem;
-      color:#bbb;
-      margin-bottom:4px;
-    }
-    .page-sermon .comment-author{ font-weight:600; color:#666; }
-    .page-sermon .comment-body{ font-size:0.88rem; color:#333; line-height:1.6; }
-    .page-sermon .c-del, .page-sermon .c-edit{
-      float:right;
-      background:none;
-      border:none;
-      color:#ccc;
-      font-size:0.75rem;
-      cursor:pointer;
-      padding:0 3px;
-      line-height:1;
+    .page-sermon .comments{ margin-top:36px; padding-top:28px; border-top:1px solid var(--c-border); }
+    .page-sermon .comment-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:18px; }
+    .page-sermon .comment-item{ padding:10px 14px; background:var(--c-bg-subtle); border-radius:var(--radius-sm); }
+    .page-sermon .comment-meta{ font-size:0.72rem; color:var(--c-text-muted); margin-bottom:4px; }
+    .page-sermon .comment-author{ font-weight:600; color:var(--c-text-sub); }
+    .page-sermon .comment-body{ font-size:0.88rem; color:var(--c-text-sub); line-height:1.6; }
+    .page-sermon .c-del,.page-sermon .c-edit{
+      float:right; background:none; border:none; color:var(--c-text-muted);
+      font-size:0.75rem; cursor:pointer; padding:0 3px; line-height:1;
     }
     .page-sermon .c-del:hover{ color:#d44; }
     .page-sermon .c-edit:hover{ color:#557; }
     .page-sermon .comment-form{ display:flex; flex-direction:column; gap:8px; }
     .page-sermon .comment-row{ display:flex; gap:8px; align-items:flex-start; }
     .page-sermon .c-input{
-      border:1px solid #ddd;
-      border-radius:8px;
-      padding:8px 10px;
-      font-size:0.85rem;
-      font-family:inherit;
-      outline:none;
+      border:1px solid var(--c-border); border-radius:8px; padding:8px 10px;
+      font-size:0.85rem; font-family:inherit; outline:none;
     }
-    .page-sermon .c-input:focus{ border-color:#999; }
+    .page-sermon .c-input:focus{ border-color:var(--c-accent); }
     .page-sermon .c-name{ width:120px; flex-shrink:0; height:62px; }
-    .page-sermon .c-pw{
-      width:120px; flex-shrink:0; height:62px;
-      letter-spacing:0.12em;
-      -webkit-user-select:none;
-      user-select:none;
-    }
-    @keyframes pw-flicker{
-      0%,100%{ opacity:1; }
-      45%{ opacity:0.82; }
-      50%{ opacity:1; }
-      95%{ opacity:0.88; }
-    }
-    .page-sermon .c-pw.has-value{
-      animation: pw-flicker 1.7s infinite;
-      filter: contrast(1.04);
-    }
+    .page-sermon .c-pw{ width:120px; flex-shrink:0; height:62px; letter-spacing:0.12em; -webkit-user-select:none; user-select:none; }
+    @keyframes pw-flicker{ 0%,100%{ opacity:1; } 45%{ opacity:0.82; } 50%{ opacity:1; } 95%{ opacity:0.88; } }
+    .page-sermon .c-pw.has-value{ animation:pw-flicker 1.7s infinite; filter:contrast(1.04); }
     .page-sermon .c-text{ flex:1; resize:none; height:62px; }
     .page-sermon .c-footer{ display:flex; justify-content:space-between; align-items:center; }
-    .page-sermon .c-count{ font-size:0.72rem; color:#bbb; }
+    .page-sermon .c-count{ font-size:0.72rem; color:var(--c-text-muted); }
     .page-sermon .c-submit{
-      padding:8px 18px;
-      background:#333;
-      color:#fff;
-      border:none;
-      border-radius:8px;
-      font-size:0.8rem;
-      cursor:pointer;
+      padding:8px 18px; background:var(--c-accent); color:#fff; border:none;
+      border-radius:8px; font-size:0.8rem; cursor:pointer; transition:background var(--dur-fast);
     }
-    .page-sermon .c-submit:hover{ opacity:.75; }
+    .page-sermon .c-submit:hover{ background:var(--c-accent-hover); }
     .page-sermon .c-submit:disabled{ opacity:.4; cursor:default; }
     .page-sermon .c-cancel{
-      background:none;
-      border:none;
-      color:#aaa;
-      font-size:0.78rem;
-      cursor:pointer;
-      padding:0 4px;
-      display:none;
+      background:none; border:none; color:var(--c-text-muted);
+      font-size:0.78rem; cursor:pointer; padding:0 4px; display:none;
     }
-    .page-sermon .c-cancel:hover{ color:#555; }
+    .page-sermon .c-cancel:hover{ color:var(--c-text-sub); }
     .page-sermon .c-error{ font-size:0.72rem; color:#d44; min-height:16px; }
-    .page-sermon .c-empty{ text-align:center; color:#ccc; padding:20px 0; font-size:0.85rem; }
+    .page-sermon .c-empty{ text-align:center; color:var(--c-text-muted); padding:20px 0; font-size:0.85rem; }
 
     @media (max-width:768px){
       .page-sermon .comment-row{ flex-wrap:wrap; }

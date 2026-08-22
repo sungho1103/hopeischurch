@@ -1,34 +1,88 @@
 /* =================================================
-   Reset & Base
+   Design System — Hope is Church
+   Rose Gold + Warm Gold accent
 ================================================= */
-html{
-  font-size:18px;
+:root{
+  /* Neutral (warm tone) */
+  --c-text:        #1a1a1a;
+  --c-text-sub:    #5c5c5c;
+  --c-text-muted:  #9a9a9a;
+  --c-border:      #e5e5e5;
+  --c-bg:          #ffffff;
+  --c-bg-subtle:   #f5f5f3;
+  --c-bg-elevated: #fafaf8;
+
+  /* Accent: Rose gold */
+  --c-accent:        #b76e79;
+  --c-accent-hover:  #a25d68;
+  --c-accent-light:  #f5e6e8;
+  --c-accent-muted:  #d4a0a8;
+
+  /* Secondary: Warm gold */
+  --c-gold:        #b8963e;
+  --c-gold-light:  #faf5e8;
+
+  /* Typography */
+  --fs-display: 3.6rem;
+  --fs-h1:      2.4rem;
+  --fs-h2:      1.8rem;
+  --fs-h3:      1.2rem;
+  --fs-body:    1rem;
+  --fs-small:   0.875rem;
+  --fs-xs:      0.75rem;
+
+  /* Spacing */
+  --space-section: 120px;
+  --space-lg:  64px;
+  --space-md:  40px;
+  --space-sm:  24px;
+  --space-xs:  16px;
+
+  /* Radius */
+  --radius-sm:   10px;
+  --radius-md:   16px;
+  --radius-lg:   24px;
+  --radius-full: 999px;
+
+  /* Transitions */
+  --ease-out:    cubic-bezier(0.16,1,0.3,1);
+  --dur-fast:    0.15s;
+  --dur-normal:  0.3s;
+  --dur-slow:    0.6s;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
 }
 
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-body{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;
-  line-height:1.7;
-  color:#222;
-  background:#fff;
-}
-
-a{
-  color:inherit;
-  text-decoration:none;
-}
-
-a:hover{
-  text-decoration:underline;
+@media(max-width:768px){
+  :root{
+    --space-section: 64px;
+    --fs-display: 2.4rem;
+    --fs-h1: 1.8rem;
+    --fs-h2: 1.4rem;
+  }
 }
 
 /* =================================================
-   Layout — PC: 상단 고정 가로 네비게이션
+   Reset & Base
+================================================= */
+html{ font-size:18px; }
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+body{
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;
+  line-height:1.7;
+  color:var(--c-text);
+  background:var(--c-bg);
+}
+
+a{ color:inherit; text-decoration:none; }
+a:hover{ text-decoration:underline; }
+
+/* =================================================
+   Layout — PC: sticky top nav
 ================================================= */
 .wrap{
   display:flex;
@@ -46,11 +100,13 @@ aside{
   position:sticky;
   top:0;
   z-index:200;
-  background:#fff;
+  background:rgba(255,255,255,0.85);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
   display:flex;
   align-items:center;
   padding:0 20px;
-  height:56px;
+  height:64px;
   gap:8px;
 }
 aside::after{
@@ -60,7 +116,7 @@ aside::after{
   left:20px;
   right:20px;
   height:1px;
-  background:#e8e8e8;
+  background:var(--c-border);
 }
 
 main{
@@ -74,12 +130,13 @@ main{
 ================================================= */
 .brand{
   font-size:1.05rem;
-  font-weight:700;
+  font-weight:800;
   margin-bottom:0;
   padding-left:0;
   white-space:nowrap;
   margin-right:16px;
-  color:#111;
+  color:var(--c-text);
+  letter-spacing:-0.02em;
 }
 
 nav{
@@ -91,64 +148,200 @@ nav{
 nav a{
   display:block;
   padding:7px 13px;
-  border-radius:8px;
+  border-radius:var(--radius-sm);
   font-size:.9rem;
-  color:#555;
+  color:var(--c-text-sub);
+  position:relative;
+  transition:color var(--dur-fast), background var(--dur-fast);
 }
-
 nav a:hover{
-  background:#f3f5f9;
+  background:var(--c-bg-subtle);
   text-decoration:none;
+  color:var(--c-text);
 }
-
 nav a.is-active{
-  color:#111;
+  color:var(--c-accent);
   font-weight:600;
 }
 
-.notice{
-  display:none;
-}
+.notice{ display:none; }
 .notice-item{
   padding:10px 12px;
   line-height:1.7;
 }
 .notice-item + .notice-item{
-  border-top:1px solid #e0e0e0;
+  border-top:1px solid var(--c-border);
 }
 
 /* =================================================
    Headings
 ================================================= */
-h1{
-  font-size:2rem;
-  margin-bottom:10px;
-}
-
-h2{
-  font-size:1.4rem;
-  margin-bottom:16px;
-}
+h1{ font-size:2rem; margin-bottom:10px; }
+h2{ font-size:1.4rem; margin-bottom:16px; }
 
 /* =================================================
-   공통 Round Box (카드)
+   Common Round Box
 ================================================= */
 .box{
-  border:1px solid #e6e6e6;
+  border:1px solid var(--c-border);
   border-radius:20px;
-  padding:28px 28px;
-  background:transparent; /* 배경색 없음 */
+  padding:28px;
+  background:transparent;
 }
 
 /* =================================================
-   모바일 전용 컴포넌트 — PC에서는 숨김
+   Buttons
 ================================================= */
-.mobile-header { display:none; }
-.drawer {
+.btn{
+  display:inline-block;
+  padding:11px 22px;
+  border-radius:var(--radius-sm);
+  font-size:.9rem;
+  font-weight:600;
+  text-decoration:none;
+  cursor:pointer;
+  transition:all var(--dur-fast) ease;
+}
+.btn:hover{ text-decoration:none; }
+.btn:active{ transform:scale(0.98); }
+
+.btn-solid{
+  background:var(--c-accent);
+  color:#fff;
+  border:1.5px solid var(--c-accent);
+}
+.btn-solid:hover{
+  background:var(--c-accent-hover);
+  border-color:var(--c-accent-hover);
+  box-shadow:0 4px 12px rgba(183,110,121,0.25);
+}
+
+.btn-outline{
+  background:var(--c-bg);
+  color:var(--c-text);
+  border:1.5px solid var(--c-border);
+}
+.btn-outline:hover{
+  background:var(--c-bg-subtle);
+  border-color:var(--c-text-muted);
+}
+
+.btn-inline{
+  padding:3px 10px;
+  font-size:0.72rem;
+  border:1px solid var(--c-border);
+  border-radius:8px;
+  background:var(--c-bg);
+  cursor:pointer;
+  color:var(--c-text-sub);
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  vertical-align:middle;
+}
+.btn-inline:hover{ background:var(--c-bg-subtle); text-decoration:none; }
+
+/* =================================================
+   Badge
+================================================= */
+.badge{
+  display:inline-block;
+  padding:4px 12px;
+  border-radius:var(--radius-full);
+  font-size:0.72rem;
+  font-weight:500;
+  background:var(--c-accent-light);
+  color:var(--c-accent);
+}
+
+/* =================================================
+   Bento Grid
+================================================= */
+.bento-grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  grid-template-rows:auto auto;
+  gap:16px;
+  margin-bottom:var(--space-section);
+}
+.bento-item{
+  background:var(--c-bg-subtle);
+  border-radius:var(--radius-lg);
+  padding:28px 24px;
+  transition:transform var(--dur-normal) var(--ease-out), box-shadow var(--dur-normal) var(--ease-out);
+}
+.bento-item:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shadow-md);
+}
+
+.bento-worship{ grid-column:1 / 3; grid-row:1 / 3; }
+.bento-notice{ grid-column:3; grid-row:1; }
+.bento-sermon-quick{ grid-column:4; grid-row:1; background:var(--c-accent); color:#fff; }
+.bento-sermon-quick .bento-label{ color:rgba(255,255,255,0.7); }
+.bento-sermon-quick .bento-title{ color:#fff; }
+.bento-bulletin-quick{ grid-column:3 / 5; grid-row:2; }
+
+.bento-label{
+  display:block;
+  font-size:0.7rem;
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  color:var(--c-accent-muted);
+  margin-bottom:8px;
+  font-weight:500;
+}
+.bento-title{
+  font-size:var(--fs-h3);
+  font-weight:800;
+  letter-spacing:-0.03em;
+  color:var(--c-text);
+  margin-bottom:var(--space-xs);
+}
+
+@media(max-width:980px){
+  .bento-grid{
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto;
+  }
+  .bento-worship{ grid-column:1 / 3; grid-row:auto; }
+  .bento-notice{ grid-column:1; grid-row:auto; }
+  .bento-sermon-quick{ grid-column:2; grid-row:auto; }
+  .bento-bulletin-quick{ grid-column:1 / 3; grid-row:auto; }
+}
+
+@media(max-width:768px){
+  .bento-grid{ grid-template-columns:1fr; }
+  .bento-worship,
+  .bento-notice,
+  .bento-sermon-quick,
+  .bento-bulletin-quick{ grid-column:auto; }
+}
+
+/* =================================================
+   Footer
+================================================= */
+.site-footer{
+  border-top:1px solid var(--c-border);
+  margin-top:0;
+  padding:32px 24px;
+  text-align:center;
+  font-size:.8rem;
+  color:var(--c-text-muted);
+  line-height:1.4;
+}
+.site-footer a{ color:var(--c-text-muted); }
+
+/* =================================================
+   Mobile-only — hidden on PC
+================================================= */
+.mobile-header{ display:none; }
+.drawer{
   position:fixed;
   top:0; right:0; bottom:0;
   width:72vw; max-width:280px;
-  background:#fff;
+  background:var(--c-bg);
   z-index:400;
   padding:20px 24px;
   display:none;
@@ -157,52 +350,53 @@ h2{
   transition:transform .25s ease;
   box-shadow:-4px 0 20px rgba(0,0,0,.12);
 }
-.drawer.open { transform:translateX(0); }
-.drawer-overlay {
+.drawer.open{ transform:translateX(0); }
+.drawer-overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.45);
   z-index:300;
   display:none;
 }
-.drawer-overlay.open { display:block; }
-.mobile-notice { display:none; }
-.bottom-nav { display:none; }
+.drawer-overlay.open{ display:block; }
+.mobile-notice{ display:none; }
+.bottom-nav{ display:none; }
 
 /* =================================================
-   @media 768px — 모바일 오버라이드
+   @media 768px — Mobile overrides
 ================================================= */
-@media (max-width:768px){
-  body {
+@media(max-width:768px){
+  body{
     padding-top:0;
     padding-bottom:60px;
   }
 
-  /* 기존 PC 레이아웃 숨김 */
-  aside { display:none !important; }
-  .wrap { flex-direction:column; gap:0; padding:0; }
+  aside{ display:none !important; }
+  .wrap{ flex-direction:column; gap:0; padding:0; }
 
-  /* ── Sticky Header ── */
-  .mobile-header {
+  /* ── Sticky Header (frosted glass) ── */
+  .mobile-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
     position:sticky;
     top:0;
     z-index:200;
-    background:#fff;
-    border-bottom:1px solid #e8e8e8;
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--c-border);
     padding:0 16px;
     height:52px;
-    box-shadow:0 1px 6px rgba(0,0,0,.06);
+    box-shadow:0 1px 6px rgba(0,0,0,.04);
   }
-  .mobile-brand {
+  .mobile-brand{
     font-size:1.05rem;
-    font-weight:700;
-    letter-spacing:-.01em;
-    color:#111;
+    font-weight:800;
+    letter-spacing:-.02em;
+    color:var(--c-text);
   }
-  .hamburger {
+  .hamburger{
     background:none;
     border:none;
     cursor:pointer;
@@ -212,138 +406,142 @@ h2{
     justify-content:center;
     gap:5px;
   }
-  .hamburger span {
+  .hamburger span{
     display:block;
     width:22px;
     height:2px;
-    background:#222;
+    background:var(--c-text);
     border-radius:2px;
   }
 
   /* ── Drawer ── */
-  .drawer { display:flex; }
-  .drawer-close {
+  .drawer{ display:flex; }
+  .drawer-close{
     align-self:flex-end;
     background:none;
     border:none;
     font-size:1.8rem;
     line-height:1;
     cursor:pointer;
-    color:#444;
+    color:var(--c-text-sub);
     margin-bottom:20px;
     padding:4px 8px;
   }
-  .drawer a {
-    font-size:1.15rem;
+  .drawer a{
+    font-size:1.1rem;
     font-weight:700;
     padding:11px 0;
-    border-bottom:1px solid #f0f0f0;
-    color:#111;
+    border-bottom:1px solid var(--c-border);
+    color:var(--c-text);
     text-decoration:none;
+    line-height:1.5;
   }
-  .drawer a:last-child { border-bottom:none; }
-  .drawer a.is-active { color:#000; opacity:1; }
-  #installBtn {
+  .drawer a:last-of-type{ border-bottom:none; }
+  .drawer a.is-active{ color:var(--c-accent); }
+  #installBtn{
     display:none;
     margin-top:16px;
     padding:12px 0;
     width:100%;
-    background:#111;
+    background:var(--c-accent);
     color:#fff;
     border:none;
-    border-radius:10px;
+    border-radius:var(--radius-sm);
     font-size:1rem;
     font-weight:700;
     cursor:pointer;
     text-align:center;
   }
-  #installBtn.visible { display:block; }
+  #installBtn.visible{ display:block; }
 
-  /* ── 공지사항 슬라이드 배너 ── */
-  .mobile-notice {
+  /* ── Mobile notice ── */
+  .mobile-notice{
     overflow-x:auto;
     gap:10px;
     padding:10px 16px;
-    background:#f7f7f7;
-    border-bottom:1px solid #ebebeb;
+    background:var(--c-bg-subtle);
+    border-bottom:1px solid var(--c-border);
     scrollbar-width:none;
+    scroll-snap-type:x mandatory;
   }
-  .mobile-notice::-webkit-scrollbar { display:none; }
-  .mobile-notice.has-items { display:flex; }
-  .mobile-notice-item {
+  .mobile-notice::-webkit-scrollbar{ display:none; }
+  .mobile-notice.has-items{ display:flex; }
+  .mobile-notice-item{
     flex-shrink:0;
     max-width:78vw;
-    background:#fff;
-    border:1px solid #e6e6e6;
-    border-radius:10px;
+    background:var(--c-bg);
+    border:1px solid var(--c-border);
+    border-radius:var(--radius-sm);
     padding:8px 14px;
     font-size:0.75rem;
     line-height:1.6;
-    color:#333;
+    color:var(--c-text-sub);
+    scroll-snap-align:start;
   }
 
-  /* ── Bottom Navigation Bar ── */
-  .bottom-nav {
+  /* ── Bottom Nav (frosted glass) ── */
+  .bottom-nav{
     display:flex;
     position:fixed;
     bottom:0; left:0; right:0;
     height:56px;
-    background:#fff;
-    border-top:1px solid #e8e8e8;
+    background:rgba(255,255,255,0.9);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--c-border);
     z-index:200;
-    box-shadow:0 -1px 8px rgba(0,0,0,.06);
   }
-  .bottom-nav-item {
+  .bottom-nav-item{
     flex:1;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
     gap:3px;
-    color:#111;
+    color:var(--c-text-muted);
     font-size:0.6rem;
     font-weight:500;
     text-decoration:none;
-    transition:color .15s, background .15s;
+    transition:color var(--dur-fast);
+    position:relative;
   }
-  .bottom-nav-item.is-active {
-    color:#fff;
-    background:#111;
-    border-radius:14px;
-    padding:6px 14px;
-    margin:6px 4px;
+  .bottom-nav-item.is-active{
+    color:var(--c-accent);
+    font-weight:700;
   }
-  .bottom-nav-item svg { width:22px; height:22px; }
+  .bottom-nav-item.is-active::after{
+    content:'';
+    position:absolute;
+    bottom:6px;
+    width:4px;
+    height:4px;
+    border-radius:50%;
+    background:var(--c-accent);
+  }
+  .bottom-nav-item svg{ width:22px; height:22px; }
 
-  .box { padding:20px 18px; border-radius:16px; }
+  .box{ padding:20px 18px; border-radius:var(--radius-md); }
 }
 
 /* =================================================
-   인사말 전용 수정 ⭐ 핵심
+   인사말 전용 — 내부 스타일 리셋
 ================================================= */
-/* 인사말 안쪽에 생기는 모든 내부 박스/테두리 제거 */
 #pastor *{
   border:none !important;
   background:transparent !important;
   box-shadow:none !important;
 }
-
-/* 문단 간격만 정돈 */
-#pastor p{
-  margin-bottom:14px;
-}
-
-/* 서명/섬기는이들 구분선만 유지하고 싶을 때 */
+#pastor p{ margin-bottom:14px; }
 #pastor .divider{
   margin-top:24px;
   padding-top:16px;
-  border-top:1px solid #e6e6e6 !important;
+  border-top:1px solid var(--c-border) !important;
 }
 
 /* =================================================
-   기타 유틸
+   Utilities
 ================================================= */
 .muted{
-  color:#666;
+  color:var(--c-text-sub);
   font-size:0.95rem;
 }

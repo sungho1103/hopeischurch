@@ -4,259 +4,168 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>희망은교회</title>
-      <link rel="stylesheet" href="/assets/common.css?v=20260411-01">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="/assets/common.css?v=20260822-3">
   <style>
-    /* ================================================
-       PC 공지사항 배너
-    ================================================ */
-    .worship-notice-wrap 
-      background: #f7f7f7;
-      border: 1px solid #e8e8e8;
-      border-radius: 14px;
-      padding: 24px 20px 16px;
-      margin-bottom: 40px;
+    /* Hero */
+    .hero{
+      position:relative;
+      overflow:hidden;
+      padding:100px 0 80px;
+      margin-bottom:var(--space-section);
     }
-    .worship-notice-wrap .section { margin-bottom: 0; }
-    .pc-notice {
-      display: none;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 10px;
-      background: transparent;
-      border: none;
-      border-top: 1px solid #e0e0e0;
-      border-radius: 0;
-      margin: 16px 0 0;
-      padding: 16px 0 0;
+    .hero-inner{ position:relative; z-index:1; }
+    .hero-eyebrow{
+      font-size:0.7rem;
+      letter-spacing:.15em;
+      text-transform:uppercase;
+      color:var(--c-accent-muted);
+      margin-bottom:16px;
+      font-weight:500;
     }
-    .pc-notice.has-items { display: flex; }
-    .pc-notice-item {
-      font-size: 0.875rem;
-      color: #333;
-      line-height: 1.6;
-      padding: 8px 14px;
-      background: #fff;
-      border: 1px solid #e6e6e6;
-      border-radius: 10px;
+    .hero h1{
+      font-size:var(--fs-display);
+      font-weight:800;
+      letter-spacing:-.05em;
+      line-height:1.1;
+      color:var(--c-text);
+      margin-bottom:20px;
+    }
+    .hero-desc{
+      font-size:1rem;
+      color:var(--c-text-sub);
+      line-height:1.85;
+      max-width:480px;
+      margin-bottom:40px;
+    }
+    .hero-btns{ display:flex; gap:12px; flex-wrap:wrap; }
+
+    /* Section 공통 */
+    .section{ margin-bottom:var(--space-section); }
+    .section-label{
+      display:block;
+      font-size:0.7rem;
+      letter-spacing:.15em;
+      text-transform:uppercase;
+      color:var(--c-accent-muted);
+      margin-bottom:10px;
+      font-weight:500;
+    }
+    .section-title{
+      font-size:var(--fs-h2);
+      font-weight:800;
+      letter-spacing:-.03em;
+      color:var(--c-text);
+      margin-bottom:var(--space-sm);
+    }
+    .divider{
+      border:none;
+      border-top:1px solid var(--c-border);
+      margin:0 0 var(--space-section);
     }
 
-    /* ================================================
-       Hero
-    ================================================ */
-    .hero {
-      position: relative;
-      overflow: hidden;
-      padding: 56px 0 48px;
-      border-bottom: 1px solid #e4e4e4;
-      margin-bottom: 60px;
+    /* 예배 카드 */
+    .worship-grid{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:12px;
     }
-    .hero-inner {
-      position: relative;
-      z-index: 1;
+    .worship-card{
+      border:1px solid var(--c-border);
+      border-radius:var(--radius-md);
+      padding:24px 20px;
+      background:var(--c-bg);
+      transition:transform var(--dur-normal) var(--ease-out), box-shadow var(--dur-normal) var(--ease-out);
     }
-    .hero-eyebrow {
-      font-size: 0.65rem;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: #999;
-      margin-bottom: 14px;
+    .worship-card:hover{
+      transform:translateY(-3px);
+      box-shadow:var(--shadow-md);
     }
-    .hero h1 {
-      font-size: 3rem;
-      font-weight: 800;
-      letter-spacing: -.04em;
-      line-height: 1.15;
-      color: #111;
-      margin-bottom: 14px;
+    .worship-card-title{
+      font-size:.72rem;
+      font-weight:600;
+      letter-spacing:.08em;
+      color:var(--c-accent-muted);
+      margin-bottom:8px;
+      text-transform:uppercase;
     }
-    .hero-desc {
-      font-size: .98rem;
-      color: #555;
-      line-height: 1.8;
-      max-width: 480px;
-      margin-bottom: 32px;
+    .worship-card-time{
+      font-size:1.3rem;
+      font-weight:800;
+      letter-spacing:-.03em;
+      color:var(--c-text);
+      margin-bottom:2px;
     }
-    .hero-btns {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    .worship-card-loc{ font-size:.78rem; color:var(--c-text-muted); }
+    .worship-extra{
+      margin-top:16px;
+      font-size:var(--fs-small);
+      color:var(--c-text-muted);
+      line-height:1.7;
     }
 
-    /* ================================================
-       Buttons
-    ================================================ */
-    .btn {
-      display: inline-block;
-      padding: 11px 22px;
-      border-radius: 8px;
-      font-size: .9rem;
-      font-weight: 600;
-      text-decoration: none;
-      cursor: pointer;
-      transition: opacity .15s;
+    /* Bento Notice */
+    .bento-notice-list{ display:flex; flex-direction:column; gap:8px; }
+    .bento-notice-item{
+      font-size:var(--fs-small);
+      color:var(--c-text-sub);
+      line-height:1.6;
+      padding:10px 14px;
+      background:rgba(255,255,255,0.6);
+      border-radius:var(--radius-sm);
     }
-    .btn:hover { opacity: .72; text-decoration: none; }
-    .btn-solid   { background: #111; color: #fff; border: 2px solid #111; }
-    .btn-outline { background: #fff; color: #111; border: 2px solid #333; }
+    .bento-notice-item a{ color:var(--c-accent); font-weight:500; }
+    .bento-notice-empty{ font-size:var(--fs-small); color:var(--c-text-muted); }
 
-    /* ================================================
-       Section 공통
-    ================================================ */
-    .section { margin-bottom: 60px; }
+    /* Bento Quick Link */
+    .bento-link{ display:flex; flex-direction:column; justify-content:space-between; height:100%; }
+    .bento-link-arrow{
+      font-size:1.8rem; margin-top:auto; opacity:0.6;
+      transition:transform var(--dur-normal) var(--ease-out), opacity var(--dur-normal);
+    }
+    .bento-item:hover .bento-link-arrow{ transform:translateX(4px); opacity:1; }
 
-    .section-label {
-      display: block;
-      font-size: 0.6rem;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      color: #aaa;
-      margin-bottom: 10px;
+    /* 인사말 */
+    .greeting-body{ margin-bottom:32px; }
+    .greeting-body p{ font-size:.97rem; line-height:1.85; color:var(--c-text-sub); margin-bottom:16px; }
+    .greeting-body p:last-child{ margin-bottom:0; }
+    .greeting-sign{
+      padding-top:24px;
+      border-top:1px solid var(--c-border);
+      font-size:.88rem; color:var(--c-text-sub); line-height:1.8;
     }
-    .section-title {
-      font-size: 1.45rem;
-      font-weight: 700;
-      letter-spacing: -.02em;
-      color: #111;
-      margin-bottom: 24px;
-    }
+    .greeting-sign strong{ display:block; margin-top:2px; font-size:.95rem; color:var(--c-text); }
 
-    .divider {
-      border: none;
-      border-top: 1px solid #ebebeb;
-      margin: 0 0 60px;
+    /* 섬기는 이들 */
+    .minister-list{ list-style:none; margin:0; padding:0; max-width:360px; }
+    .minister-item{
+      display:flex; gap:20px; align-items:baseline;
+      padding:10px 0; border-bottom:1px solid var(--c-border); font-size:.94rem;
     }
+    .minister-item:last-child{ border-bottom:none; }
+    .minister-role{ min-width:76px; font-size:.8rem; color:var(--c-text-muted); font-weight:500; }
+    .minister-name{ font-weight:700; color:var(--c-text); }
 
-    /* ================================================
-       예배 카드 그리드
-    ================================================ */
-    .worship-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 14px;
-    }
-    .worship-card {
-      border: 1px solid #e4e4e4;
-      border-radius: 14px;
-      padding: 22px 20px;
-      background: #fff;
-    }
-    .worship-card-title {
-      font-size: .82rem;
-      font-weight: 700;
-      letter-spacing: .04em;
-      color: #888;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-    }
-    .worship-card-time {
-      font-size: 1.35rem;
-      font-weight: 800;
-      letter-spacing: -.03em;
-      color: #111;
-      margin-bottom: 4px;
-    }
-    .worship-card-loc { font-size: .83rem; color: #aaa; }
+    /* 찾아오는 길 */
+    .map-address{ font-size:1.05rem; font-weight:700; color:var(--c-text); margin-bottom:8px; }
+    .map-phone{ font-size:.9rem; color:var(--c-text-sub); margin-bottom:24px; }
 
-    /* ================================================
-       인사말
-    ================================================ */
-    .greeting-body {
-      margin-bottom: 28px;
-    }
-    .greeting-body p {
-      font-size: .97rem;
-      line-height: 1.9;
-      color: #333;
-      margin-bottom: 16px;
-    }
-    .greeting-body p:last-child { margin-bottom: 0; }
+    /* Hero Sermon full-width */
+    #hero-sermon{ margin-left:-20px; margin-right:-20px; margin-top:0; }
 
-    .greeting-sign {
-      padding-top: 20px;
-      border-top: 1px solid #e8e8e8;
-      font-size: .88rem;
-      color: #666;
-      line-height: 1.8;
+    /* 반응형 */
+    @media(max-width:768px){
+      main{ padding:0 20px; }
+      .hero{ padding:48px 0 40px; margin-bottom:40px; }
+      .hero-desc{ font-size:.92rem; margin-bottom:24px; }
+      .hero-btns{ flex-direction:column; gap:10px; }
+      .hero-btns .btn{ display:block; width:100%; text-align:center; padding:14px 0; min-height:48px; }
+      .worship-grid{ grid-template-columns:1fr 1fr; gap:10px; }
+      .worship-card{ padding:18px 14px; }
+      .worship-card-time{ font-size:1.1rem; }
+      #map .btn-outline{ flex:1; text-align:center; padding:14px 0; min-height:48px; }
     }
-    .greeting-sign strong {
-      display: block;
-      margin-top: 2px;
-      font-size: .95rem;
-      color: #111;
-    }
-
-    /* ================================================
-       섬기는 이들
-    ================================================ */
-    .minister-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      max-width: 360px;
-    }
-    .minister-item {
-      display: flex;
-      gap: 20px;
-      align-items: baseline;
-      padding: 6px 0;
-      border-bottom: 1px solid #f2f2f2;
-      font-size: .94rem;
-    }
-    .minister-item:last-child { border-bottom: none; }
-    .minister-role { min-width: 76px; font-size: .83rem; color: #999; }
-    .minister-name { font-weight: 600; color: #111; }
-
-    /* ================================================
-       찾아오는 길
-    ================================================ */
-    .map-address {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: #111;
-      margin-bottom: 6px;
-    }
-    .map-phone {
-      font-size: .9rem;
-      color: #777;
-      margin-bottom: 22px;
-    }
-
-    /* ================================================
-       반응형
-    ================================================ */
-    @media (max-width: 768px) {
-      /* 본문 좌우 패딩 */
-      main { padding: 0 20px; }
-
-      /* Hero */
-      .hero { padding: 28px 0 24px; margin-bottom: 36px; }
-      .hero h1 { font-size: 2rem; }
-      .hero-desc { font-size: .92rem; margin-bottom: 20px; }
-      .hero-btns { flex-direction: column; gap: 8px; }
-      .btn { display: block; width: 100%; text-align: center; padding: 14px 0; font-size: .95rem; min-height: 48px; }
-
-      /* 예배 카드 2×2 */
-      .worship-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .worship-card { padding: 16px 14px; }
-      .worship-card-time { font-size: 1.15rem; }
-
-      /* 섹션 간격 */
-      .section { margin-bottom: 40px; }
-
-      /* 찾아오는 길 — 지도 버튼 */
-      #map .btn-outline { flex: 1; text-align: center; padding: 14px 0; min-height: 48px; }
-    }
-  
-  /* ================================================
-     홈 페이지 - hero-sermon full-width 처리
-     main의 padding(20px)을 벗어나 전체 너비로 표시
-  ================================================ */
-  #hero-sermon {
-    margin-left: -20px;
-    margin-right: -20px;
-    margin-top: 0;
-  }
-</style>
+  </style>
 </head>
 
 <body>
@@ -295,7 +204,6 @@
 
       <!-- ① Hero -->
       <section class="hero">
-        <canvas id="bgCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
         <div class="hero-inner">
           <div class="hero-eyebrow">기독교 대한 성결교회</div>
           <h1>희망은교회</h1>
@@ -581,41 +489,61 @@
 </script>
 <!-- ============================================================ HERO 끝 -->
 
-      <!-- ② 예배 및 모임 안내 + 공지사항 묶음 박스 -->
-      <div class="worship-notice-wrap">
-      <section class="section" id="worship">
-        <span class="section-label">Worship</span>
-        <h2 class="section-title">예배 및 모임 안내</h2>
-        <div class="worship-grid">
-          <div class="worship-card">
-            <div class="worship-card-title">주일예배</div>
-            <div class="worship-card-time">11:00 AM</div>
-            <div class="worship-card-loc">주일 · 본당</div>
+      <!-- ② 벤토 그리드: 예배 + 공지 + 바로가기 -->
+      <div class="bento-grid" id="worship">
+        <div class="bento-item bento-worship">
+          <span class="bento-label">Worship</span>
+          <h2 class="bento-title">예배 및 모임 안내</h2>
+          <div class="worship-grid">
+            <div class="worship-card">
+              <div class="worship-card-title">주일예배</div>
+              <div class="worship-card-time">11:00 AM</div>
+              <div class="worship-card-loc">주일 · 본당</div>
+            </div>
+            <div class="worship-card">
+              <div class="worship-card-title">청소년예배</div>
+              <div class="worship-card-time">1:30 PM</div>
+              <div class="worship-card-loc">주일 · 본당</div>
+            </div>
+            <div class="worship-card">
+              <div class="worship-card-title">수요예배</div>
+              <div class="worship-card-time">7:30 PM</div>
+              <div class="worship-card-loc">수요일</div>
+            </div>
+            <div class="worship-card">
+              <div class="worship-card-title">월삭예배</div>
+              <div class="worship-card-time">6:00 AM</div>
+              <div class="worship-card-loc">매월 첫째주 토요일</div>
+            </div>
           </div>
-          <div class="worship-card">
-            <div class="worship-card-title">청소년예배</div>
-            <div class="worship-card-time">1:30 PM</div>
-            <div class="worship-card-loc">주일 · 본당</div>
-          </div>
-          <div class="worship-card">
-            <div class="worship-card-title">수요예배</div>
-            <div class="worship-card-time">7:30 PM</div>
-            <div class="worship-card-loc">수요일</div>
-          </div>
-          <div class="worship-card">
-            <div class="worship-card-title">월삭예배</div>
-            <div class="worship-card-time">6:00 AM</div>
-            <div class="worship-card-loc">매월 첫째주 토요일</div>
+          <p class="worship-extra">주일예배시 15분전인 10:45am 에 찬양시작합니다.<br>예배 후에는 다같이 애찬(공동식사)을 나눕니다.</p>
+        </div>
+        <div class="bento-item bento-notice">
+          <span class="bento-label">Notice</span>
+          <h3 class="bento-title">공지사항</h3>
+          <div class="bento-notice-list" id="bentoNotice">
+            <span class="bento-notice-empty">공지사항이 없습니다.</span>
           </div>
         </div>
-        <p class="muted" style="margin-top:16px;"><br>주일예배시 15분전인 10:45am 에 찬양시작합니다.<br>예배 후에는 다같이 애찬(공동식사)을 나눕니다.<br><br></p>
-      </section>
-
-      <!-- 공지사항 -->
-      <div class="pc-notice" id="pcNotice"></div>
-      </div><!-- /.worship-notice-wrap -->
-
-      <hr class="divider">
+        <a href="/sermon/" class="bento-item bento-sermon-quick" style="text-decoration:none;">
+          <div class="bento-link">
+            <div>
+              <span class="bento-label">Sermon</span>
+              <h3 class="bento-title">주일 설교<br>보러가기</h3>
+            </div>
+            <span class="bento-link-arrow">&#8594;</span>
+          </div>
+        </a>
+        <a href="/bulletin/" class="bento-item bento-bulletin-quick" style="text-decoration:none;">
+          <div class="bento-link" style="flex-direction:row;align-items:center;">
+            <div>
+              <span class="bento-label">Bulletin</span>
+              <h3 class="bento-title">이번 주 주보 보기</h3>
+            </div>
+            <span class="bento-link-arrow" style="margin-top:0;margin-left:auto;">&#8594;</span>
+          </div>
+        </a>
+      </div>
 
       <!-- ③ 인사말 -->
       <section class="section" id="pastor">
@@ -680,16 +608,15 @@
         <span class="section-label">Location</span>
         <h2 class="section-title">찾아오는 길</h2>
         <p class="map-address">경기도 부천시 소사구 은성로 62번길 13 (3층)
-          <button id="copyAddrBtn" onclick="navigator.clipboard.writeText('경기도 부천시 소사구 은성로 62번길 13').then(()=>{this.textContent='복사됨 ✓';setTimeout(()=>{this.innerHTML=this.dataset.orig;},1500)})"
+          <button id="copyAddrBtn" class="btn-inline" onclick="navigator.clipboard.writeText('경기도 부천시 소사구 은성로 62번길 13').then(()=>{this.textContent='복사됨 ✓';setTimeout(()=>{this.innerHTML=this.dataset.orig;},1500)})"
             data-orig=""
-            style="margin-left:10px;padding:3px 10px;font-size:0.72rem;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;color:#555;vertical-align:middle;display:inline-flex;align-items:center;gap:5px;">
+            style="margin-left:10px;">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             주소복사</button>
           <script>var b=document.getElementById('copyAddrBtn');b.dataset.orig=b.innerHTML;</script>
         </p>
         <p class="map-phone">
-          <a href="tel:010-7795-2102"
-            style="padding:3px 10px;font-size:0.72rem;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;color:#555;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+          <a href="tel:010-7795-2102" class="btn-inline">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .95h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
             전화하기</a>
         </p>
@@ -709,10 +636,10 @@
     </main>
   </div>
 
-  <footer style="border-top:1px solid #e8e8e8;margin-top:0;padding:28px 20px;text-align:center;font-size:.8rem;color:#aaa;line-height:1.4;">
-    <a href="/admin/" style="color:#aaa;">HOPEISCHURCH</a>, Korea. &nbsp;|&nbsp; Hits: <span id="visitor-hit-count" style="font-variant-numeric:tabular-nums;">…</span><br>
-    Copyright&copy; 2025-2026 <a href="https://sungho1103.github.io/" style="color:#aaa;">https://www.hopeischurch.com</a> All rights reserved. Designed by sungho.
-    <a href="mailto:galtensh@gmail.com" style="color:#aaa;vertical-align:middle;margin-left:6px;display:inline-flex;align-items:center;" title="메일 보내기">
+  <footer class="site-footer">
+    <a href="/admin/">HOPEISCHURCH</a>, Korea. &nbsp;|&nbsp; Hits: <span id="visitor-hit-count" style="font-variant-numeric:tabular-nums;">…</span><br>
+    Copyright&copy; 2025-2026 <a href="https://www.hopeischurch.com">https://www.hopeischurch.com</a> All rights reserved. Designed by sungho.
+    <a href="mailto:galtensh@gmail.com" style="vertical-align:middle;margin-left:6px;display:inline-flex;align-items:center;" title="메일 보내기">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
     </a>
   </footer>
@@ -766,15 +693,15 @@
               }).join('');
             }
           }
-          // 공지 배너 (PC + 모바일 공통)
+          // 벤토 공지
           const items=n.items||[]; if(!items.length) return;
-          const pc=document.getElementById('pcNotice'); if(pc&&items.length){
-            pc.innerHTML=items.map(item=>{
-              const line=_e(item.text||'').replace(/\n/g,'<br>');
-              if(item.link_url) return `<a class="pc-notice-item" href="${_e(item.link_url)}" target="_blank" rel="noreferrer" style="cursor:pointer;">${line}</a>`;
-              return `<div class="pc-notice-item">${line}</div>`;
+          const bento=document.getElementById('bentoNotice');
+          if(bento&&items.length){
+            bento.innerHTML=items.map(item=>{
+              let line=_e(item.text||'').replace(/\n/g,'<br>');
+              if(item.link_url) line+=` <a href="${_e(item.link_url)}" target="_blank" rel="noreferrer">${_e(item.link_text||'자세히')}</a>`;
+              return `<div class="bento-notice-item">${line}</div>`;
             }).join('');
-            pc.classList.add('has-items');
           }
         }).catch(()=>{});
     })();
@@ -824,95 +751,6 @@
     }
   </script>
 
-  <script>
-  // 3D 미디어아트 배경 — 궤도 링(orrery) 스타일
-  (function(){
-    const canvas = document.getElementById('bgCanvas');
-    const ctx    = canvas.getContext('2d');
-    const WORDS  = ['hope', 'is', 'church'];
-    const FOV    = 620;
-    let W, H;
-
-    function resize(){
-      W = canvas.width  = canvas.offsetWidth;
-      H = canvas.height = canvas.offsetHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    // 세 궤도 링: 반지름 / 기울기 / 방위각 / 공전속도 / 파티클 수
-    const rings = [
-      { r:300, incl:0.40, az:0.0,  spd: 0.0040, n:10 },
-      { r:220, incl:1.15, az:2.10, spd:-0.0030, n: 7 },
-      { r:380, incl:0.75, az:4.20, spd: 0.0025, n:13 },
-    ];
-
-    const pts = [];
-    rings.forEach(ring => {
-      for(let i = 0; i < ring.n; i++){
-        pts.push({
-          ring,
-          phase: (i / ring.n) * Math.PI * 2,
-          word:  WORDS[Math.floor(Math.random() * WORDS.length)],
-          size:  10 + Math.random() * 12,
-        });
-      }
-    });
-
-    let t = 0;
-
-    function project(x, y, z){
-      const s = FOV / (FOV + z + 480);
-      return { sx: W/2 + x*s, sy: H/2 + y*s, s };
-    }
-
-    function frame(){
-      ctx.clearRect(0, 0, W, H);
-      t += 0.016;
-
-      const gt = Math.sin(t * 0.07) * 0.12; // 전체 씬 틸트 진동
-
-      const visible = pts.map(p => {
-        const angle = p.phase + t * p.ring.spd * 60;
-
-        // 링 평면 위 좌표
-        let x = p.ring.r * Math.cos(angle);
-        let y = p.ring.r * Math.sin(angle);
-        let z = 0;
-
-        // 기울기 — X축 회전
-        const ci = Math.cos(p.ring.incl + gt);
-        const si = Math.sin(p.ring.incl + gt);
-        const y1 = y*ci - z*si;
-        const z1 = y*si + z*ci;
-
-        // 방위각 세차 — Y축 회전 (매우 느리게)
-        const ca = Math.cos(p.ring.az + t * 0.06);
-        const sa = Math.sin(p.ring.az + t * 0.06);
-        const x2 =  x*ca + z1*sa;
-        const z2 = -x*sa + z1*ca;
-
-        const { sx, sy, s } = project(x2, y1, z2);
-        return { word: p.word, sx, sy, s, size: p.size, z: z2 };
-      }).sort((a, b) => a.z - b.z);
-
-      ctx.textAlign    = 'center';
-      ctx.textBaseline = 'middle';
-
-      visible.forEach(p => {
-        if(p.s <= 0) return;
-        const fs    = Math.max(5, p.size * p.s * 2.4);
-        const alpha = Math.min(0.30, p.s * 0.44);
-        ctx.font      = `300 ${fs}px -apple-system,BlinkMacSystemFont,sans-serif`;
-        ctx.fillStyle = `rgba(130,138,155,${alpha.toFixed(3)})`;
-        ctx.fillText(p.word, p.sx, p.sy);
-      });
-
-      requestAnimationFrame(frame);
-    }
-    frame();
-  })();
-  </script>
   <script>
   // 홈화면 추가(PWA install)
   let _installPrompt = null;
