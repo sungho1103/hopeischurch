@@ -808,6 +808,75 @@ let _bulletinIndexSha = null;
 let _bulletinIndex    = [];
 let _currentBulletinSha = null;
 
+// 한국어 성경책 이름 → API book ID 매핑
+const _bibleBookMap = {
+  '창세기':'gn','창':'gn','출애굽기':'ex','출':'ex','레위기':'lv','레':'lv',
+  '민수기':'nm','민':'nm','신명기':'dt','신':'dt','여호수아':'js','수':'js',
+  '사사기':'jd','삿':'jd','룻기':'rt','룻':'rt',
+  '사무엘상':'1sm','삼상':'1sm','사무엘하':'2sm','삼하':'2sm',
+  '열왕기상':'1kgs','왕상':'1kgs','열왕기하':'2kgs','왕하':'2kgs',
+  '역대상':'1ch','대상':'1ch','역대하':'2ch','대하':'2ch',
+  '에스라':'ezr','스':'ezr','느헤미야':'ne','느':'ne','에스더':'et',
+  '욥기':'job','욥':'job','시편':'ps','시':'ps','잠언':'prv','잠':'prv',
+  '전도서':'ec','전':'ec','아가':'so',
+  '이사야':'is','사':'is','예레미야':'jr','렘':'jr','예레미야애가':'lm','애':'lm',
+  '에스겔':'ez','겔':'ez','다니엘':'dn','단':'dn',
+  '호세아':'ho','호':'ho','요엘':'jl','욜':'jl','아모스':'am','암':'am',
+  '오바댜':'ob','옵':'ob','요나':'jn','욘':'jn','미가':'mi','미':'mi',
+  '나훔':'na','나':'na','하박국':'hk','합':'hk','스바냐':'zp','습':'zp',
+  '학개':'hg','학':'hg','스가랴':'zc','슥':'zc','말라기':'ml','말':'ml',
+  '마태복음':'mt','마태':'mt','마':'mt','마가복음':'mk','마가':'mk','막':'mk',
+  '누가복음':'lk','누가':'lk','눅':'lk','요한복음':'jo','요한':'jo','요':'jo',
+  '사도행전':'act','행':'act','로마서':'rm','롬':'rm',
+  '고린도전서':'1co','고전':'1co','고린도후서':'2co','고후':'2co',
+  '갈라디아서':'gl','갈':'gl','에베소서':'eph','엡':'eph',
+  '빌립보서':'ph','빌':'ph','골로새서':'cl','골':'cl',
+  '데살로니가전서':'1ts','살전':'1ts','데살로니가후서':'2ts','살후':'2ts',
+  '디모데전서':'1tm','딤전':'1tm','디모데후서':'2tm','딤후':'2tm',
+  '디도서':'tt','딛':'tt','빌레몬서':'phm','몬':'phm',
+  '히브리서':'hb','히':'hb','야고보서':'jm','약':'jm',
+  '베드로전서':'1pe','벧전':'1pe','베드로후서':'2pe','벧후':'2pe',
+  '요한일서':'1jo','요일':'1jo','요한이서':'2jo','요이':'2jo','요한삼서':'3jo','요삼':'3jo',
+  '유다서':'jud','유':'jud','요한계시록':'re','계':'re'
+};
+
+async function fetchBibleVerse(reference) {
+  if (!reference) return;
+  const m = reference.trim().match(/^(.+?)\s*(\d+)\s*:\s*(\d+)\s*(?:[-~]\s*(\d+))?/);
+  if (!m) return;
+  const bookName = m[1].trim();
+  const chapter = m[2];
+  const startV = parseInt(m[3]);
+  const endV = m[4] ? parseInt(m[4]) : startV;
+  const bookId = _bibleBookMap[bookName];
+  if (!bookId) { console.warn('성경책 매핑 없음:', bookName); return; }
+
+  const baseUrl = 'https://raw.githubusercontent.com/maatheusgois/bible/main/versions/ko/ko';
+  const texts = [];
+  try {
+    for (let v = startV; v <= endV; v++) {
+      const res = await fetch(`${baseUrl}/${bookId}/${chapter}/${v}.json`);
+      if (!res.ok) { console.warn(`${bookId}/${chapter}/${v} 로드 실패`); continue; }
+      const raw = await res.text();
+      // JSON 파싱 시도, 실패하면 원문 텍스트 사용
+      try {
+        const json = JSON.parse(raw);
+        const t = (typeof json === 'string') ? json : (json.text || json.verse || raw);
+        texts.push(t.replace(/[\s!]+$/g, '').trim());
+      } catch(e) {
+        texts.push(raw.replace(/^"|"$/g, '').replace(/[\s!]+$/g, '').trim());
+      }
+    }
+    if (texts.length > 0) {
+      document.getElementById('bVerseText').value = texts.join(' ');
+      toast('성경본문 자동 입력 완료');
+    }
+  } catch(e) {
+    console.error('성경본문 가져오기 실패:', e);
+    toast('성경본문 자동 가져오기 실패', 'err');
+  }
+}
+
 async function loadBulletinIndex() {
   try {
     const res = await fetch('/bulletin/data/index.json?_=' + Date.now(), { cache: 'no-store' });
@@ -930,9 +999,19 @@ function fillBulletinForm(data) {
   document.getElementById('bDate').value     = w.date    || (w.week_id ? w.week_id.replace(/-/g, '.') : '');
   document.getElementById('bIssue').value    = w.issue   || '';
   renderOrderRows(data.worship_order || []);
+
+  // 성경봉독 step의 content → 성경구절 자동 복사
   const mv = (data.memory_verse || [])[0] || {};
-  document.getElementById('bVerseRef').value  = mv.reference || '';
-  document.getElementById('bVerseText').value = mv.text      || '';
+  const bibleStep = (data.worship_order || []).find(r => r.step === '성경봉독');
+  const verseRef = (bibleStep && bibleStep.content) || mv.reference || '';
+  document.getElementById('bVerseRef').value  = verseRef;
+  document.getElementById('bVerseText').value = mv.text || '';
+
+  // 성경봉독 내용이 있고 기존 본문과 구절이 다르면 자동 fetch
+  if (verseRef && verseRef !== (mv.reference || '')) {
+    fetchBibleVerse(verseRef);
+  }
+
   renderNewsItems(data.news || []);
 }
 
@@ -1220,6 +1299,23 @@ window.onload = function() {
   document.getElementById('loginForm').addEventListener('submit', e => {
     e.preventDefault();
     login(document.getElementById('pwInput').value);
+  });
+
+  // 예배순서 성경봉독 내용 변경 시 → 성경구절/본문 자동 동기화
+  let _verseFetchTimer = null;
+  document.getElementById('orderTableBody').addEventListener('change', e => {
+    const input = e.target;
+    if (!input.classList.contains('o-content')) return;
+    const tr = input.closest('tr');
+    const step = tr.querySelector('.o-step').value.trim();
+    if (step === '성경봉독') {
+      const ref = input.value.trim();
+      document.getElementById('bVerseRef').value = ref;
+      if (ref) {
+        clearTimeout(_verseFetchTimer);
+        _verseFetchTimer = setTimeout(() => fetchBibleVerse(ref), 300);
+      }
+    }
   });
 };
 </script>
