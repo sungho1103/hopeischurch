@@ -300,35 +300,17 @@
     return await res.json();
   }
   async function loadWeeks(){
-    // GitHub Contents API로 bulletin/data/ 폴더 파일 목록 가져오기
-    const dirRes = await fetch(
-      "https://api.github.com/repos/sungho1103/hopeischurch/contents/bulletin/data?ref=main&_=" + Date.now(),
-      { headers: { Accept: "application/vnd.github.v3+json" } }
-    );
-    if (!dirRes.ok) throw new Error("폴더 목록 로드 실패: " + dirRes.status);
-    const dirItems = await dirRes.json();
+    // index.json에서 주차 목록 직접 로드 (GitHub API 불필요)
+    const indexData = await fetchJSON(DATA_BASE + "/index.json");
+    const weeks = (Array.isArray(indexData) ? indexData : [])
+      .filter(w => w.week_id)
+      .sort((a, b) => b.week_id.localeCompare(a.week_id));
 
-    // YYYY-MM-DD.json 파일만 추출, 날짜 역순 정렬
-    const dateFiles = dirItems
-      .filter(f => f.type === "file" && /^\d{4}-\d{2}-\d{2}\.json$/.test(f.name))
-      .sort((a, b) => b.name.localeCompare(a.name));
-
-    if (!dateFiles.length) {
+    if (!weeks.length) {
       weekSelect.innerHTML = "<option value=''>주차 데이터가 없습니다</option>";
       return { weeks: [], selected: "" };
     }
 
-    // 각 파일의 week 필드 병렬 로드
-    const weekDataArr = await Promise.all(
-      dateFiles.map(f =>
-        fetch(f.download_url + "?_=" + Date.now(), { cache: "no-store" })
-          .then(r => r.json())
-          .then(d => d.week || { week_id: f.name.replace(".json",""), date: f.name.replace(".json","").replace(/-/g,"."), issue: "", title: "주일예배" })
-          .catch(() => ({ week_id: f.name.replace(".json",""), date: f.name.replace(".json","").replace(/-/g,"."), issue: "", title: "주일예배" }))
-      )
-    );
-
-    const weeks = weekDataArr;
     weekSelect.innerHTML = weeks.map(w =>
       "<option value='" + escapeHtml(w.week_id) + "'>" + escapeHtml(formatWeekLabel(w)) + "</option>"
     ).join("");

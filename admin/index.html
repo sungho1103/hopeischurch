@@ -848,13 +848,14 @@ async function newBulletinWeek() {
     try { await loadBulletinIndex(); } catch(e) {}
   }
 
-  // 직전 주 데이터를 템플릿으로 로드
+  // 직전 주 데이터를 템플릿으로 로드 (읽기 전용이므로 사이트에서 직접 fetch)
   let prev = { worship_order: [], memory_verse: [], news: [] };
   if (_bulletinIndex.length > 0) {
     const prevWeekId = _bulletinIndex[0].week_id;
     try {
-      const { text } = await ghGet(`bulletin/data/${prevWeekId}.json`);
-      prev = JSON.parse(text);
+      const res = await fetch(`/bulletin/data/${prevWeekId}.json?_=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+      prev = await res.json();
       toast('직전 주(' + prevWeekId + ') 내용을 템플릿으로 불러왔습니다');
     } catch(e) {
       console.error('직전 주 데이터 로드 실패:', e);
