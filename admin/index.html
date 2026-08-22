@@ -843,18 +843,40 @@ async function newBulletinWeek() {
 
   _currentBulletinSha = null;
 
+  // 인덱스가 아직 안 불러와졌으면 먼저 로드
+  if (_bulletinIndex.length === 0) {
+    try { await loadBulletinIndex(); } catch(e) {}
+  }
+
   // 직전 주 데이터를 템플릿으로 로드
   let prev = { worship_order: [], memory_verse: [], news: [] };
   if (_bulletinIndex.length > 0) {
+    const prevWeekId = _bulletinIndex[0].week_id;
     try {
-      const { text } = await ghGet(`bulletin/data/${_bulletinIndex[0].week_id}.json`);
+      const { text } = await ghGet(`bulletin/data/${prevWeekId}.json`);
       prev = JSON.parse(text);
-      toast('직전 주 내용을 템플릿으로 불러왔습니다');
-    } catch(e) { /* 없으면 빈 템플릿 */ }
+      toast('직전 주(' + prevWeekId + ') 내용을 템플릿으로 불러왔습니다');
+    } catch(e) {
+      console.error('직전 주 데이터 로드 실패:', e);
+      toast('직전 주 데이터 로드 실패: ' + e.message, 'err');
+    }
+  }
+
+  // 호수 자동 증가 (예: "26-33" → "26-34")
+  let nextIssue = '';
+  const lastEntry = (_bulletinIndex || []).find(w => w.issue);
+  if (lastEntry && lastEntry.issue) {
+    const parts = lastEntry.issue.split('-');
+    if (parts.length === 2) {
+      nextIssue = parts[0] + '-' + String(Number(parts[1]) + 1);
+    } else {
+      const n = Number(lastEntry.issue);
+      nextIssue = isNaN(n) ? '' : String(n + 1);
+    }
   }
 
   fillBulletinForm({
-    week: { week_id: weekId, date: weekId.replace(/-/g, '.'), issue: (()=>{ const last = (_bulletinIndex||[]).find(w=>w.issue); return last ? String(Number(last.issue)+1) : ''; })(), title: '주일예배' },
+    week: { week_id: weekId, date: weekId.replace(/-/g, '.'), issue: nextIssue, title: '주일예배' },
     worship_order: prev.worship_order || [],
     memory_verse:  prev.memory_verse  || [],
     news:          prev.news          || []
