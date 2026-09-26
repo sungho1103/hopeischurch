@@ -65,6 +65,7 @@
     }
 
     .page-sermon .meta-row{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; }
+    .page-sermon .meta-row .badge{ font-size:0.8rem; }
 
     .page-sermon pre{
       margin:0; white-space:pre-wrap; word-break:break-word;
@@ -458,7 +459,6 @@
       <div class="meta-row">
         ${ref ? `<span class="badge">본문: ${escapeHtml(ref)}</span>` : ""}
         ${who ? `<span class="badge">설교자: ${escapeHtml(who)}</span>` : ""}
-        <span class="badge">파일: ${escapeHtml(filename)}</span>
       </div>
       <pre>${escapeHtml(body || "(본문이 비어 있습니다)")}</pre>
     `;
