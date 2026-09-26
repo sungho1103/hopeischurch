@@ -238,6 +238,7 @@
     <span class="admin-brand">희망은교회 관리자</span>
     <div class="header-btns">
       <button onclick="openTokenModal()">🔑 GitHub 토큰</button>
+      <button onclick="openGeminiModal()">🤖 Gemini API 키</button>
       <button onclick="logout()">로그아웃</button>
     </div>
   </header>
@@ -425,6 +426,7 @@
               <input id="sVideoUrl" type="text" placeholder="https://www.youtube.com/watch?v=..." style="flex:1;">
               <button type="button" class="btn-icon" onclick="document.getElementById('sVideoUrl').value='';" title="지우기">✕</button>
             </div>
+            <button type="button" id="sSummaryBtn" class="btn-add" style="margin-top:8px;" onclick="generateSermonSummary()">🤖 요약문 생성 (Gemini)</button>
           </div>
 
           <div class="form-group">
@@ -457,6 +459,24 @@
   </div>
 </div>
 
+<!-- ═══════════════ GEMINI API KEY MODAL ═══════════════ -->
+<div id="geminiModal" class="modal-wrap">
+  <div class="modal-overlay" onclick="closeGeminiModal()"></div>
+  <div class="modal-box">
+    <h3>Gemini API 키 설정</h3>
+    <p>
+      Google AI Studio(aistudio.google.com)에서 발급받은 API 키를 입력하세요.<br>
+      설교 영상 요약 자동 생성에 사용됩니다.<br>
+      키는 이 기기의 localStorage에만 저장됩니다.
+    </p>
+    <input id="geminiKeyInput" type="password" placeholder="AIza...">
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="saveGeminiKey()">저장</button>
+      <button class="btn-cancel"  onclick="closeGeminiModal()">취소</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════ TOAST ═══════════════ -->
 <div id="toast" class="toast"></div>
 
@@ -468,6 +488,7 @@ const PASSWORD  = 'hopeischurch';
 const REPO      = 'sungho1103/hopeischurch';
 const BRANCH    = 'main';
 const API       = `https://api.github.com/repos/${REPO}/contents`;
+const GEMINI_MODEL = 'gemini-3.6-flash'; // 필요시 다른 Gemini 모델로 교체 가능
 
 /* ════════════════════════════════════════════
    유틸
@@ -655,6 +676,25 @@ function saveToken() {
   localStorage.setItem('gh_token', v);
   closeTokenModal();
   toast('토큰 저장됨');
+}
+
+/* ════════════════════════════════════════════
+   Gemini API 키 모달
+════════════════════════════════════════════ */
+function geminiKey() { return localStorage.getItem('gemini_key') || ''; }
+function openGeminiModal() {
+  document.getElementById('geminiKeyInput').value = geminiKey();
+  document.getElementById('geminiModal').classList.add('open');
+}
+function closeGeminiModal() {
+  document.getElementById('geminiModal').classList.remove('open');
+}
+function saveGeminiKey() {
+  const v = document.getElementById('geminiKeyInput').value.trim();
+  if (!v) { toast('API 키를 입력하세요', 'err'); return; }
+  localStorage.setItem('gemini_key', v);
+  closeGeminiModal();
+  toast('Gemini API 키 저장됨');
 }
 
 /* ════════════════════════════════════════════
@@ -1235,6 +1275,70 @@ async function saveSermon() {
     toast(`설교 ${date} 저장됨 ✓`);
   } catch(e) {
     toast('저장 실패: ' + e.message, 'err');
+  }
+}
+
+/* ════════════════════════════════════════════
+   설교 요약 자동 생성 (Gemini)
+════════════════════════════════════════════ */
+function isYoutubeUrl(url) {
+  return /^https?:\/\/(www\.)?(youtube\.com\/(watch\?v=|shorts\/)|youtu\.be\/)/.test(url);
+}
+
+async function generateSermonSummary() {
+  const videoUrl = document.getElementById('sVideoUrl').value.trim();
+  if (!videoUrl) { toast('동영상 URL을 먼저 입력하세요', 'err'); return; }
+  if (!isYoutubeUrl(videoUrl)) { toast('유효한 YouTube URL이 아닙니다', 'err'); return; }
+
+  const key = geminiKey();
+  if (!key) { toast('Gemini API 키를 먼저 설정하세요 (🤖 버튼)', 'err'); openGeminiModal(); return; }
+
+  const bodyEl = document.getElementById('sBody');
+  if (bodyEl.value.trim() && !confirm('설교 내용을 새로 생성된 요약으로 덮어쓸까요?')) return;
+
+  const btn = document.getElementById('sSummaryBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '생성 중…';
+
+  try {
+    const prompt =
+      '이 영상은 교회 주일 설교 영상입니다. 설교의 핵심 내용을 한국어로 자연스러운 글로 정리해 주세요. ' +
+      '분량은 공백 포함 1000자 내외로 맞추고, 설교의 흐름(도입-본론-결론)이 잘 드러나도록 작성하세요. ' +
+      '별도의 제목, 인사말, 부연 설명 없이 요약 본문만 출력하세요.';
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { file_data: { file_uri: videoUrl } },
+              { text: prompt }
+            ]
+          }]
+        })
+      }
+    );
+
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const text = (data.candidates?.[0]?.content?.parts || [])
+      .map(p => p.text || '').join('').trim();
+    if (!text) throw new Error('요약 결과가 비어 있습니다 (영상이 비공개이거나 처리할 수 없는 형식일 수 있습니다)');
+
+    bodyEl.value = text;
+    toast(`요약 생성됨 (${text.length}자) ✓`);
+  } catch(e) {
+    toast('요약 생성 실패: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
   }
 }
 
