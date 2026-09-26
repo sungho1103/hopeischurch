@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>관리자 | 희망은교회</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif; font-size: 14px; background: #f5f5f5; color: #111; line-height: 1.6; }
@@ -200,6 +202,8 @@
     .modal-btns .btn-primary:hover { background: #333; }
     .modal-btns .btn-cancel { background: #f0f0f0; color: #333; }
     .modal-btns .btn-cancel:hover { background: #e0e0e0; }
+    .modal-box.modal-wide { width: 720px; }
+    .modal-box.modal-wide img { width: 100%; display: block; border-radius: 8px; }
 
     /* ── Toast ── */
     .toast {
@@ -404,7 +408,9 @@
 
           <!-- 이미지 -->
           <div class="form-group">
-            <label>사진</label>
+            <label>사진
+              <button type="button" id="sThumbGenBtn" class="btn-icon" style="margin-left:6px;font-size:11px;width:auto;padding:2px 10px;" onclick="generateSermonThumbnail()" title="AI로 유튜브 인트로용 이미지 생성 (제목·본문·날짜·설교자 자동 반영)">✨ 생성</button>
+            </label>
             <!-- URL 직접 입력 -->
             <div style="display:flex;gap:8px;margin-bottom:8px;">
               <input id="sImageUrl" type="text" placeholder="이미지 URL 직접 입력 (선택)" style="flex:1;" oninput="showSermonImgPreview(this.value.trim())">
@@ -414,6 +420,11 @@
             <div style="display:flex;gap:8px;align-items:center;">
               <input id="sImageFile" type="file" accept="image/*" style="flex:1;font-size:12px;">
               <button type="button" class="btn-add" style="margin-top:0;white-space:nowrap;" onclick="uploadSermonImage()">GitHub에 업로드</button>
+            </div>
+            <!-- AI 생성 미리보기 / 사용하기 -->
+            <div id="sThumbActions" style="display:none;gap:8px;margin-top:8px;">
+              <button type="button" class="btn-add" style="margin-top:0;" onclick="previewSermonThumbnail()">🖼 미리보기</button>
+              <button type="button" class="btn-add" style="margin-top:0;" onclick="useSermonThumbnail()">✅ 사용하기</button>
             </div>
             <!-- 미리보기 -->
             <div id="sImagePreview" style="margin-top:10px;"></div>
@@ -477,6 +488,19 @@
   </div>
 </div>
 
+<!-- ═══════════════ 썸네일 미리보기 MODAL ═══════════════ -->
+<div id="thumbPreviewModal" class="modal-wrap">
+  <div class="modal-overlay" onclick="closeThumbPreviewModal()"></div>
+  <div class="modal-box modal-wide">
+    <h3>썸네일 미리보기</h3>
+    <img id="thumbPreviewImg" alt="생성된 썸네일 미리보기" style="margin-bottom:14px;">
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="useSermonThumbnail()">✅ 사용하기</button>
+      <button class="btn-cancel"  onclick="closeThumbPreviewModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════ TOAST ═══════════════ -->
 <div id="toast" class="toast"></div>
 
@@ -489,6 +513,8 @@ const REPO      = 'sungho1103/hopeischurch';
 const BRANCH    = 'main';
 const API       = `https://api.github.com/repos/${REPO}/contents`;
 const GEMINI_MODEL = 'gemini-3.6-flash'; // 필요시 다른 Gemini 모델로 교체 가능
+const GEMINI_IMAGE_MODEL = 'gemini-3.1-flash-image'; // 썸네일 배경 생성용 (Nano Banana 2)
+let _thumbDataUrl = null; // AI로 생성한 썸네일(배경+텍스트 합성) data URL
 
 /* ════════════════════════════════════════════
    유틸
@@ -1222,6 +1248,8 @@ function fillSermonForm(filename, txt) {
   document.getElementById('sImageUrl').value = imgUrl;
   showSermonImgPreview(imgUrl);
   document.getElementById('sVideoUrl').value = meta['동영상'] || meta['video'] || '';
+  _thumbDataUrl = null;
+  document.getElementById('sThumbActions').style.display = 'none';
 }
 
 function newSermon() {
@@ -1236,6 +1264,8 @@ function newSermon() {
   document.getElementById('sImageUrl').value = '';
   document.getElementById('sImageFile').value = '';
   showSermonImgPreview('');
+  _thumbDataUrl = null;
+  document.getElementById('sThumbActions').style.display = 'none';
   document.getElementById('sermonForm').style.display = '';
   document.getElementById('sDate').focus();
 }
@@ -1339,6 +1369,206 @@ async function generateSermonSummary() {
   } finally {
     btn.disabled = false;
     btn.textContent = originalLabel;
+  }
+}
+
+/* ════════════════════════════════════════════
+   설교 썸네일(유튜브 인트로 화면) AI 생성
+════════════════════════════════════════════ */
+function formatKoreanDate(s) {
+  const m = String(s).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (!m) return s;
+  return `${m[1]}년 ${parseInt(m[2], 10)}월 ${parseInt(m[3], 10)}일`;
+}
+
+// 배경 이미지(base64 data URL) 위에 제목/본문/날짜/설교자 텍스트를 합성해 1280x720 캔버스로 반환
+function drawSermonThumbnail(bgDataUrl, info) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const W = 1280, H = 720;
+      const canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      // 배경 cover-fit
+      const scale = Math.max(W / img.width, H / img.height);
+      const sw = W / scale, sh = H / scale;
+      const sx = (img.width - sw) / 2, sy = (img.height - sh) / 2;
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+
+      // 텍스트 가독성을 위한 은은한 radial 톤 보정
+      const grad = ctx.createRadialGradient(W/2, H*0.42, H*0.12, W/2, H*0.42, H*0.78);
+      grad.addColorStop(0, 'rgba(255,250,240,0.32)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.20)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'alphabetic';
+      let cy = H * 0.40;
+
+      // 제목 (여러 줄 자동 줄바꿈)
+      ctx.fillStyle = '#2b2013';
+      ctx.font = '700 56px "Noto Serif KR", serif';
+      const words = (info.title || '설교 제목').split(' ');
+      const titleLines = [];
+      let line = '';
+      for (const w of words) {
+        const t = line ? line + ' ' + w : w;
+        if (ctx.measureText(t).width > W * 0.78 && line) { titleLines.push(line); line = w; }
+        else line = t;
+      }
+      if (line) titleLines.push(line);
+      titleLines.forEach((l, i) => ctx.fillText(l, W/2, cy + i * 66));
+      cy += titleLines.length * 66 + 44;
+
+      // 성경 본문
+      if (info.ref) {
+        ctx.font = '400 30px "Noto Serif KR", serif';
+        ctx.fillStyle = '#4a3d2a';
+        ctx.fillText(`(${info.ref})`, W/2, cy);
+        cy += 54;
+      }
+
+      // 장식 구분자
+      ctx.font = '20px serif';
+      ctx.fillStyle = '#9c8a63';
+      ctx.fillText('◇', W/2, cy);
+      cy += 46;
+
+      // 날짜
+      ctx.font = '400 22px "Noto Serif KR", serif';
+      ctx.fillStyle = '#5a4c36';
+      if (info.date) { ctx.fillText(info.date, W/2, cy); cy += 32; }
+
+      // 설교자
+      if (info.preacher) {
+        ctx.fillText(`${info.preacher}(희망은교회)`, W/2, cy);
+      }
+
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('배경 이미지를 불러오지 못했습니다'));
+    img.src = bgDataUrl;
+  });
+}
+
+async function generateSermonThumbnail() {
+  const title    = document.getElementById('sTitle').value.trim();
+  const ref      = document.getElementById('sRef').value.trim();
+  const dateRaw  = document.getElementById('sDate').value.trim();
+  const preacher = document.getElementById('sPreacher').value.trim();
+  if (!title || !dateRaw) { toast('제목과 날짜를 먼저 입력하세요', 'err'); return; }
+
+  const key = geminiKey();
+  if (!key) { toast('Gemini API 키를 먼저 설정하세요 (🤖 버튼)', 'err'); openGeminiModal(); return; }
+
+  const btn = document.getElementById('sThumbGenBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '생성 중…';
+
+  try {
+    const bgPrompt =
+      '교회 주일 설교 인트로 화면용 배경 이미지를 생성해 주세요. ' +
+      '은은하고 몽환적인 황금빛 노을 자연 풍경: 크림·피치·골드 톤의 부드러운 하늘, 잔잔히 안개 낀 산 능선, ' +
+      '오른쪽 언덕 위 작은 십자가가 있는 예배당 실루엣, 왼쪽 하단에 은은한 나뭇가지·잎사귀 실루엣, ' +
+      '따뜻하고 차분한 분위기, 살짝 빈티지한 필름 그레인. ' +
+      '화면 중앙~상단에 글자를 얹을 넉넉한 여백을 남겨주세요. ' +
+      '이미지 안에 글자, 숫자, 워터마크는 절대 넣지 마세요. 16:9 와이드 구도.';
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_IMAGE_MODEL}:generateContent?key=${encodeURIComponent(key)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: bgPrompt }] }],
+          generationConfig: {
+            responseModalities: ['IMAGE'],
+            imageConfig: { aspectRatio: '16:9' }
+          }
+        })
+      }
+    );
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const imgPart = parts.find(p => p.inlineData || p.inline_data);
+    const inline = imgPart && (imgPart.inlineData || imgPart.inline_data);
+    if (!inline) throw new Error('이미지 생성 결과가 없습니다');
+    const mime = inline.mimeType || inline.mime_type || 'image/png';
+    const bgDataUrl = `data:${mime};base64,${inline.data}`;
+
+    _thumbDataUrl = await drawSermonThumbnail(bgDataUrl, {
+      title, ref, date: formatKoreanDate(dateRaw), preacher
+    });
+
+    document.getElementById('sThumbActions').style.display = 'flex';
+    toast('썸네일 생성 완료 ✓');
+  } catch(e) {
+    toast('생성 실패: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
+
+function previewSermonThumbnail() {
+  if (!_thumbDataUrl) { toast('먼저 생성하세요', 'err'); return; }
+  document.getElementById('thumbPreviewImg').src = _thumbDataUrl;
+  document.getElementById('thumbPreviewModal').classList.add('open');
+}
+function closeThumbPreviewModal() {
+  document.getElementById('thumbPreviewModal').classList.remove('open');
+}
+
+// 생성된 이미지를 유튜브 영상 첫 화면처럼 2초간 전체화면으로 보여줌
+function flashAsIntro(dataUrl) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .4s ease;';
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.style.cssText = 'max-width:100%;max-height:100%;';
+  overlay.appendChild(img);
+  document.body.appendChild(overlay);
+  setTimeout(() => {
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.remove(), 400);
+  }, 2000);
+}
+
+async function useSermonThumbnail() {
+  if (!_thumbDataUrl) { toast('먼저 생성하세요', 'err'); return; }
+  closeThumbPreviewModal();
+  flashAsIntro(_thumbDataUrl);
+
+  const date = document.getElementById('sDate').value.trim();
+  if (!date) { toast('날짜가 없어 사진 저장은 건너뜁니다', 'err'); return; }
+
+  try {
+    const base64 = _thumbDataUrl.split(',')[1];
+    const imgFilename = `${date}-thumb.png`;
+    const imgPath = `sermon/images/${imgFilename}`;
+    const sha = await ghGetSha(imgPath);
+    const body = { message: `content: 설교 썸네일 ${imgFilename}`, content: base64, branch: BRANCH };
+    if (sha) body.sha = sha;
+    const r = await fetch(`${API}/${imgPath}`, {
+      method: 'PUT',
+      headers: { ...authHeaders(true), 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || r.status); }
+    const publicUrl = `/sermon/images/${imgFilename}`;
+    document.getElementById('sImageUrl').value = publicUrl;
+    showSermonImgPreview(publicUrl);
+    toast('썸네일이 사진으로 저장됨 ✓');
+  } catch(e) {
+    toast('사진 저장 실패: ' + e.message, 'err');
   }
 }
 
