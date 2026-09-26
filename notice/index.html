@@ -15,8 +15,8 @@
     .bb-outline:hover { background:var(--c-text); color:var(--c-bg); }
     .bb-sm { padding:5px 12px; font-size:.78rem; }
     .bb-xs { padding:3px 9px; font-size:.72rem; border-radius:var(--radius-sm); }
-            .bb-danger { background:var(--c-accent); color:#fff; border:2px solid var(--c-accent); }
-            .bb-danger:hover { background:var(--c-accent-hover); border-color:var(--c-accent-hover); }
+            .bb-danger { background:var(--c-text-muted); color:#fff; border:2px solid var(--c-text-muted); }
+            .bb-danger:hover { background:var(--c-text); border-color:var(--c-text); }
 
     /* auth bar */
     .board-auth-bar { display:flex; align-items:center; gap:8px; margin-left:auto; }
@@ -34,6 +34,7 @@
     .post-table th, .post-table td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--c-border); white-space:nowrap; font-size:.9rem; }
     .post-table th { font-weight:700; font-size:.85rem; }
     .post-row:hover { background:var(--c-bg-subtle); cursor:pointer; }
+    .post-row:hover .col-title { color:var(--c-accent); }
     .col-title { white-space:normal !important; }
     .comment-count { color:var(--c-text-muted); font-size:.8rem; margin-left:5px; }
     .tc { text-align:center !important; }
