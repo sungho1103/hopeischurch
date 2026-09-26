@@ -1,32 +1,35 @@
 /* =================================================
    Design System — Hope is Church
-   Rose Gold + Warm Gold accent
+   Neo-Editorial Zine — ink black / cream / signal orange
 ================================================= */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&display=swap");
+
 :root{
-  /* Neutral (warm tone) */
-  --c-text:        #1a1a1a;
-  --c-text-sub:    #5c5c5c;
-  --c-text-muted:  #9a9a9a;
-  --c-border:      #e5e5e5;
-  --c-bg:          #ffffff;
-  --c-bg-subtle:   #f5f5f3;
-  --c-bg-elevated: #fafaf8;
+  /* Neutral (warm ink / cream) */
+  --c-text:        #151210;
+  --c-text-sub:    #3A352F;
+  --c-text-muted:  #8A8378;
+  --c-border:      #151210;
+  --c-bg:          #F3EFE7;
+  --c-bg-subtle:   #ECE5D8;
+  --c-bg-elevated: #FFFFFF;
 
-  /* Accent: Rose gold */
-  --c-accent:        #b76e79;
-  --c-accent-hover:  #a25d68;
-  --c-accent-light:  #f5e6e8;
-  --c-accent-muted:  #d4a0a8;
+  /* Accent: Signal orange */
+  --c-accent:        #FF4B2B;
+  --c-accent-hover:  #E23D1F;
+  --c-accent-light:  #FFE1D6;
+  --c-accent-muted:  #C43E1F;
 
-  /* Secondary: Warm gold */
+  /* Secondary: kept for pages that reference it */
   --c-gold:        #b8963e;
   --c-gold-light:  #faf5e8;
 
   /* Typography */
-  --fs-display: 3.6rem;
-  --fs-h1:      2.4rem;
-  --fs-h2:      1.8rem;
-  --fs-h3:      1.2rem;
+  --font-display: "Fraunces", serif;
+  --fs-display: 4.4rem;
+  --fs-h1:      2.6rem;
+  --fs-h2:      1.9rem;
+  --fs-h3:      1.25rem;
   --fs-body:    1rem;
   --fs-small:   0.875rem;
   --fs-xs:      0.75rem;
@@ -38,11 +41,11 @@
   --space-sm:  24px;
   --space-xs:  16px;
 
-  /* Radius */
-  --radius-sm:   10px;
-  --radius-md:   16px;
-  --radius-lg:   24px;
-  --radius-full: 999px;
+  /* Radius — sharp, editorial */
+  --radius-sm:   2px;
+  --radius-md:   0px;
+  --radius-lg:   0px;
+  --radius-full: 3px;
 
   /* Transitions */
   --ease-out:    cubic-bezier(0.16,1,0.3,1);
@@ -50,17 +53,18 @@
   --dur-normal:  0.3s;
   --dur-slow:    0.6s;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+  /* Shadows — hard offset, no blur */
+  --shadow-sm: none;
+  --shadow-md: 5px 5px 0 rgba(21,18,16,0.92);
 }
 
 @media(max-width:768px){
   :root{
     --space-section: 64px;
-    --fs-display: 2.4rem;
-    --fs-h1: 1.8rem;
-    --fs-h2: 1.4rem;
+    --fs-display: 2.6rem;
+    --fs-h1: 1.9rem;
+    --fs-h2: 1.5rem;
+    --shadow-md: 3px 3px 0 rgba(21,18,16,0.92);
   }
 }
 
@@ -100,7 +104,7 @@ aside{
   position:sticky;
   top:0;
   z-index:200;
-  background:rgba(255,255,255,0.85);
+  background:rgba(243,239,231,0.92);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
   display:flex;
@@ -115,7 +119,7 @@ aside::after{
   bottom:0;
   left:20px;
   right:20px;
-  height:1px;
+  height:2px;
   background:var(--c-border);
 }
 
@@ -129,8 +133,9 @@ main{
    Top Nav
 ================================================= */
 .brand{
-  font-size:1.05rem;
-  font-weight:800;
+  font-family:var(--font-display);
+  font-size:1.15rem;
+  font-weight:900;
   margin-bottom:0;
   padding-left:0;
   white-space:nowrap;
@@ -150,6 +155,7 @@ nav a{
   padding:7px 13px;
   border-radius:var(--radius-sm);
   font-size:.9rem;
+  font-weight:600;
   color:var(--c-text-sub);
   position:relative;
   transition:color var(--dur-fast), background var(--dur-fast);
@@ -161,7 +167,7 @@ nav a:hover{
 }
 nav a.is-active{
   color:var(--c-accent);
-  font-weight:600;
+  font-weight:700;
 }
 
 .notice{ display:none; }
@@ -176,15 +182,15 @@ nav a.is-active{
 /* =================================================
    Headings
 ================================================= */
-h1{ font-size:2rem; margin-bottom:10px; }
-h2{ font-size:1.4rem; margin-bottom:16px; }
+h1{ font-family:var(--font-display); font-weight:900; font-size:2rem; margin-bottom:10px; letter-spacing:-0.02em; }
+h2{ font-family:var(--font-display); font-weight:900; font-size:1.4rem; margin-bottom:16px; letter-spacing:-0.02em; }
 
 /* =================================================
    Common Round Box
 ================================================= */
 .box{
-  border:1px solid var(--c-border);
-  border-radius:20px;
+  border:2px solid var(--c-border);
+  border-radius:var(--radius-md);
   padding:28px;
   background:transparent;
 }
@@ -194,10 +200,10 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
 ================================================= */
 .btn{
   display:inline-block;
-  padding:11px 22px;
+  padding:12px 24px;
   border-radius:var(--radius-sm);
   font-size:.9rem;
-  font-weight:600;
+  font-weight:700;
   text-decoration:none;
   cursor:pointer;
   transition:all var(--dur-fast) ease;
@@ -206,31 +212,32 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
 .btn:active{ transform:scale(0.98); }
 
 .btn-solid{
-  background:var(--c-accent);
-  color:#fff;
-  border:1.5px solid var(--c-accent);
+  background:var(--c-text);
+  color:var(--c-bg);
+  border:2px solid var(--c-text);
 }
 .btn-solid:hover{
-  background:var(--c-accent-hover);
-  border-color:var(--c-accent-hover);
-  box-shadow:0 4px 12px rgba(183,110,121,0.25);
+  background:var(--c-accent);
+  border-color:var(--c-accent);
+  color:#fff;
 }
 
 .btn-outline{
-  background:var(--c-bg);
+  background:transparent;
   color:var(--c-text);
-  border:1.5px solid var(--c-border);
+  border:2px solid var(--c-text);
 }
 .btn-outline:hover{
-  background:var(--c-bg-subtle);
-  border-color:var(--c-text-muted);
+  background:var(--c-text);
+  color:var(--c-bg);
 }
 
 .btn-inline{
   padding:3px 10px;
   font-size:0.72rem;
+  font-weight:600;
   border:1px solid var(--c-border);
-  border-radius:8px;
+  border-radius:var(--radius-sm);
   background:var(--c-bg);
   cursor:pointer;
   color:var(--c-text-sub);
@@ -240,7 +247,7 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
   gap:5px;
   vertical-align:middle;
 }
-.btn-inline:hover{ background:var(--c-bg-subtle); text-decoration:none; }
+.btn-inline:hover{ background:var(--c-text); color:var(--c-bg); text-decoration:none; }
 
 /* =================================================
    Badge
@@ -250,9 +257,9 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
   padding:4px 12px;
   border-radius:var(--radius-full);
   font-size:0.72rem;
-  font-weight:500;
+  font-weight:700;
   background:var(--c-accent-light);
-  color:var(--c-accent);
+  color:var(--c-accent-muted);
 }
 
 /* =================================================
@@ -266,20 +273,21 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
   margin-bottom:var(--space-section);
 }
 .bento-item{
-  background:var(--c-bg-subtle);
+  background:var(--c-bg-elevated);
+  border:2px solid var(--c-border);
   border-radius:var(--radius-lg);
   padding:28px 24px;
   transition:transform var(--dur-normal) var(--ease-out), box-shadow var(--dur-normal) var(--ease-out);
 }
 .bento-item:hover{
-  transform:translateY(-4px);
+  transform:translate(-3px,-3px);
   box-shadow:var(--shadow-md);
 }
 
 .bento-worship{ grid-column:1 / 3; grid-row:1 / 3; }
 .bento-notice{ grid-column:3; grid-row:1; }
-.bento-sermon-quick{ grid-column:4; grid-row:1; background:var(--c-accent); color:#fff; }
-.bento-sermon-quick .bento-label{ color:rgba(255,255,255,0.7); }
+.bento-sermon-quick{ grid-column:4; grid-row:1; background:var(--c-accent); border-color:var(--c-text); color:#fff; }
+.bento-sermon-quick .bento-label{ color:rgba(255,255,255,0.78); }
 .bento-sermon-quick .bento-title{ color:#fff; }
 .bento-bulletin-quick{ grid-column:3 / 5; grid-row:2; }
 
@@ -290,12 +298,13 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
   text-transform:uppercase;
   color:var(--c-accent-muted);
   margin-bottom:8px;
-  font-weight:500;
+  font-weight:700;
 }
 .bento-title{
+  font-family:var(--font-display);
   font-size:var(--fs-h3);
-  font-weight:800;
-  letter-spacing:-0.03em;
+  font-weight:900;
+  letter-spacing:-0.02em;
   color:var(--c-text);
   margin-bottom:var(--space-xs);
 }
@@ -323,7 +332,7 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
    Footer
 ================================================= */
 .site-footer{
-  border-top:1px solid var(--c-border);
+  border-top:2px solid var(--c-border);
   margin-top:0;
   padding:32px 24px;
   text-align:center;
@@ -349,12 +358,13 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
   transform:translateX(100%);
   transition:transform .25s ease;
   box-shadow:-4px 0 20px rgba(0,0,0,.12);
+  border-left:2px solid var(--c-border);
 }
 .drawer.open{ transform:translateX(0); }
 .drawer-overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.45);
+  background:rgba(21,18,16,.55);
   z-index:300;
   display:none;
 }
@@ -382,17 +392,17 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
     position:sticky;
     top:0;
     z-index:200;
-    background:rgba(255,255,255,0.85);
+    background:rgba(243,239,231,0.92);
     backdrop-filter:blur(12px);
     -webkit-backdrop-filter:blur(12px);
-    border-bottom:1px solid var(--c-border);
+    border-bottom:2px solid var(--c-border);
     padding:0 16px;
     height:52px;
-    box-shadow:0 1px 6px rgba(0,0,0,.04);
   }
   .mobile-brand{
-    font-size:1.05rem;
-    font-weight:800;
+    font-family:var(--font-display);
+    font-size:1.1rem;
+    font-weight:900;
     letter-spacing:-.02em;
     color:var(--c-text);
   }
@@ -443,9 +453,9 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
     margin-top:16px;
     padding:12px 0;
     width:100%;
-    background:var(--c-accent);
-    color:#fff;
-    border:none;
+    background:var(--c-text);
+    color:var(--c-bg);
+    border:2px solid var(--c-text);
     border-radius:var(--radius-sm);
     font-size:1rem;
     font-weight:700;
@@ -469,7 +479,7 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
   .mobile-notice-item{
     flex-shrink:0;
     max-width:78vw;
-    background:var(--c-bg);
+    background:var(--c-bg-elevated);
     border:1px solid var(--c-border);
     border-radius:var(--radius-sm);
     padding:8px 14px;
@@ -485,10 +495,10 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
     position:fixed;
     bottom:0; left:0; right:0;
     height:56px;
-    background:rgba(255,255,255,0.9);
+    background:rgba(243,239,231,0.95);
     backdrop-filter:blur(12px);
     -webkit-backdrop-filter:blur(12px);
-    border-top:1px solid var(--c-border);
+    border-top:2px solid var(--c-border);
     z-index:200;
   }
   .bottom-nav-item{
@@ -500,7 +510,7 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
     gap:3px;
     color:var(--c-text-muted);
     font-size:0.6rem;
-    font-weight:500;
+    font-weight:600;
     text-decoration:none;
     transition:color var(--dur-fast);
     position:relative;
@@ -535,7 +545,7 @@ h2{ font-size:1.4rem; margin-bottom:16px; }
 #pastor .divider{
   margin-top:24px;
   padding-top:16px;
-  border-top:1px solid var(--c-border) !important;
+  border-top:2px solid var(--c-border) !important;
 }
 
 /* =================================================
