@@ -1,178 +1,153 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>희망은교회</title>
+  <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>주일 설교 | 희망은교회</title>
+
+  <!-- Pretendard 폰트 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+  <!-- ✅ 모든 페이지 공통 레이아웃 -->
   <link rel="stylesheet" href="/assets/common.css?v=20260822-3">
+
+  <!-- 설교 페이지 전용 스타일 -->
   <style>
-    /* Hero */
-    .hero{
-      position:relative;
-      overflow:hidden;
-      padding:100px 0 80px;
-      margin-bottom:var(--space-section);
-    }
-    .hero-inner{ position:relative; z-index:1; }
-    .hero-eyebrow{
-      font-size:0.72rem;
-      letter-spacing:.15em;
-      text-transform:uppercase;
-      color:var(--c-accent);
-      margin-bottom:18px;
-      font-weight:700;
-    }
-    .hero h1{
-      font-family:var(--font-display);
-      font-size:var(--fs-display);
-      font-weight:900;
-      letter-spacing:-.03em;
-      line-height:0.98;
-      color:var(--c-text);
-      margin-bottom:22px;
-    }
-    .hero-desc{
-      font-size:1rem;
-      color:var(--c-text-sub);
-      line-height:1.85;
-      max-width:480px;
-      margin-bottom:40px;
-    }
-    .hero-btns{ display:flex; gap:12px; flex-wrap:wrap; }
 
-    /* Section 공통 */
-    .section{ margin-bottom:var(--space-section); }
-    .section-label{
-      display:block;
-      font-size:0.7rem;
-      letter-spacing:.15em;
-      text-transform:uppercase;
-      color:var(--c-accent-muted);
-      margin-bottom:10px;
-      font-weight:500;
-    }
-    .section-title{
-      font-family:var(--font-display);
-      font-size:var(--fs-h2);
-      font-weight:900;
-      letter-spacing:-.02em;
-      color:var(--c-text);
-      margin-bottom:var(--space-sm);
-    }
-    .divider{
-      border:none;
-      border-top:2px solid var(--c-border);
-      margin:0 0 var(--space-section);
+    body.page-sermon .wrap{ padding-top:0; }
+    body.page-sermon main{ padding:0; }
+    body.page-sermon .container{ padding:48px 20px 0; }
+
+    @media (max-width:768px){
+      body.page-sermon .wrap{ padding-top:0; }
+      .page-sermon .container{ padding:10px 16px 40px; }
+      .page-sermon pre{ font-size:0.9rem; }
     }
 
-    /* 예배 카드 */
-    .worship-grid{
-      display:grid;
-      grid-template-columns:repeat(2, 1fr);
+    .page-sermon .sermon-top{
+      display:flex;
+      justify-content:space-between;
       gap:12px;
-    }
-    .worship-card{
-      border:2px solid var(--c-border);
-      border-radius:var(--radius-md);
-      padding:24px 20px;
-      background:var(--c-bg-elevated);
-      transition:transform var(--dur-normal) var(--ease-out), box-shadow var(--dur-normal) var(--ease-out);
-    }
-    .worship-card:hover{
-      transform:translate(-3px,-3px);
-      box-shadow:var(--shadow-md);
-    }
-    .worship-card-title{
-      font-size:.72rem;
-      font-weight:700;
-      letter-spacing:.08em;
-      color:var(--c-accent-muted);
-      margin-bottom:8px;
-      text-transform:uppercase;
-    }
-    .worship-card-time{
-      font-family:var(--font-display);
-      font-size:1.4rem;
-      font-weight:900;
-      letter-spacing:-.02em;
-      color:var(--c-text);
-      margin-bottom:2px;
-    }
-    .worship-card-loc{ font-size:.78rem; color:var(--c-text-muted); }
-    .worship-extra{
-      margin-top:16px;
-      font-size:var(--fs-small);
-      color:var(--c-text-muted);
-      line-height:1.7;
+      align-items:flex-end;
+      flex-wrap:wrap;
     }
 
-    /* Bento Notice */
-    .bento-notice-list{ display:flex; flex-direction:column; gap:8px; }
-    .bento-notice-item{
-      font-size:var(--fs-small);
-      color:var(--c-text-sub);
-      line-height:1.6;
-      padding:10px 14px;
-      background:var(--c-bg-elevated);
+    .page-sermon .muted{ color:var(--c-text-sub); font-size:0.9rem; line-height:1.7; }
+    .page-sermon main h1{ margin:0; font-size:var(--fs-h1,2.4rem); font-weight:800; letter-spacing:-.03em; }
+
+    .page-sermon .grid{ display:grid; grid-template-columns:320px 1fr; gap:16px; }
+
+    .page-sermon .panel{
       border:1px solid var(--c-border);
+      border-radius:var(--radius-md);
+      padding:16px;
+      background:var(--c-bg);
+      transition:transform var(--dur-normal,0.3s) var(--ease-out), box-shadow var(--dur-normal,0.3s) var(--ease-out);
+    }
+    .page-sermon .panel:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
+
+    .page-sermon .select{
+      width:100%;
+      padding:10px 12px;
+      border:1.5px solid var(--c-accent);
       border-radius:var(--radius-sm);
+      font-size:0.9rem;
+      background:var(--c-accent);
+      color:#fff;
     }
-    .bento-notice-item a{ color:var(--c-accent); font-weight:500; }
-    .bento-notice-empty{ font-size:var(--fs-small); color:var(--c-text-muted); }
 
-    /* Bento Quick Link */
-    .bento-link{ display:flex; flex-direction:column; justify-content:space-between; height:100%; }
-    .bento-link-arrow{
-      font-size:1.8rem; margin-top:auto; opacity:0.6;
-      transition:transform var(--dur-normal) var(--ease-out), opacity var(--dur-normal);
+    .page-sermon .sermon-title{
+      font-size:2.1rem;
+      font-weight:400;
+      margin:0 0 10px;
+      letter-spacing:-.03em;
     }
-    .bento-item:hover .bento-link-arrow{ transform:translateX(4px); opacity:1; }
 
-    /* 인사말 */
-    .greeting-body{ margin-bottom:32px; }
-    .greeting-body p{ font-size:.97rem; line-height:1.85; color:var(--c-text-sub); margin-bottom:16px; }
-    .greeting-body p:last-child{ margin-bottom:0; }
-    .greeting-sign{
-      padding-top:24px;
-      border-top:1px solid var(--c-border);
-      font-size:.88rem; color:var(--c-text-sub); line-height:1.8;
+    .page-sermon .meta-row{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; }
+    .page-sermon .meta-row .badge{ font-size:0.8rem; }
+
+    .page-sermon pre{
+      margin:0; white-space:pre-wrap; word-break:break-word;
+      font-size:0.9rem; line-height:1.85; font-family:inherit; transition:font-size .2s;
     }
-    .greeting-sign strong{ display:block; margin-top:2px; font-size:.95rem; color:var(--c-text); }
-
-    /* 섬기는 이들 */
-    .minister-list{ list-style:none; margin:0; padding:0; max-width:360px; }
-    .minister-item{
-      display:flex; gap:20px; align-items:baseline;
-      padding:10px 0; border-bottom:1px solid var(--c-border); font-size:.94rem;
+    .font-size-ctrl{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+    .sermon-title-row{
+      display:flex; justify-content:space-between; align-items:center; margin:0 0 10px; gap:12px;
     }
-    .minister-item:last-child{ border-bottom:none; }
-    .minister-role{ min-width:76px; font-size:.8rem; color:var(--c-text-muted); font-weight:500; }
-    .minister-name{ font-weight:700; color:var(--c-text); }
+    .sermon-title-row .sermon-title{ margin:0; }
+    .font-size-ctrl button{
+      background:none; border:1px solid var(--c-border); border-radius:8px;
+      padding:3px 9px; font-size:0.78rem; cursor:pointer; color:var(--c-text); line-height:1.4;
+    }
+    .font-size-ctrl button:hover:not(:disabled){ background:var(--c-bg-subtle); }
+    .font-size-ctrl button:disabled{ opacity:.35; cursor:default; }
+    .font-size-ctrl .fs-label{ font-size:0.72rem; color:var(--c-text); }
+    #fsPlus{ background:var(--c-accent); color:#fff; border-color:var(--c-accent); }
+    #fsPlus:hover:not(:disabled){ background:var(--c-accent-hover); }
 
-    /* 찾아오는 길 */
-    .map-address{ font-size:1.05rem; font-weight:700; color:var(--c-text); margin-bottom:8px; }
-    .map-phone{ font-size:.9rem; color:var(--c-text-sub); margin-bottom:24px; }
+    @media(max-width:980px){ .page-sermon .grid{ grid-template-columns:1fr; } }
 
-    /* Hero Sermon full-width */
-    #hero-sermon{ margin-left:-20px; margin-right:-20px; margin-top:0; }
+    /* 동영상 */
+    .sermon-video-wrap{
+      position:relative; padding-bottom:56.25%; height:0;
+      margin-top:16px; border-radius:var(--radius-sm); overflow:hidden;
+    }
+    .sermon-video-wrap iframe{
+      position:absolute; top:0; left:0; width:100%; height:100%; border:0;
+    }
 
-    /* 반응형 */
-    @media(max-width:768px){
-      main{ padding:0 20px; }
-      .hero{ padding:48px 0 40px; margin-bottom:40px; }
-      .hero-desc{ font-size:.92rem; margin-bottom:24px; }
-      .hero-btns{ flex-direction:column; gap:10px; }
-      .hero-btns .btn{ display:block; width:100%; text-align:center; padding:14px 0; min-height:48px; }
-      .worship-grid{ grid-template-columns:1fr 1fr; gap:10px; }
-      .worship-card{ padding:18px 14px; }
-      .worship-card-time{ font-size:1.1rem; }
-      #map .btn-outline{ flex:1; text-align:center; padding:14px 0; min-height:48px; }
+    /* 댓글 */
+    .page-sermon .comments{ margin-top:36px; padding-top:28px; border-top:1px solid var(--c-border); }
+    .page-sermon .comment-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:18px; }
+    .page-sermon .comment-item{ padding:10px 14px; background:var(--c-bg-subtle); border-radius:var(--radius-sm); }
+    .page-sermon .comment-meta{ font-size:0.72rem; color:var(--c-text-muted); margin-bottom:4px; }
+    .page-sermon .comment-author{ font-weight:600; color:var(--c-text-sub); }
+    .page-sermon .comment-body{ font-size:0.88rem; color:var(--c-text-sub); line-height:1.6; }
+    .page-sermon .c-del,.page-sermon .c-edit{
+      float:right; background:none; border:none; color:var(--c-text-muted);
+      font-size:0.75rem; cursor:pointer; padding:0 3px; line-height:1;
+    }
+    .page-sermon .c-del:hover{ color:#d44; }
+    .page-sermon .c-edit:hover{ color:#557; }
+    .page-sermon .comment-form{ display:flex; flex-direction:column; gap:8px; }
+    .page-sermon .comment-row{ display:flex; gap:8px; align-items:flex-start; }
+    .page-sermon .c-input{
+      border:1px solid var(--c-border); border-radius:8px; padding:8px 10px;
+      font-size:0.85rem; font-family:inherit; outline:none;
+    }
+    .page-sermon .c-input:focus{ border-color:var(--c-accent); }
+    .page-sermon .c-name{ width:120px; flex-shrink:0; height:62px; }
+    .page-sermon .c-pw{ width:120px; flex-shrink:0; height:62px; letter-spacing:0.12em; -webkit-user-select:none; user-select:none; }
+    @keyframes pw-flicker{ 0%,100%{ opacity:1; } 45%{ opacity:0.82; } 50%{ opacity:1; } 95%{ opacity:0.88; } }
+    .page-sermon .c-pw.has-value{ animation:pw-flicker 1.7s infinite; filter:contrast(1.04); }
+    .page-sermon .c-text{ flex:1; resize:none; height:62px; }
+    .page-sermon .c-footer{ display:flex; justify-content:space-between; align-items:center; }
+    .page-sermon .c-count{ font-size:0.72rem; color:var(--c-text-muted); }
+    .page-sermon .c-submit{
+      padding:8px 18px; background:var(--c-accent); color:#fff; border:none;
+      border-radius:8px; font-size:0.8rem; cursor:pointer; transition:background var(--dur-fast);
+    }
+    .page-sermon .c-submit:hover{ background:var(--c-accent-hover); }
+    .page-sermon .c-submit:disabled{ opacity:.4; cursor:default; }
+    .page-sermon .c-cancel{
+      background:none; border:none; color:var(--c-text-muted);
+      font-size:0.78rem; cursor:pointer; padding:0 4px; display:none;
+    }
+    .page-sermon .c-cancel:hover{ color:var(--c-text-sub); }
+    .page-sermon .c-error{ font-size:0.72rem; color:#d44; min-height:16px; }
+    .page-sermon .c-empty{ text-align:center; color:var(--c-text-muted); padding:20px 0; font-size:0.85rem; }
+
+    @media (max-width:768px){
+      .page-sermon .comment-row{ flex-wrap:wrap; }
+      .page-sermon .c-name{ flex:1; width:auto; }
+      .page-sermon .c-pw{ flex:1; width:auto; }
+      .page-sermon .c-text{ flex:0 0 100%; }
     }
   </style>
 </head>
 
-<body>
+<body class="page-sermon">
   <!-- 모바일 Sticky Header -->
   <header class="mobile-header">
     <span class="mobile-brand">희망은교회</span>
@@ -186,14 +161,16 @@
     <a href="/" data-nav="home">홈</a>
     <a href="/bulletin/" data-nav="bulletin">주보</a>
     <a href="/sermon/" data-nav="sermon">주일설교</a>
-    <a href="/notice/" data-nav="notice">게시판</a>
+      <a href="/notice/" data-nav="notice">게시판</a>
     <a href="/#map" data-nav="map">찾아오는 길</a>
     <button id="installBtn" onclick="installApp()">📱 핸드폰에 저장하기</button>
-    <img src="/menu_m_slogan.jpg" alt="" style="margin-top:auto;padding-top:24px;width:100%;border-radius:8px;object-fit:contain;">
   </nav>
+  <div class="mobile-notice" id="mobileNotice"></div>
+
   <div class="wrap">
     <aside>
       <div class="brand">희망은교회</div>
+
       <nav id="menu">
         <a href="/" data-nav="home">홈</a>
         <a href="/bulletin/" data-nav="bulletin">주보</a>
@@ -201,646 +178,561 @@
         <a href="/notice/" data-nav="notice">게시판</a>
         <a href="/#map" data-nav="map">찾아오는 길</a>
       </nav>
+
       <div class="notice" id="siteNotice"></div>
     </aside>
 
     <main>
 
-      <!-- ① Hero -->
-      <style>
-        /* 설교 인용문으로 바뀌기 전까지 깜빡임(FOUC) 방지 — 준비되면 부드럽게 페이드인 */
-        #heroEyebrow, #heroTitle, #heroDesc { opacity: 0; transition: opacity .35s ease; }
-        .hero-ready #heroEyebrow, .hero-ready #heroTitle, .hero-ready #heroDesc { opacity: 1; }
-      </style>
-      <section class="hero">
-        <div class="hero-inner">
-          <div class="hero-eyebrow" id="heroEyebrow">기독교 대한 성결교회</div>
-          <h1 id="heroTitle">희망은교회</h1>
-          <p class="hero-desc" id="heroDesc">
-            하나님의 말씀과 기도를 중심으로<br>
-            함께 예배하고, 함께 성장하며, 함께 걸어가는 공동체입니다.
-          </p>
-          <div class="hero-btns">
-            <a class="btn btn-solid"   href="/sermon/">주일 설교 보기</a>
-            <a class="btn btn-outline" href="/bulletin/">이번 주 주보 보기</a>
+      <div class="container">
+        <div class="sermon-top">
+          <div>
+            <h1>주일 설교</h1>
+            <div class="muted"></br>설교는 주마다 업데이트됩니다.</br>설교 녹화영상을 올려드립니다.설교본문은 요약본입니다.</br>
+              <a href="https://www.youtube.com/@MojaMose" target="_blank" rel="noreferrer"
+                style="display:inline-block;margin-top:8px;padding:6px 14px;font-size:0.78rem;font-weight:600;color:#555;background:#e8e8e8;border-radius:8px;text-decoration:none;">이전 설교 영상 보기 2023년 →</a>
+            </div>
+          </div>
+          <div class="muted" id="status">불러오는 중…</div>
+        </div>
+
+        <hr style="margin-top:28px;"/>
+
+        <div class="grid" style="margin-top:28px;">
+          <section class="panel">
+            <div class="muted" style="margin-bottom:10px;">설교 목록</div>
+
+            <!-- ✅ 드롭다운 -->
+            <select class="select" id="select">
+              <option>불러오는 중…</option>
+            </select>
+
+            <!-- 주차별 사진 -->
+            <div id="sermonImg" style="display:none;margin-top:24px;">
+              <img id="sermonImgEl" src="" alt="" style="width:100%;border-radius:10px;display:block;object-fit:cover;">
+            </div>
+
+            <!-- 동영상 -->
+            <div id="sermonVideo" style="display:none;">
+              <div class="sermon-video-wrap">
+                <iframe id="sermonVideoEl" src=""
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen>
+                </iframe>
+              </div>
+            </div>
+
+          </section>
+
+          <section class="panel" id="viewer">
+            <div class="muted">왼쪽에서 설교를 선택하세요.</div>
+          </section>
+        </div>
+
+        <!-- 댓글 -->
+        <div id="commentsWrap" class="comments" style="display:none;">
+          <div class="muted" style="margin-bottom:14px;">댓글</div>
+          <div id="commentList" class="comment-list">
+            <div class="c-empty">첫 번째 댓글을 남겨주세요.</div>
+          </div>
+          <div class="comment-form">
+            <div class="comment-row">
+              <input id="cName" class="c-input c-name" placeholder="이름" maxlength="20">
+              <input id="cPw" class="c-input c-pw" type="text" placeholder="비밀번호" maxlength="20" autocomplete="off" spellcheck="false" autocorrect="off">
+              <textarea id="cText" class="c-input c-text" placeholder="200자 이내로 작성해주세요." maxlength="200"></textarea>
+            </div>
+            <div class="c-footer">
+              <span id="cCount" class="c-count">0 / 200</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button id="cCancel" class="c-cancel">취소</button>
+                <button id="cSubmit" class="c-submit">등록</button>
+              </div>
+            </div>
+            <div id="cError" class="c-error"></div>
           </div>
         </div>
-      </section>
 
-      <!-- ============================================================
-     HERO QUOTE — 최신 설교 텍스트에서 한 문장을 인용해 위 히어로에 표시
-     ============================================================ -->
-      <script>
-      (function () {
-        function extractHeroQuote(fullText) {
-          var body = fullText;
-          var vIdx = body.search(/동영상\s*[:：]/);
-          if (vIdx > -1) {
-            var nl = body.indexOf('\n', vIdx);
-            if (nl > -1) body = body.substring(nl + 1);
-          }
-          body = body.replace(/\r\n/g, ' ').replace(/\n/g, ' ').trim();
-          var parts = body.split('.');
-          var cur = '';
-          for (var i = 0; i < parts.length; i++) {
-            cur += parts[i];
-            if (cur.trim().length > 15) {
-              var sentence = cur.trim() + '.';
-              if (sentence.length > 74) {
-                var cut = sentence.lastIndexOf(' ', 70);
-                sentence = sentence.substring(0, cut > 15 ? cut : 70).trim() + '…';
-              }
-              return sentence;
-            }
-          }
-          return null;
-        }
-
-        function applyQuote(quote, dateLabel) {
-          var eyebrow = document.getElementById('heroEyebrow');
-          var titleEl = document.getElementById('heroTitle');
-          var descEl  = document.getElementById('heroDesc');
-          if (!titleEl) return;
-          if (eyebrow) eyebrow.textContent = '이번 주 말씀 중에서';
-          titleEl.innerHTML = '<span style="color:var(--c-accent)">“</span>' + quote + '<span style="color:var(--c-accent)">”</span>';
-          if (descEl) descEl.innerHTML = (dateLabel ? dateLabel + ' 주일설교 · ' : '') + '이일례 목사';
-        }
-
-        function reveal() {
-          var heroInner = document.querySelector('.hero-inner');
-          if (heroInner) heroInner.classList.add('hero-ready');
-        }
-
-        function init() {
-          var revealed = false;
-          function revealOnce() {
-            if (revealed) return;
-            revealed = true;
-            reveal();
-          }
-          fetch('/sermon/texts/index.json', { cache: 'no-store' })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-              var files = (data.files || []).filter(function (f) { return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
-              if (!files.length) return;
-              var file = files[0];
-              return fetch('/sermon/texts/' + file)
-                .then(function (r) { if (!r.ok) throw new Error(); return r.text(); })
-                .then(function (text) {
-                  var quote = extractHeroQuote(text);
-                  if (!quote) return;
-                  applyQuote(quote, file.replace('.txt', ''));
-                });
-            })
-            .catch(function () { /* 실패 시 기본 문구 유지 */ })
-            .then(revealOnce, revealOnce);
-          // 안전장치: 네트워크가 느려도 0.8초 후엔 무조건 보이게
-          setTimeout(revealOnce, 800);
-        }
-
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', init);
-        } else {
-          init();
-        }
-      })();
-      </script>
-
-      <!-- ============================================================
-     HERO SERMON SECTION - hopeischurch.com
-     YouTube 채널(UCA_BZv-LRo4miwSnJH6J7pA) 최신 영상 자동 감지
-     ============================================================ -->
-<style>
-  #hero-sermon {
-    position: relative;
-    min-height: 88vh;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    background: #151210;
-    margin-bottom: var(--space-lg);
-  }
-  #hero-sermon .hero-bg {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    z-index: 0;
-  }
-  #hero-sermon::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(21,18,16,0.94) 0%, rgba(21,18,16,0.86) 50%, rgba(60,24,12,0.72) 100%);
-    z-index: 1;
-  }
-  #hero-sermon .hero-inner {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 6.5rem 2rem 4rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3.5rem;
-    align-items: center;
-  }
-  .hero-badges { display:flex; align-items:center; gap:0.65rem; margin-bottom:1.1rem; }
-  .badge-ai { display:inline-flex; align-items:center; gap:0.4rem; background:rgba(255,75,43,0.18); border:1px solid rgba(255,75,43,0.55); color:#FF7A5C; font-size:0.76rem; font-weight:700; padding:0.32rem 0.75rem; border-radius:3px; animation:pulse-badge 2.5s ease-in-out infinite; }
-  @keyframes pulse-badge { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
-  .badge-latest { display:inline-flex; align-items:center; background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.28); color:#fff; font-size:0.76rem; font-weight:700; padding:0.32rem 0.75rem; border-radius:3px; }
-  #hero-title { font-family:var(--font-display); font-size:clamp(1.7rem,3.5vw,2.8rem); font-weight:900; color:#fff; line-height:1.2; margin:0 0 0.9rem; letter-spacing:-0.02em; }
-  .hero-meta { display:flex; align-items:center; gap:0.5rem; color:rgba(255,255,255,0.72); font-size:0.9rem; margin-bottom:1.6rem; flex-wrap:wrap; }
-  .hero-meta .dot { width:3px; height:3px; border-radius:50%; background:rgba(255,255,255,0.38); flex-shrink:0; }
-  .sermon-summary-hero { background:rgba(255,255,255,0.06); border-left:3px solid #FF4B2B; border-radius:0; padding:1.1rem 1.4rem; backdrop-filter:blur(6px); }
-  .sermon-summary-label { font-size:0.7rem; font-weight:700; color:#FF7A5C; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.8rem; }
-  .sermon-summary-hero ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.65rem; }
-  .sermon-summary-hero ul li { color:rgba(255,255,255,0.86); font-size:0.88rem; line-height:1.7; padding-left:1rem; position:relative; }
-  .sermon-summary-hero ul li::before { content:"\203A"; position:absolute; left:0; color:#FF7A5C; font-weight:700; font-size:1.1rem; }
-  .hero-video-wrap iframe { width:100%; aspect-ratio:16/9; border-radius:4px; box-shadow:0 20px 50px rgba(0,0,0,0.55); border:1px solid rgba(255,255,255,0.12); }
-  .hero-loading-txt { color:rgba(255,255,255,0.5); font-size:0.88rem; text-align:center; padding:3rem 1rem; }
-  @keyframes heroUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
-  .hero-left { animation:heroUp 0.65s ease forwards; }
-  .hero-right { animation:heroUp 0.65s ease 0.18s forwards; opacity:0; }
-  @media (max-width:768px) { #hero-sermon .hero-inner { grid-template-columns:1fr; gap:2rem; padding:5rem 1.25rem 2.5rem; } #hero-sermon { min-height:auto; } }
-</style>
-
-<section id="hero-sermon">
-  <div class="hero-bg" id="hero-bg"></div>
-  <div class="hero-inner">
-    <div class="hero-left">
-      <div class="hero-badges">
-        <span class="badge-latest">희망은 주일설교</span>
       </div>
-      <h2 id="hero-title">불러오는 중…</h2>
-      <div class="hero-meta" id="hero-meta"></div>
-      <div class="sermon-summary-hero" id="hero-summary" style="display:none">
-        <div class="sermon-summary-label">✦ 설교 요약</div>
-        <ul id="hero-summary-list"></ul>
-      </div>
-    </div>
-    <div class="hero-right">
-      <div class="hero-video-wrap">
-        <div class="hero-loading-txt" id="hero-video-loading">영상을 불러오는 중…</div>
-        <iframe id="hero-iframe" style="display:none" src="" title="최신 설교 영상" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
-    </div>
-  </div>
-</section>
-
-<script>
-(function () {
-  var CHANNEL_ID = 'UCA_BZv-LRo4miwSnJH6J7pA';
-  var RSS_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + CHANNEL_ID;
-  var PROXY_URL = 'https://api.allorigins.win/get?url=' + encodeURIComponent(RSS_URL);
-
-  function getLatestTxtFile() {
-    var sel = document.querySelector('select');
-    if (!sel || !sel.options.length) return null;
-    return sel.options[0].value;
-  }
-
-  function extractSummary(text) {
-    // txt 헤더(제목:, 본문:, 설교자:, 날짜:, 동영상: 한 줄) 이후 실제 설교 본문 추출
-    var body = text;
-    // 개행 2개 이상 이후가 본문이거나, 동영상: URL 다음이 본문
-    var youtubeIdx = body.indexOf('youtu');
-    if (youtubeIdx > 0) {
-      // youtu.be/xxx 이후 공백 이후 본문 시작
-      var afterYt = body.indexOf(' ', youtubeIdx + 10);
-      if (afterYt > 0) body = body.substring(afterYt).trim();
-    }
-    body = body.replace(/\r\n/g, ' ').replace(/\n/g, ' ').trim();
-    // 마침표류로 끝나는 문장 분리 (한국어)
-    var parts = body.split('.');
-    var sentences = [];
-    var cur = '';
-    for (var i = 0; i < parts.length; i++) {
-      cur += parts[i];
-      if (cur.trim().length > 20) {
-        sentences.push(cur.trim() + '.');
-        cur = '';
-        if (sentences.length >= 3) break;
-      }
-    }
-    return sentences.slice(0, 3);
-  }
-  function fetchLatestVideoFromTxt(txtFile) {
-    if (!txtFile) return Promise.resolve(null);
-    return fetch('/sermon/texts/' + txtFile)
-      .then(function(r){ if (!r.ok) throw new Error(); return r.text(); })
-      .then(function(text){
-        var m = text.match(/youtu\.be\/([A-Za-z0-9_-]{11})/) ||
-                text.match(/youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})/);
-        if (!m) throw new Error('no videoId in txt');
-        var titleMatch = text.match(/^제목[:：]\s*(.+)/m);
-        var parsedTitle = titleMatch ? titleMatch[1].trim() : null;
-        return { videoId: m[1], title: parsedTitle, published: null, fullText: text };
-      });
-  }
-
-  function fetchLatestVideoFromRSS() {
-    return fetch(PROXY_URL)
-      .then(function(res){ return res.json(); })
-      .then(function(data){
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(data.contents, 'application/xml');
-        var entry = doc.querySelector('entry');
-        if (!entry) throw new Error('no entry');
-        var rawId = '';
-        var vidEl = entry.querySelector('videoId');
-        if (vidEl) {
-          rawId = vidEl.textContent;
-        } else {
-          var linkEl = entry.querySelector('link');
-          var href = linkEl ? (linkEl.getAttribute('href') || '') : '';
-          var m = href.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-          rawId = m ? m[1] : '';
-        }
-        var title = (entry.querySelector('title') || {textContent: ''}).textContent;
-        var pub = ((entry.querySelector('published') || {textContent: ''}).textContent).substring(0, 10);
-        return { videoId: rawId, title: title, published: pub, fullText: null };
-      })
-      .catch(function(e){ console.warn('[hero] RSS 실패:', e.message); return null; });
-  }
-
-  function waitForValidTxtFile() {
-    return new Promise(function(resolve) {
-      var hasSel = !!document.querySelector('select');
-      if (!hasSel) {
-        // 메인 페이지: select 없음 → index.json 첫 번째 파일 즉시 사용 (가장 빠른 경로)
-        fetch('/sermon/texts/index.json', { cache: 'no-store' })
-          .then(function(r){ return r.json(); })
-          .then(function(data){
-            var files = (data.files || []).filter(function(f){ return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
-            resolve(files.length ? files[0] : null);
-          })
-          .catch(function(){ resolve(null); });
-        return;
-      }
-      // 설교 페이지: select가 있으면 MutationObserver로 대기
-      function check() {
-        var sel = document.querySelector('select');
-        if (sel && sel.options.length > 0) {
-          var val = sel.options[0].value;
-          if (val && /^\d{4}-\d{2}-\d{2}\.txt$/.test(val)) {
-            resolve(val);
-            return true;
-          }
-        }
-        return false;
-      }
-      if (check()) return;
-      var obs = new MutationObserver(function() {
-        if (check()) obs.disconnect();
-      });
-      obs.observe(document.querySelector('select'), { childList: true });
-      setTimeout(function() {
-        obs.disconnect();
-        if (check()) return;
-        fetch('/sermon/texts/index.json', { cache: 'no-store' })
-          .then(function(r){ return r.json(); })
-          .then(function(data){
-            var files = (data.files || []).filter(function(f){ return /^\d{4}-\d{2}-\d{2}\.txt$/.test(f); });
-            resolve(files.length ? files[0] : null);
-          })
-          .catch(function(){ resolve(null); });
-      }, 3000);
-    });
-  }
-
-    function renderHero() {
-    var bgEl    = document.getElementById('hero-bg');
-    var titleEl = document.getElementById('hero-title');
-    var metaEl  = document.getElementById('hero-meta');
-    var iframe  = document.getElementById('hero-iframe');
-    var loadTxt = document.getElementById('hero-video-loading');
-    var summBox = document.getElementById('hero-summary');
-    var summList= document.getElementById('hero-summary-list');
-
-    waitForValidTxtFile().then(function(txtFile) {
-      fetchLatestVideoFromTxt(txtFile)
-        .catch(function(){ return null; })
-        .then(function(yt){
-          if (!yt || !yt.videoId) {
-            return fetchLatestVideoFromRSS();
-          }
-          return yt;
-        })
-        .then(function(yt){
-          var videoId = (yt && yt.videoId) ? yt.videoId : 'CKw2qJn6cW0';
-          var ytTitle = (yt && yt.title && yt.title.length > 2) ? yt.title : '최신 설교';
-          var ytDate  = (yt && yt.published) ? yt.published : '2026-04-26';
-
-          bgEl.style.backgroundImage = 'url(https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg)';
-
-          var dateLabel = txtFile ? txtFile.replace('.txt', '') : ytDate;
-
-          titleEl.textContent = ytTitle;
-          metaEl.innerHTML = '<span>📅 ' + dateLabel + '</span>' +
-            '<span class="dot"></span>' +
-            '<span>이일례 목사</span>' +
-            '<span class="dot"></span>' +
-            '<span>희망은교회</span>';
-
-          if (txtFile) {
-            var textPromise = (yt && yt.fullText)
-              ? Promise.resolve(yt.fullText)
-              : fetch('/sermon/texts/' + txtFile)
-                  .then(function(r){ if (!r.ok) throw new Error(); return r.text(); });
-
-            textPromise
-              .then(function(fullText){
-                var lines = extractSummary(fullText);
-                if (lines.length) {
-                  summList.innerHTML = lines.map(function(l){ return '<li>' + l + '</li>'; }).join('');
-                  summBox.style.display = 'block';
-                }
-              })
-              .catch(function(){});
-          }
-
-          iframe.src = 'https://www.youtube.com/embed/' + videoId + '?rel=0&modestbranding=1&color=white';
-          iframe.style.display = 'block';
-          if (loadTxt) loadTxt.style.display = 'none';
-        });
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', renderHero);
-  } else {
-    renderHero();
-  }
-})();
-</script>
-<!-- ============================================================ HERO 끝 -->
-
-      <!-- ② 벤토 그리드: 예배 + 공지 + 바로가기 -->
-      <div class="bento-grid" id="worship">
-        <div class="bento-item bento-worship">
-          <span class="bento-label">Worship</span>
-          <h2 class="bento-title">예배 및 모임 안내</h2>
-          <div class="worship-grid">
-            <div class="worship-card">
-              <div class="worship-card-title">주일예배</div>
-              <div class="worship-card-time">11:00 AM</div>
-              <div class="worship-card-loc">주일 · 본당</div>
-            </div>
-            <div class="worship-card">
-              <div class="worship-card-title">청소년예배</div>
-              <div class="worship-card-time">1:30 PM</div>
-              <div class="worship-card-loc">주일 · 본당</div>
-            </div>
-            <div class="worship-card">
-              <div class="worship-card-title">수요예배</div>
-              <div class="worship-card-time">7:30 PM</div>
-              <div class="worship-card-loc">수요일</div>
-            </div>
-            <div class="worship-card">
-              <div class="worship-card-title">월삭예배</div>
-              <div class="worship-card-time">6:00 AM</div>
-              <div class="worship-card-loc">매월 첫째주 토요일</div>
-            </div>
-          </div>
-          <p class="worship-extra">주일예배시 15분전인 10:45am 에 찬양시작합니다.<br>예배 후에는 다같이 애찬(공동식사)을 나눕니다.</p>
-        </div>
-        <div class="bento-item bento-notice">
-          <span class="bento-label">Notice</span>
-          <h3 class="bento-title">공지사항</h3>
-          <div class="bento-notice-list" id="bentoNotice">
-            <span class="bento-notice-empty">공지사항이 없습니다.</span>
-          </div>
-        </div>
-        <a href="/sermon/" class="bento-item bento-sermon-quick" style="text-decoration:none;">
-          <div class="bento-link">
-            <div>
-              <span class="bento-label">Sermon</span>
-              <h3 class="bento-title">주일 설교<br>보러가기</h3>
-            </div>
-            <span class="bento-link-arrow">&#8594;</span>
-          </div>
-        </a>
-        <a href="/bulletin/" class="bento-item bento-bulletin-quick" style="text-decoration:none;">
-          <div class="bento-link" style="flex-direction:row;align-items:center;">
-            <div>
-              <span class="bento-label">Bulletin</span>
-              <h3 class="bento-title">이번 주 주보 보기</h3>
-            </div>
-            <span class="bento-link-arrow" style="margin-top:0;margin-left:auto;">&#8594;</span>
-          </div>
-        </a>
-      </div>
-
-      <!-- ③ 인사말 -->
-      <section class="section" id="pastor">
-        <span class="section-label">Greeting</span>
-        <h2 class="section-title">인사말</h2>
-        <div class="greeting-body">
-          <p>방문하신 모든 분들을 주님의 이름으로 진심으로 환영합니다.</p>
-          <p>
-            희망은교회는 하나님의 말씀과 기도를 중심으로<br>
-            함께 예배하고, 함께 성장하며, 함께 걸어가는 공동체입니다.
-          </p>
-          <p>
-            2026년은 "만민에게 복음을 전파하라"는 주님의 명령을 마음에 새기며,<br>
-            예수 그리스도께서 참 생명 되심을 이 땅 가운데 증언하는 한 해가 되기를 소망합니다.
-          </p>
-          <p>
-            이 복음이 이곳을 잠시 방문한 모든 분들께,<br>
-            그리고 희망은교회 공동체 안에 있는 모든 성도들께<br>
-            위로와 회복, 그리고 새로운 소망으로 전해지기를 기도합니다.
-          </p>
-          <p>
-            희망은교회의 문은 언제나 열려 있습니다.<br>
-            언제든 편안한 마음으로 찾아와 함께 예배하시기를 바랍니다.
-          </p>
-        </div>
-        <div class="greeting-sign">
-          기독교 대한 성결교회 희망은교회
-          <strong>담임목사 이일례</strong>
-        </div>
-      </section>
-
-      <hr class="divider">
-
-      <!-- ④ 섬기는 이들 -->
-      <section class="section">
-        <span class="section-label">Staff</span>
-        <h2 class="section-title">섬기는 이들</h2>
-        <ul class="minister-list">
-          <li class="minister-item">
-            <span class="minister-role">담임목사</span>
-            <span class="minister-name">이일례</span>
-          </li>
-          <li class="minister-item">
-            <span class="minister-role">협동목사</span>
-            <span class="minister-name">김영인</span>
-          </li>
-          <li class="minister-item">
-            <span class="minister-role">전도사</span>
-            <span class="minister-name">권성호</span>
-          </li>
-          <li class="minister-item">
-            <span class="minister-role">반주자</span>
-            <span class="minister-name">원지애</span>
-          </li>
-        </ul>
-      </section>
-
-      <hr class="divider">
-
-      <!-- ⑤ 찾아오는 길 -->
-      <section class="section" id="map">
-        <span class="section-label">Location</span>
-        <h2 class="section-title">찾아오는 길</h2>
-        <p class="map-address">경기도 부천시 소사구 은성로 62번길 13 (3층)
-          <button id="copyAddrBtn" class="btn-inline" onclick="navigator.clipboard.writeText('경기도 부천시 소사구 은성로 62번길 13').then(()=>{this.textContent='복사됨 ✓';setTimeout(()=>{this.innerHTML=this.dataset.orig;},1500)})"
-            data-orig=""
-            style="margin-left:10px;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            주소복사</button>
-          <script>var b=document.getElementById('copyAddrBtn');b.dataset.orig=b.innerHTML;</script>
-        </p>
-        <p class="map-phone">
-          <a href="tel:010-7795-2102" class="btn-inline">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .95h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-            전화하기</a>
-        </p>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;">
-          <a class="btn btn-outline"
-             href="https://map.naver.com/v5/search/경기도%20부천시%20소사구%20은성로%2062번길%2013"
-             target="_blank" rel="noreferrer">네이버 지도 →</a>
-          <a class="btn btn-outline"
-             href="https://map.kakao.com/?q=경기도+부천시+소사구+은성로+62번길+13"
-             target="_blank" rel="noreferrer">카카오맵 →</a>
-          <a class="btn btn-outline"
-             href="tmap://route?goalname=경기도+부천시+소사구+은성로+62번길+13"
-             target="_blank" rel="noreferrer">티맵 →</a>
-        </div>
-      </section>
-
     </main>
   </div>
 
-  <footer class="site-footer">
-    <a href="/admin/">HOPEISCHURCH</a>, Korea. &nbsp;|&nbsp; Hits: <span id="visitor-hit-count" style="font-variant-numeric:tabular-nums;">…</span><br>
-    Copyright&copy; 2025-2026 <a href="https://www.hopeischurch.com">https://www.hopeischurch.com</a> All rights reserved. Designed by sungho.
-    <a href="mailto:galtensh@gmail.com" style="vertical-align:middle;margin-left:6px;display:inline-flex;align-items:center;" title="메일 보내기">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
-    </a>
-  </footer>
+<!-- 모바일 하단 탭바 -->
+<nav class="bottom-nav">
+  <a href="/" class="bottom-nav-item" data-nav="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/>
+    </svg>
+    <span>홈</span>
+  </a>
+  <a href="/bulletin/" class="bottom-nav-item" data-nav="bulletin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/>
+    </svg>
+    <span>주보</span>
+  </a>
+  <a href="/sermon/" class="bottom-nav-item" data-nav="sermon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+    </svg>
+    <span>설교</span>
+  </a>
+  <a href="/notice/" class="bottom-nav-item" data-nav="notice">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+    </svg>
+    <span>게시판</span>
+  </a>
+  <a href="/#map" class="bottom-nav-item" data-nav="map">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+    </svg>
+    <span>위치</span>
+  </a>
+</nav>
 
-  <!-- 모바일 하단 탭바 -->
-  <nav class="bottom-nav">
-    <a href="/" class="bottom-nav-item" data-nav="home">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/>
-      </svg>
-      <span>홈</span>
-    </a>
-    <a href="/bulletin/" class="bottom-nav-item" data-nav="bulletin">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/>
-      </svg>
-      <span>주보</span>
-    </a>
-    <a href="/sermon/" class="bottom-nav-item" data-nav="sermon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
-      </svg>
-      <span>설교</span>
-    </a>
-    <a href="/notice/" class="bottom-nav-item" data-nav="notice">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-      </svg>
-      <span>게시판</span>
-    </a>
-    <a href="/#map" class="bottom-nav-item" data-nav="map">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-      </svg>
-      <span>위치</span>
-    </a>
-  </nav>
+<script>
+  // 모바일 햄버거 메뉴
+  (function(){
+    const btn=document.getElementById('hamburgerBtn'),overlay=document.getElementById('drawerOverlay'),drawer=document.getElementById('drawer'),closeBtn=document.getElementById('drawerClose');
+    if(!btn) return;
+    function open(){ drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+    function close(){ drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow=''; }
+    btn.addEventListener('click',open); closeBtn.addEventListener('click',close); overlay.addEventListener('click',close);
+  })();
 
-  <script>
-    // 공지사항 동적 로드
-    (function(){
-      function _e(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-      fetch('/data/notice.json',{cache:'no-store'})
-        .then(r=>r.json()).then(n=>{
-          const el=document.getElementById('siteNotice'); if(el){
-            const items=n.items||[]; if(items.length){
-              el.innerHTML=items.map(item=>{
-                const line=_e(item.text||'').replace(/\n/g,'<br>');
-                if(item.link_url) return `<a class="notice-item" href="${_e(item.link_url)}" target="_blank" rel="noreferrer" style="display:block;cursor:pointer;">${line}</a>`;
-                return `<div class="notice-item">${line}</div>`;
-              }).join('');
-            }
-          }
-          // 벤토 공지
-          const items=n.items||[]; if(!items.length) return;
-          const bento=document.getElementById('bentoNotice');
-          if(bento&&items.length){
-            bento.innerHTML=items.map(item=>{
-              let line=_e(item.text||'').replace(/\n/g,'<br>');
-              if(item.link_url) line+=` <a href="${_e(item.link_url)}" target="_blank" rel="noreferrer">${_e(item.link_text||'자세히')}</a>`;
-              return `<div class="bento-notice-item">${line}</div>`;
-            }).join('');
-          }
-        }).catch(()=>{});
-    })();
+  // 하단 탭바 + 드로어 active 상태
+  (function(){
+    const path=location.pathname;
+    document.querySelectorAll('.bottom-nav-item[data-nav], .drawer a[data-nav], #menu a[data-nav]').forEach(el=>{
+      const nav=el.dataset.nav;
+      if((nav==='bulletin'&&path.includes('/bulletin/'))||(nav==='sermon'&&path.includes('/sermon/')))
+        el.classList.add('is-active');
+    });
+  })();
 
-    // 모바일 햄버거 메뉴
-    (function(){
-      const btn=document.getElementById('hamburgerBtn');
-      const overlay=document.getElementById('drawerOverlay');
-      const drawer=document.getElementById('drawer');
-      const closeBtn=document.getElementById('drawerClose');
-      if(!btn) return;
-      function open(){ drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden'; }
-      function close(){ drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow=''; }
-      btn.addEventListener('click',open);
-      closeBtn.addEventListener('click',close);
-      overlay.addEventListener('click',close);
-    })();
+  // 공지사항 동적 로드
+  fetch('/data/notice.json',{cache:'no-store'})
+    .then(r=>r.json()).then(n=>{
+      const el=document.getElementById('siteNotice');
+      if(el){ const items=n.items||[]; if(items.length){ el.innerHTML=items.map(item=>{ let line=escapeHtml(item.text||'').replace(/\n/g,'<br>'); if(item.link_url) line+=` <a href="${escapeHtml(item.link_url)}" target="_blank" rel="noreferrer">${escapeHtml(item.link_text||item.link_url)}</a>`; return `<div class="notice-item">${line}</div>`; }).join(''); } }
+      const mob=document.getElementById('mobileNotice'); if(!mob) return;
+      const items=n.items||[]; if(!items.length) return;
+      mob.innerHTML=items.map(item=>`<div class="mobile-notice-item">${escapeHtml(item.text||'').replace(/\n/g,'<br>')}</div>`).join('');
+      mob.classList.add('has-items');
+    }).catch(()=>{});
 
-    // 하단 탭바 + 드로어 active 상태
-    (function(){
-      const path=location.pathname;
-      const isHome=path==='/'||path.endsWith('/index.html');
-      const isBulletin=path.includes('/bulletin/');
-      const isSermon=path.includes('/sermon/');
-    const isNotice=path.includes('/notice/');
-      document.querySelectorAll('.bottom-nav-item[data-nav], .drawer a[data-nav], #menu a[data-nav]').forEach(el=>{
-        const nav=el.dataset.nav;
-        if((nav==='home'&&isHome)||(nav==='bulletin'&&isBulletin)||(nav==='sermon'&&isSermon))
-          el.classList.add('is-active');
-      });
-    })();
+  // ✅ 안정적: GitHub API 대신 "우리 사이트"의 정적 파일을 읽음
+  const LIST_URL  = "/sermon/texts/index.json";
+  const TEXT_BASE = "/sermon/texts/";
 
-    const menu = document.getElementById("menu");
-    if (menu) {
-      const hashLinks = Array.from(menu.querySelectorAll('a[href*="#"]'));
-      function setActiveByHash(hash) {
-        hashLinks.forEach(a => a.classList.remove("is-active"));
-        const t = hashLinks.find(a => a.getAttribute("href").endsWith(hash));
-        if (t) t.classList.add("is-active");
-      }
-      if (location.hash) setActiveByHash(location.hash);
-      hashLinks.forEach(a =>
-        a.addEventListener("click", () =>
-          setActiveByHash("#" + a.getAttribute("href").split("#")[1])
-        )
-      );
+  // 글자 크기 단계 (5단계)
+  const FS_STEPS = ['0.9rem','1.05rem','1.2rem','1.4rem','1.6rem'];
+  let fsLevel = 2; // 기본값 3/5
+
+  function changeFontSize(dir){
+    fsLevel = Math.max(0, Math.min(4, fsLevel + dir));
+    document.querySelectorAll('#viewer pre').forEach(el => el.style.fontSize = FS_STEPS[fsLevel]);
+    document.getElementById('fsLabel').textContent = `${fsLevel+1} / 5`;
+    document.getElementById('fsMinus').disabled = fsLevel === 0;
+    document.getElementById('fsPlus').disabled  = fsLevel === 4;
+  }
+  const selectEl = document.getElementById("select");
+  const viewerEl = document.getElementById("viewer");
+  const statusEl = document.getElementById("status");
+
+  const qs = new URLSearchParams(location.search);
+  const currentFile = qs.get("file"); // 예: 2026-02-02.txt
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function youtubeEmbedUrl(url){
+    if(!url) return '';
+    const m = url.match(/(?:youtube\.com\/watch\?.*v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    return m ? `https://www.youtube.com/embed/${m[1]}?fs=1` : '';
+  }
+
+  function parseSermonTxt(txt){
+    const lines = txt.replace(/\r\n/g, "\n").split("\n");
+    const meta = {};
+    let i = 0;
+
+    for(; i < lines.length; i++){
+      const line = lines[i].trim();
+      if(line === "") { i++; break; }
+      const m = line.match(/^([^:]+)\s*:\s*(.*)$/);
+      if(m) meta[m[1].trim()] = m[2].trim();
     }
-  </script>
 
-  <script>
-  // 홈화면 추가(PWA install)
+    const body = lines.slice(i).join("\n").trim();
+    return { meta, body };
+  }
+
+  function formatTitleFromFilename(name){
+    return name.replace(/\.txt$/i, "");
+  }
+
+  function setFileParam(filename){
+    const u = new URL(location.href);
+    u.searchParams.set("file", filename);
+    location.href = u.toString();
+  }
+
+  async function fetchJSON(url){
+    const res = await fetch(url, { cache:"no-store" });
+    if(!res.ok) throw new Error(`JSON fetch failed: ${res.status}`);
+    return await res.json();
+  }
+
+  async function fetchText(url){
+    const res = await fetch(url, { cache:"no-store" });
+    if(!res.ok) throw new Error(`TXT fetch failed: ${res.status}`);
+    return await res.text();
+  }
+
+  async function loadList(){
+    const data = await fetchJSON(LIST_URL);
+    const files = (data.files || [])
+      .filter(name => /\.txt$/i.test(name))
+      .sort((a,b) => b.localeCompare(a));
+
+    if(!files.length){
+      selectEl.innerHTML = `<option>(설교 파일 없음)</option>`;
+      statusEl.textContent = "목록 없음";
+      return { files, selected: null };
+    }
+
+    const selected = (currentFile && files.includes(currentFile)) ? currentFile : files[0];
+
+    selectEl.innerHTML = files.map(name => {
+      const label = formatTitleFromFilename(name);
+      const sel = (name === selected) ? "selected" : "";
+      return `<option value="${escapeHtml(name)}" ${sel}>${escapeHtml(label)}</option>`;
+    }).join("");
+
+    statusEl.textContent = `총 ${files.length}개`;
+    return { files, selected };
+  }
+
+  async function renderFile(filename){
+    viewerEl.innerHTML = `<div class="muted">불러오는 중…</div>`;
+
+    const url = TEXT_BASE + encodeURIComponent(filename);
+    const txt = await fetchText(url);
+
+    const { meta, body } = parseSermonTxt(txt);
+
+    const title  = meta["제목"] || meta["title"] || formatTitleFromFilename(filename);
+    const date   = meta["날짜"] || meta["date"] || formatTitleFromFilename(filename);
+    const ref    = meta["본문"] || meta["text"] || "";
+    const who    = meta["설교자"] || meta["preacher"] || "";
+    const imgSrc  = meta["이미지"] || meta["image"] || "";
+    const vidSrc  = meta["동영상"] || meta["video"] || "";
+
+    const imgDiv = document.getElementById("sermonImg");
+    const imgEl  = document.getElementById("sermonImgEl");
+    if (imgSrc) { imgEl.src = imgSrc; imgDiv.style.display = ""; }
+    else        { imgDiv.style.display = "none"; imgEl.src = ""; }
+
+    const vidDiv = document.getElementById("sermonVideo");
+    const vidEl  = document.getElementById("sermonVideoEl");
+    const embedUrl = youtubeEmbedUrl(vidSrc);
+    if (embedUrl) { vidEl.src = embedUrl; vidDiv.style.display = ""; }
+    else          { vidDiv.style.display = "none"; vidEl.src = ""; }
+
+    viewerEl.innerHTML = `
+      <div class="sermon-title-row" style="margin-bottom:6px;">
+        <div class="muted">${escapeHtml(date)}</div>
+        <div class="font-size-ctrl">
+          <span class="fs-label">글자크게</span>
+          <button id="fsMinus" onclick="changeFontSize(-1)" title="글자 작게">A−</button>
+          <span class="fs-label" id="fsLabel">${fsLevel+1} / 5</span>
+          <button id="fsPlus"  onclick="changeFontSize(+1)" title="글자 크게">A+</button>
+        </div>
+      </div>
+      <h2 class="sermon-title" style="margin:0 0 10px;">${escapeHtml(title)}</h2>
+      <div class="meta-row">
+        ${ref ? `<span class="badge">본문: ${escapeHtml(ref)}</span>` : ""}
+        ${who ? `<span class="badge">설교자: ${escapeHtml(who)}</span>` : ""}
+      </div>
+      <pre>${escapeHtml(body || "(본문이 비어 있습니다)")}</pre>
+    `;
+    document.getElementById('fsMinus').disabled = fsLevel === 0;
+    document.getElementById('fsPlus').disabled  = fsLevel === 4;
+    if(fsLevel > 0) document.querySelectorAll('#viewer pre').forEach(el => el.style.fontSize = FS_STEPS[fsLevel]);
+    document.dispatchEvent(new CustomEvent("sermonLoaded", { detail: { file: filename } }));
+  }
+
+  selectEl.addEventListener("change", () => {
+    const filename = selectEl.value;
+    if(filename) setFileParam(filename);
+  });
+
+  (async function main(){
+    try{
+      const { selected } = await loadList();
+      if(selected) await renderFile(selected);
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "불러오기 실패";
+      viewerEl.innerHTML = `
+        <div class="muted">
+          설교를 불러오지 못했습니다.<br/><br/>
+          <span class="badge">오류</span> ${escapeHtml(err.message)}<br/>
+          <span class="badge">LIST</span> ${escapeHtml(LIST_URL)}<br/>
+          <span class="badge">TEXT</span> ${escapeHtml(TEXT_BASE)}YYYY-MM-DD.txt
+        </div>
+      `;
+    }
+  })();
+</script>
+
+<script type="module">
+const FB = {
+  apiKey:            "AIzaSyCTS7eCGaNcuo9dKX-nYF-flNUlAC4dopM",
+  authDomain:        "hopeischurch-sermon.firebaseapp.com",
+  databaseURL:       "https://hopeischurch-sermon-default-rtdb.firebaseio.com",
+  projectId:         "hopeischurch-sermon",
+  storageBucket:     "hopeischurch-sermon.firebasestorage.app",
+  messagingSenderId: "423981952872",
+  appId:             "1:423981952872:web:6c7a337334a42c4bde30dd",
+};
+
+// 관리자 비밀번호의 SHA-256 해시 (평문 노출 방지)
+const ADMIN_HASH = "b243cf0ed002cd1d17567bb7a23bdd8d462cdef17e50f65c7adf7ca09afd96a2";
+
+import { initializeApp }                        from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+let db;
+try { db = getDatabase(initializeApp(FB)); }
+catch(e){ console.warn("Firebase 오류:", e.message); }
+
+const wrap    = document.getElementById("commentsWrap");
+const listEl  = document.getElementById("commentList");
+const nameEl  = document.getElementById("cName");
+const pwEl    = document.getElementById("cPw");
+const textEl  = document.getElementById("cText");
+const countEl = document.getElementById("cCount");
+const errorEl = document.getElementById("cError");
+const submitEl= document.getElementById("cSubmit");
+
+textEl.addEventListener("input", () => {
+  countEl.textContent = `${textEl.value.length} / 200`;
+});
+
+// 비밀번호 커스텀 마스킹: 첫 2글자만 표시, 나머지 •
+let realPw = "";
+
+function updatePwDisplay(){
+  if(realPw.length === 0){
+    pwEl.value = "";
+    pwEl.classList.remove("has-value");
+  } else if(realPw.length <= 2){
+    pwEl.value = realPw;
+    pwEl.classList.add("has-value");
+  } else {
+    pwEl.value = realPw.slice(0,2) + "•".repeat(realPw.length - 2);
+    pwEl.classList.add("has-value");
+  }
+}
+
+pwEl.addEventListener("keydown", e => {
+  if(e.ctrlKey || e.metaKey) { e.preventDefault(); return; }
+  if(e.key.length > 1 && e.key !== "Backspace" && e.key !== "Delete") return;
+  e.preventDefault();
+  if(e.key === "Backspace")     realPw = realPw.slice(0,-1);
+  else if(e.key === "Delete")   realPw = "";
+  else if(realPw.length < 20)  realPw += e.key;
+  updatePwDisplay();
+});
+pwEl.addEventListener("paste",  e => e.preventDefault());
+pwEl.addEventListener("drop",   e => e.preventDefault());
+
+function esc(s){
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+async function sha256(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+let cache = {};
+let unsub  = null;
+let curFile = "";
+
+function fileKey(f){ return f.replace(/[\.\#\$\[\]\/]/g,"_"); }
+
+function loadComments(file){
+  if(!db) return;
+  curFile = file;
+  wrap.style.display = "";
+  if(unsub) unsub();
+  cache = {};
+  unsub = onValue(ref(db, `sermon_comments/${fileKey(file)}`), snap => {
+    cache = snap.val() || {};
+    render();
+  });
+}
+
+function render(){
+  const items = Object.entries(cache)
+    .map(([id,v]) => ({id,...v}))
+    .sort((a,b) => a.ts - b.ts);
+
+  if(!items.length){
+    listEl.innerHTML = '<div class="c-empty">첫 번째 댓글을 남겨주세요.</div>';
+    return;
+  }
+  listEl.innerHTML = items.map(c => {
+    const d  = new Date(c.ts);
+    const dt = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+    return `<div class="comment-item">
+      <div class="comment-meta">
+        <span class="comment-author">${esc(c.name)}</span> · ${dt}${c.edited ? ' <span style="font-size:0.65rem;color:#bbb;">(수정됨)</span>' : ''}
+        <button class="c-del" data-id="${esc(c.id)}" data-hash="${esc(c.pwHash||'')}">삭제</button>
+        <button class="c-edit" data-id="${esc(c.id)}" data-hash="${esc(c.pwHash||'')}" data-name="${esc(c.name)}" data-text="${esc(c.text)}">수정</button>
+      </div>
+      <div class="comment-body">${esc(c.text)}</div>
+    </div>`;
+  }).join("");
+
+  listEl.querySelectorAll(".c-del").forEach(btn => {
+    btn.addEventListener("click", () => handleDelete(btn.dataset.id, btn.dataset.hash));
+  });
+  listEl.querySelectorAll(".c-edit").forEach(btn => {
+    btn.addEventListener("click", () => handleEdit(btn.dataset.id, btn.dataset.hash, btn.dataset.name, btn.dataset.text));
+  });
+}
+
+let editId   = null;
+let editHash = null;
+
+const cancelEl = document.getElementById('cCancel');
+cancelEl.addEventListener("click", () => resetEditMode());
+
+function resetEditMode(){
+  editId = null; editHash = null;
+  nameEl.value = ""; textEl.value = "";
+  realPw = ""; updatePwDisplay();
+  countEl.textContent = "0 / 200";
+  submitEl.textContent = "등록";
+  cancelEl.style.display = "none";
+  errorEl.textContent = "";
+}
+
+async function handleEdit(id, storedHash, name, text){
+  const entered = window.prompt("비밀번호를 입력하세요\n(작성 시 비밀번호 또는 관리자 비밀번호)");
+  if(entered === null) return;
+
+  const enteredHash = await sha256(entered);
+  const isAdmin  = enteredHash === ADMIN_HASH;
+  const isAuthor = storedHash && enteredHash === storedHash;
+
+  if(!isAdmin && !isAuthor){ alert("비밀번호가 맞지 않습니다."); return; }
+
+  editId   = id;
+  editHash = storedHash;
+  nameEl.value = name;
+  textEl.value = text;
+  realPw = entered; updatePwDisplay();
+  countEl.textContent = `${text.length} / 200`;
+  submitEl.textContent = "수정";
+  cancelEl.style.display = "inline-block";
+  textEl.focus();
+  document.getElementById('commentsWrap').scrollIntoView({ behavior:'smooth', block:'end' });
+}
+
+async function handleDelete(id, storedHash){
+  const entered = window.prompt("비밀번호를 입력하세요\n(작성 시 비밀번호 또는 관리자 비밀번호)");
+  if(entered === null) return;
+
+  const enteredHash = await sha256(entered);
+
+  const isAdmin  = enteredHash === ADMIN_HASH;
+  const isAuthor = storedHash && enteredHash === storedHash;
+
+  if(!isAdmin && !isAuthor){
+    alert("비밀번호가 맞지 않습니다.");
+    return;
+  }
+  try {
+    await remove(ref(db, `sermon_comments/${fileKey(curFile)}/${id}`));
+  } catch(e){
+    alert("삭제에 실패했습니다: " + e.message);
+  }
+}
+
+function validate(name, pw, text){
+  if(!name.trim()) return "이름을 입력해주세요.";
+  if(!pw.trim())   return "비밀번호를 입력해주세요.";
+  if(!text.trim()) return "내용을 입력해주세요.";
+  if(text.length > 200) return "200자 이내로 작성해주세요.";
+
+  const items = Object.values(cache).sort((a,b) => a.ts - b.ts);
+
+  if(items.some(c => c.text.trim() === text.trim()))
+    return "이미 동일한 내용의 댓글이 있습니다.";
+
+  const last2 = items.slice(-2);
+  if(last2.length === 2 && last2.every(c => c.name.trim() === name.trim()))
+    return "같은 분이 연속으로 3번 이상 댓글을 달 수 없습니다.";
+
+  return null;
+}
+
+submitEl.addEventListener("click", async () => {
+  const name = nameEl.value.trim();
+  const pw   = realPw;
+  const text = textEl.value.trim();
+
+  if(editId){
+    // 수정 모드
+    if(!name){ errorEl.textContent = "이름을 입력해주세요."; return; }
+    if(!text){ errorEl.textContent = "내용을 입력해주세요."; return; }
+    if(text.length > 200){ errorEl.textContent = "200자 이내로 작성해주세요."; return; }
+    errorEl.textContent = "";
+    submitEl.disabled = true;
+    try {
+      const orig = cache[editId] || {};
+      await set(ref(db, `sermon_comments/${fileKey(curFile)}/${editId}`),
+        { name, text, ts: orig.ts || Date.now(), pwHash: editHash, edited: true });
+      resetEditMode();
+    } catch(e){
+      errorEl.textContent = "수정에 실패했습니다.";
+    } finally {
+      submitEl.disabled = false;
+    }
+  } else {
+    // 등록 모드
+    const err = validate(name, pw, text);
+    if(err){ errorEl.textContent = err; return; }
+    errorEl.textContent = "";
+    submitEl.disabled = true;
+    try {
+      const pwHash = await sha256(pw);
+      await push(ref(db, `sermon_comments/${fileKey(curFile)}`), { name, text, ts: Date.now(), pwHash });
+      textEl.value = "";
+      realPw = "";
+      updatePwDisplay();
+      countEl.textContent = "0 / 200";
+    } catch(e){
+      errorEl.textContent = "저장에 실패했습니다.";
+    } finally {
+      submitEl.disabled = false;
+    }
+  }
+});
+
+document.addEventListener("sermonLoaded", e => loadComments(e.detail.file));
+</script>
+<script>
   let _installPrompt = null;
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
@@ -855,33 +747,6 @@
       alert('홈화면 추가:\niOS Safari → 공유 버튼 → "홈 화면에 추가"\nAndroid Chrome → 브라우저 메뉴 → "홈 화면에 추가"');
     }
   }
-  </script>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    const firebaseConfig = {
-      apiKey: "AIzaSyCTS7eCGaNcuo9dKX-nYF-flNUlAC4dopM",
-      authDomain: "hopeischurch-sermon.firebaseapp.com",
-      databaseURL: "https://hopeischurch-sermon-default-rtdb.firebaseio.com",
-      projectId: "hopeischurch-sermon",
-      storageBucket: "hopeischurch-sermon.firebasestorage.app",
-      messagingSenderId: "423981952872",
-      appId: "1:423981952872:web:6c7a337334a42c4bde30dd"
-    };
-    const app = initializeApp(firebaseConfig, "visitor-counter");
-    const db = getFirestore(app);
-    (async () => {
-      try {
-        const ref = doc(db, "stats", "visitors");
-        const snap = await getDoc(ref);
-        if (!snap.exists()) { await setDoc(ref, { count: 1 }); }
-        else { await updateDoc(ref, { count: increment(1) }); }
-        const updated = await getDoc(ref);
-        const el = document.getElementById("visitor-hit-count");
-        if (el) el.textContent = updated.data().count.toLocaleString();
-      } catch(e) { console.warn("visitor counter error:", e); }
-    })();
-  </script>
+</script>
 </body>
 </html>
