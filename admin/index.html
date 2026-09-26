@@ -464,7 +464,7 @@
             <label>주제 질문 <span style="text-transform:none;color:#999;font-weight:400;">(홈페이지 메인 상단에 가장 큰 글씨로 노출됩니다)</span></label>
             <input id="sQuestion" type="text" placeholder="설교 주제와 관련된 질문 한 문장">
           </div>
-          <button class="btn-save" onclick="saveSermon()">저장</button>
+          <button id="sSaveBtn" class="btn-save" onclick="saveSermon()">저장</button>
         </div>
       </div>
     </div>
@@ -728,20 +728,21 @@ function saveToken() {
 /* ════════════════════════════════════════════
    생성 버튼 상태 색상 (생성중=노랑, 완료=파랑)
 ════════════════════════════════════════════ */
-function setBtnStatus(btn, status) {
+function setBtnStatus(btn, status, loadingLabel) {
   if (btn._dotTimer) { clearInterval(btn._dotTimer); btn._dotTimer = null; }
   btn.classList.remove('btn-loading-pulse');
 
   if (status === 'loading') {
+    const label = loadingLabel || '생성 중';
     btn.style.background = '#facc15';
     btn.style.color = '#3a2e00';
     btn.style.borderColor = '#eab308';
     btn.classList.add('btn-loading-pulse');
     let dots = 0;
-    btn.textContent = '생성 중';
+    btn.textContent = label;
     btn._dotTimer = setInterval(() => {
       dots = (dots + 1) % 4;
-      btn.textContent = '생성 중' + '.'.repeat(dots);
+      btn.textContent = label + '.'.repeat(dots);
     }, 350);
   } else if (status === 'done') {
     btn.style.background = '#2563eb';
@@ -1351,6 +1352,7 @@ function fillSermonForm(filename, txt) {
   document.getElementById('sBulletinHint').textContent = '';
   setBtnStatus(document.getElementById('sThumbGenBtn'), 'idle');
   setBtnStatus(document.getElementById('sSummaryBtn'), 'idle');
+  setBtnStatus(document.getElementById('sSaveBtn'), 'idle');
 }
 
 function newSermon() {
@@ -1373,6 +1375,7 @@ function newSermon() {
   document.getElementById('sBulletinHint').textContent = '';
   setBtnStatus(document.getElementById('sThumbGenBtn'), 'idle');
   setBtnStatus(document.getElementById('sSummaryBtn'), 'idle');
+  setBtnStatus(document.getElementById('sSaveBtn'), 'idle');
   document.getElementById('sermonForm').style.display = '';
   document.getElementById('sDate').focus();
 }
@@ -1399,6 +1402,11 @@ async function saveSermon() {
     (question ? `\n질문: ${question}` : '') +
     `\n\n${body}`;
 
+  const btn = document.getElementById('sSaveBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  setBtnStatus(btn, 'loading', '저장 중');
+
   try {
     const filePath = `sermon/texts/${filename}`;
     _currentSermonSha = await ghGetSha(filePath);
@@ -1419,8 +1427,13 @@ async function saveSermon() {
       document.getElementById('sermonFileSelect').value = filename;
     }
     toast(`설교 ${date} 저장됨 ✓`);
+    setBtnStatus(btn, 'done');
   } catch(e) {
     toast('저장 실패: ' + e.message, 'err');
+    setBtnStatus(btn, 'idle');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
   }
 }
 
