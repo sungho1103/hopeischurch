@@ -1447,50 +1447,50 @@ function drawSermonThumbnail(bgDataUrl, info) {
       const sx = (img.width - sw) / 2, sy = (img.height - sh) / 2;
       ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
 
-      // 텍스트 가독성을 위한 은은한 radial 톤 보정
-      const grad = ctx.createRadialGradient(W/2, H*0.42, H*0.12, W/2, H*0.42, H*0.78);
-      grad.addColorStop(0, 'rgba(255,250,240,0.32)');
-      grad.addColorStop(1, 'rgba(0,0,0,0.20)');
+      // 텍스트 가독성을 위한 은은한 radial 톤 보정 (밝은 파스텔 톤 유지)
+      const grad = ctx.createRadialGradient(W/2, H*0.42, H*0.14, W/2, H*0.42, H*0.82);
+      grad.addColorStop(0, 'rgba(255,255,255,0.22)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.10)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, W, H);
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'alphabetic';
-      let cy = H * 0.40;
+      let cy = H * 0.36;
 
       // 제목 (여러 줄 자동 줄바꿈)
       ctx.fillStyle = '#2b2013';
-      ctx.font = '700 56px "Noto Serif KR", serif';
+      ctx.font = '700 80px "Noto Serif KR", serif';
       const words = (info.title || '설교 제목').split(' ');
       const titleLines = [];
       let line = '';
       for (const w of words) {
         const t = line ? line + ' ' + w : w;
-        if (ctx.measureText(t).width > W * 0.78 && line) { titleLines.push(line); line = w; }
+        if (ctx.measureText(t).width > W * 0.82 && line) { titleLines.push(line); line = w; }
         else line = t;
       }
       if (line) titleLines.push(line);
-      titleLines.forEach((l, i) => ctx.fillText(l, W/2, cy + i * 66));
-      cy += titleLines.length * 66 + 44;
+      titleLines.forEach((l, i) => ctx.fillText(l, W/2, cy + i * 96));
+      cy += titleLines.length * 96 + 54;
 
       // 성경 본문
       if (info.ref) {
-        ctx.font = '400 30px "Noto Serif KR", serif';
+        ctx.font = '400 40px "Noto Serif KR", serif';
         ctx.fillStyle = '#4a3d2a';
         ctx.fillText(`(${info.ref})`, W/2, cy);
-        cy += 54;
+        cy += 64;
       }
 
       // 장식 구분자
-      ctx.font = '20px serif';
+      ctx.font = '28px serif';
       ctx.fillStyle = '#9c8a63';
       ctx.fillText('◇', W/2, cy);
-      cy += 46;
+      cy += 56;
 
       // 날짜
-      ctx.font = '400 22px "Noto Serif KR", serif';
+      ctx.font = '400 30px "Noto Serif KR", serif';
       ctx.fillStyle = '#5a4c36';
-      if (info.date) { ctx.fillText(info.date, W/2, cy); cy += 32; }
+      if (info.date) { ctx.fillText(info.date, W/2, cy); cy += 42; }
 
       // 설교자
       if (info.preacher) {
@@ -1520,11 +1520,28 @@ async function generateSermonThumbnail() {
   btn.textContent = '생성 중…';
 
   try {
+    const palettes = [
+      '블러쉬 핑크와 아이보리가 은은하게 어우러진 파스텔톤',
+      '라벤더와 민트그린이 부드럽게 섞인 파스텔톤',
+      '베이비 옐로우와 하늘색이 감도는 밝은 파스텔톤',
+      '피치와 라일락이 산뜻하게 번지는 파스텔톤',
+      '연코랄과 크림 화이트가 어우러진 화사한 파스텔톤',
+      '연보라와 살구빛이 은은히 감도는 파스텔톤'
+    ];
+    const scenes = [
+      '맑은 아침 햇살이 부드럽게 퍼지는 잔잔한 산 능선',
+      '옅은 안개가 살짝 걸린 완만한 언덕과 초원',
+      '이슬 맺힌 들판 너머로 보이는 나지막한 구릉',
+      '봄기운이 느껴지는 부드러운 능선과 옅은 구름',
+      '햇살 가득 퍼진 청량한 하늘과 완만한 산세'
+    ];
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
     const bgPrompt =
       '교회 주일 설교 인트로 화면용 배경 이미지를 생성해 주세요. ' +
-      '은은하고 몽환적인 황금빛 노을 자연 풍경: 크림·피치·골드 톤의 부드러운 하늘, 잔잔히 안개 낀 산 능선, ' +
-      '오른쪽 언덕 위 작은 십자가가 있는 예배당 실루엣, 왼쪽 하단에 은은한 나뭇가지·잎사귀 실루엣, ' +
-      '따뜻하고 차분한 분위기, 살짝 빈티지한 필름 그레인. ' +
+      `전체적으로 밝고 화사한 톤: ${pick(palettes)}의 하늘, ${pick(scenes)}. ` +
+      '오른쪽 언덕 위 작은 십자가가 있는 예배당 실루엣, 왼쪽 하단에 은은한 나뭇가지·잎사귀 실루엣. ' +
+      '어둡거나 무거운 색조, 진한 노을빛은 피하고, 채도 낮은 화사하고 밝은 파스텔 색감으로 산뜻하고 포근한 분위기를 표현해주세요. ' +
       '화면 중앙~상단에 글자를 얹을 넉넉한 여백을 남겨주세요. ' +
       '이미지 안에 글자, 숫자, 워터마크는 절대 넣지 마세요. 16:9 와이드 구도.';
 
@@ -1537,7 +1554,8 @@ async function generateSermonThumbnail() {
           contents: [{ parts: [{ text: bgPrompt }] }],
           generationConfig: {
             responseModalities: ['IMAGE'],
-            imageConfig: { aspectRatio: '16:9' }
+            imageConfig: { aspectRatio: '16:9' },
+            temperature: 1.1
           }
         })
       }
