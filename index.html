@@ -207,6 +207,11 @@
     <main>
 
       <!-- ① Hero -->
+      <style>
+        /* 설교 인용문으로 바뀌기 전까지 깜빡임(FOUC) 방지 — 준비되면 부드럽게 페이드인 */
+        #heroEyebrow, #heroTitle, #heroDesc { opacity: 0; transition: opacity .35s ease; }
+        .hero-ready #heroEyebrow, .hero-ready #heroTitle, .hero-ready #heroDesc { opacity: 1; }
+      </style>
       <section class="hero">
         <div class="hero-inner">
           <div class="hero-eyebrow" id="heroEyebrow">기독교 대한 성결교회</div>
@@ -261,7 +266,18 @@
           if (descEl) descEl.innerHTML = (dateLabel ? dateLabel + ' 주일설교 · ' : '') + '이일례 목사';
         }
 
+        function reveal() {
+          var heroInner = document.querySelector('.hero-inner');
+          if (heroInner) heroInner.classList.add('hero-ready');
+        }
+
         function init() {
+          var revealed = false;
+          function revealOnce() {
+            if (revealed) return;
+            revealed = true;
+            reveal();
+          }
           fetch('/sermon/texts/index.json', { cache: 'no-store' })
             .then(function (r) { return r.json(); })
             .then(function (data) {
@@ -276,7 +292,10 @@
                   applyQuote(quote, file.replace('.txt', ''));
                 });
             })
-            .catch(function () { /* 실패 시 기본 문구 유지 */ });
+            .catch(function () { /* 실패 시 기본 문구 유지 */ })
+            .then(revealOnce, revealOnce);
+          // 안전장치: 네트워크가 느려도 0.8초 후엔 무조건 보이게
+          setTimeout(revealOnce, 800);
         }
 
         if (document.readyState === 'loading') {
