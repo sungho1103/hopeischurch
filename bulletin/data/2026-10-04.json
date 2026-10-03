@@ -65,34 +65,41 @@
     {
       "week_id": "2026-10-04",
       "order": 9,
-      "step": "헌금",
-      "content": "성찬식198장/ 헌금찬198장",
-      "person": "임문진권사"
+      "step": "/성찬식/",
+      "content": "성찬식198장",
+      "person": "다합께"
     },
     {
       "week_id": "2026-10-04",
       "order": 10,
+      "step": "헌금",
+      "content": "헌금찬482장",
+      "person": "임문진권사"
+    },
+    {
+      "week_id": "2026-10-04",
+      "order": 11,
       "step": "말씀암송",
       "content": "",
       "person": "사회자"
     },
     {
       "week_id": "2026-10-04",
-      "order": 11,
+      "order": 12,
       "step": "광고",
       "content": "",
       "person": "이일례목사"
     },
     {
       "week_id": "2026-10-04",
-      "order": 12,
+      "order": 13,
       "step": "송영",
       "content": "산밑으로 내려가자",
       "person": "다함께"
     },
     {
       "week_id": "2026-10-04",
-      "order": 13,
+      "order": 14,
       "step": "축도",
       "content": "",
       "person": "이일례목사"
