@@ -103,8 +103,8 @@
     .o-actions .btn-icon { padding-left: 4px; padding-right: 4px; }
     .o-handle { cursor: grab; color: #aaa; padding: 0 4px; user-select: none; font-size: 15px; vertical-align: middle; }
     .o-handle:active { cursor: grabbing; }
-    #orderTableBody tr.o-dragging { opacity: .4; }
-    #orderTableBody tr.o-moved td { background: #fff8e6; transition: background .4s; }
+    [data-sortable].o-dragging { opacity: .4; }
+    #orderTableBody tr.o-moved td, .news-row.o-moved { background: #fff8e6; transition: background .4s; }
 
     /* ── Card ── */
     .card {
@@ -1144,7 +1144,7 @@ function fillBulletinForm(data) {
 
 function renderOrderRows(order) {
   document.getElementById('orderTableBody').innerHTML = order.map(r => `
-    <tr>
+    <tr data-sortable>
       <td><input class="o-step"    value="${esc(r.step    || '')}"></td>
       <td><input class="o-content" value="${esc(r.content || '')}"></td>
       <td><input class="o-person"  value="${esc(r.person  || '')}"></td>
@@ -1155,6 +1155,7 @@ function renderOrderRows(order) {
 
 function addOrderRow() {
   const tr = document.createElement('tr');
+  tr.setAttribute('data-sortable', '');
   tr.innerHTML = `
     <td><input class="o-step"    value=""></td>
     <td><input class="o-content" value=""></td>
@@ -1164,58 +1165,74 @@ function addOrderRow() {
   document.getElementById('orderTableBody').appendChild(tr);
 }
 
+// ── 행 순서 이동 공통 (예배순서 tr / 교회소식 .news-row) ──
+function sortHandle() {
+  return `<span class="o-handle" title="끌어서 이동" onmousedown="this.closest('[data-sortable]').draggable=true" ontouchstart="this.closest('[data-sortable]').draggable=true">⠿</span>`;
+}
+function moveButtons() {
+  return `<button type="button" class="btn-icon" title="위로" onclick="moveRow(this,-1)">▲</button>
+    <button type="button" class="btn-icon" title="아래로" onclick="moveRow(this,1)">▼</button>`;
+}
+
 function orderRowActions() {
   return `<td class="o-actions">
-    <span class="o-handle" title="끌어서 이동" onmousedown="this.closest('tr').draggable=true" ontouchstart="this.closest('tr').draggable=true">⠿</span>
-    <button type="button" class="btn-icon" title="위로" onclick="moveOrderRow(this,-1)">▲</button>
-    <button type="button" class="btn-icon" title="아래로" onclick="moveOrderRow(this,1)">▼</button>
+    ${sortHandle()}
+    ${moveButtons()}
     <button type="button" class="btn-icon" title="삭제" onclick="this.closest('tr').remove()">✕</button>
   </td>`;
 }
 
-function moveOrderRow(btn, dir) {
-  const tr = btn.closest('tr');
-  if (dir < 0 && tr.previousElementSibling) tr.parentNode.insertBefore(tr, tr.previousElementSibling);
-  else if (dir > 0 && tr.nextElementSibling) tr.parentNode.insertBefore(tr.nextElementSibling, tr);
-  tr.classList.add('o-moved');
-  setTimeout(() => tr.classList.remove('o-moved'), 400);
+function moveRow(btn, dir) {
+  const row = btn.closest('[data-sortable]');
+  if (dir < 0 && row.previousElementSibling) row.parentNode.insertBefore(row, row.previousElementSibling);
+  else if (dir > 0 && row.nextElementSibling) row.parentNode.insertBefore(row.nextElementSibling, row);
+  row.classList.add('o-moved');
+  setTimeout(() => row.classList.remove('o-moved'), 400);
 }
 
 // 드래그 앤 드롭 정렬 (⠿ 손잡이를 잡았을 때만 동작)
-(function initOrderDrag() {
-  const body = document.getElementById('orderTableBody');
-  if (!body) return;
+function initDragSort(containerId) {
+  const box = document.getElementById(containerId);
+  if (!box) return;
   let dragging = null;
-  body.addEventListener('dragstart', e => {
-    dragging = e.target.closest('tr');
-    if (!dragging || !dragging.draggable) { e.preventDefault(); return; }
+  box.addEventListener('dragstart', e => {
+    dragging = e.target.closest('[data-sortable]');
+    if (!dragging || !dragging.draggable) { dragging = null; e.preventDefault(); return; }
     dragging.classList.add('o-dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', '');
   });
-  body.addEventListener('dragover', e => {
+  box.addEventListener('dragover', e => {
     if (!dragging) return;
     e.preventDefault();
-    const over = e.target.closest('tr');
-    if (!over || over === dragging) return;
+    const over = e.target.closest('[data-sortable]');
+    if (!over || over === dragging || over.parentNode !== box) return;
     const rect = over.getBoundingClientRect();
     const after = e.clientY > rect.top + rect.height / 2;
-    body.insertBefore(dragging, after ? over.nextElementSibling : over);
+    box.insertBefore(dragging, after ? over.nextElementSibling : over);
   });
   const end = () => {
     if (dragging) { dragging.classList.remove('o-dragging'); dragging.draggable = false; }
     dragging = null;
   };
-  body.addEventListener('dragend', end);
-  body.addEventListener('drop', e => { e.preventDefault(); end(); });
-  document.addEventListener('mouseup', () => body.querySelectorAll('tr[draggable="true"]').forEach(tr => { if (tr !== dragging) tr.draggable = false; }));
-})();
+  box.addEventListener('dragend', end);
+  box.addEventListener('drop', e => { e.preventDefault(); end(); });
+  document.addEventListener('mouseup', () => box.querySelectorAll('[draggable="true"]').forEach(r => { if (r !== dragging) r.draggable = false; }));
+}
+initDragSort('orderTableBody');
+initDragSort('newsContainer');
+
+function newsRowInner(text) {
+  return `${sortHandle()}
+      <input class="n-text" value="${esc(text)}">
+      ${moveButtons()}
+      <button type="button" class="btn-icon" title="삭제" onclick="this.parentElement.remove()">✕</button>`;
+}
 
 function renderNewsItems(news) {
   document.getElementById('newsContainer').innerHTML = news.map(n => `
-    <div class="news-row">
-      <input class="n-text" value="${esc(n.text || '')}">
-      <button class="btn-icon" onclick="this.parentElement.remove()">✕</button>
+    <div class="news-row" data-sortable>
+      ${newsRowInner(n.text || '')}
     </div>
   `).join('');
 }
@@ -1223,7 +1240,8 @@ function renderNewsItems(news) {
 function addNewsItem() {
   const div = document.createElement('div');
   div.className = 'news-row';
-  div.innerHTML = `<input class="n-text" value=""><button class="btn-icon" onclick="this.parentElement.remove()">✕</button>`;
+  div.setAttribute('data-sortable', '');
+  div.innerHTML = newsRowInner('');
   document.getElementById('newsContainer').appendChild(div);
 }
 
