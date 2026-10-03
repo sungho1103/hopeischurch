@@ -464,6 +464,10 @@
             <label>주제 질문 <span style="text-transform:none;color:#999;font-weight:400;">(홈페이지 메인 상단에 가장 큰 글씨로 노출됩니다)</span></label>
             <input id="sQuestion" type="text" placeholder="설교 주제와 관련된 질문 한 문장">
           </div>
+          <div class="form-group">
+            <label>쇼츠용 문구 <span style="text-transform:none;color:#999;font-weight:400;">(유튜브 쇼츠 상단 자막용 — 비신자도 끌릴 만한 후킹 문구)</span></label>
+            <input id="sShortsHook" type="text" placeholder="종교 용어 없이, 설교 내용과 연결되는 후킹 질문">
+          </div>
           <button id="sSaveBtn" class="btn-save" onclick="saveSermon()">저장</button>
         </div>
       </div>
@@ -1343,6 +1347,7 @@ function fillSermonForm(filename, txt) {
   document.getElementById('sKey1').value     = meta['핵심문장1'] || '';
   document.getElementById('sKey2').value     = meta['핵심문장2'] || '';
   document.getElementById('sQuestion').value = meta['질문'] || '';
+  document.getElementById('sShortsHook').value = meta['쇼츠문구'] || '';
   const imgUrl = meta['이미지'] || meta['image'] || '';
   document.getElementById('sImageUrl').value = imgUrl;
   showSermonImgPreview(imgUrl);
@@ -1367,6 +1372,7 @@ function newSermon() {
   document.getElementById('sKey1').value     = '';
   document.getElementById('sKey2').value     = '';
   document.getElementById('sQuestion').value = '';
+  document.getElementById('sShortsHook').value = '';
   document.getElementById('sImageUrl').value = '';
   document.getElementById('sImageFile').value = '';
   showSermonImgPreview('');
@@ -1389,6 +1395,7 @@ async function saveSermon() {
   const key1     = document.getElementById('sKey1').value.trim();
   const key2     = document.getElementById('sKey2').value.trim();
   const question = document.getElementById('sQuestion').value.trim();
+  const shortsHook = document.getElementById('sShortsHook').value.trim();
   if (!date) { toast('날짜를 입력하세요', 'err'); return; }
 
   const imageUrl = document.getElementById('sImageUrl').value.trim();
@@ -1400,6 +1407,7 @@ async function saveSermon() {
     (key1 ? `\n핵심문장1: ${key1}` : '') +
     (key2 ? `\n핵심문장2: ${key2}` : '') +
     (question ? `\n질문: ${question}` : '') +
+    (shortsHook ? `\n쇼츠문구: ${shortsHook}` : '') +
     `\n\n${body}`;
 
   const btn = document.getElementById('sSaveBtn');
@@ -1456,8 +1464,9 @@ async function generateSermonSummary() {
   const key1El  = document.getElementById('sKey1');
   const key2El  = document.getElementById('sKey2');
   const qEl     = document.getElementById('sQuestion');
-  const hasExisting = [bodyEl, key1El, key2El, qEl].some(el => el.value.trim());
-  if (hasExisting && !confirm('설교 내용/핵심문장/질문을 새로 생성한 내용으로 덮어쓸까요?')) return;
+  const hookEl  = document.getElementById('sShortsHook');
+  const hasExisting = [bodyEl, key1El, key2El, qEl, hookEl].some(el => el.value.trim());
+  if (hasExisting && !confirm('설교 내용/핵심문장/질문/쇼츠용 문구를 새로 생성한 내용으로 덮어쓸까요?')) return;
 
   const btn = document.getElementById('sSummaryBtn');
   const originalLabel = btn.textContent;
@@ -1466,7 +1475,7 @@ async function generateSermonSummary() {
 
   try {
     const prompt =
-      '이 영상은 교회 주일 설교 영상입니다. 아래 형식을 반드시 그대로 지켜서, 4가지 항목을 순서대로 출력하세요. ' +
+      '이 영상은 교회 주일 설교 영상입니다. 아래 형식을 반드시 그대로 지켜서, 5가지 항목을 순서대로 출력하세요. ' +
       '각 항목 앞의 대괄호 표시는 그대로 유지하고, 항목 사이에 다른 설명이나 인사말은 넣지 마세요.\n\n' +
       '[요약]\n' +
       '설교의 핵심 내용을 한국어로 자연스럽게 정리. 분량은 공백 포함 1500자 내외, 설교의 흐름(도입-본론-결론)이 잘 드러나게 작성.\n' +
@@ -1475,7 +1484,11 @@ async function generateSermonSummary() {
       '[핵심문장2]\n' +
       '설교 전체에서 두 번째로 중요한 핵심 문장 1개 (완결된 한 문장, 핵심문장1과 겹치지 않게).\n' +
       '[질문]\n' +
-      '이 설교의 주제와 관련하여 성도들이 스스로에게 던져볼 만한 질문 1개. 짧고 임팩트 있게, 40자 이내로 작성.';
+      '이 설교의 주제와 관련하여 성도들이 스스로에게 던져볼 만한 질문 1개. 짧고 임팩트 있게, 40자 이내로 작성.\n' +
+      '[쇼츠문구]\n' +
+      '이 설교 내용을 바탕으로, 유튜브 쇼츠 영상 상단에 들어갈 후킹 문구 1개. 교회를 다니지 않는 비신자도 흥미나 도전을 느낄 수 있도록 ' +
+      '\'예배\', \'하나님\', \'주님\' 같은 종교적 용어는 피하되, 설교 본문의 핵심 메시지(형식/겉모습과 실제 삶 사이의 괴리, 진짜 삶의 변화 등)와의 ' +
+      '연결고리는 남겨둘 것. 짧고 임팩트 있게, 35자 이내의 질문형 문장으로 작성.';
 
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`,
@@ -1513,7 +1526,8 @@ async function generateSermonSummary() {
     const summary  = grab('[요약]', '[핵심문장1]');
     const keyOne   = grab('[핵심문장1]', '[핵심문장2]');
     const keyTwo   = grab('[핵심문장2]', '[질문]');
-    const question = grab('[질문]', null);
+    const question = grab('[질문]', '[쇼츠문구]');
+    const shortsHook = grab('[쇼츠문구]', null);
 
     if (!summary) throw new Error('요약 내용을 파싱하지 못했습니다. 다시 시도해주세요.');
 
@@ -1521,7 +1535,8 @@ async function generateSermonSummary() {
     key1El.value = keyOne;
     key2El.value = keyTwo;
     qEl.value    = question;
-    toast(`요약(${summary.length}자)·핵심문장·질문 생성됨 ✓`);
+    hookEl.value = shortsHook;
+    toast(`요약(${summary.length}자)·핵심문장·질문·쇼츠문구 생성됨 ✓`);
     setBtnStatus(btn, 'done');
   } catch(e) {
     toast('생성 실패: ' + e.message, 'err');
