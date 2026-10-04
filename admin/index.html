@@ -148,6 +148,9 @@
       border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
     }
     .committee-top button:hover { background: #333; }
+    .committee-table td { padding: 3px 8px; border-bottom: none; }
+    .committee-table input { padding: 4px 6px; }
+    .committee-table tr.c-month-gap td { padding: 0; height: 14px; border: none; }
 
     /* ── Bulletin ── */
     .bulletin-top { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
@@ -293,7 +296,7 @@
           <button onclick="generateNextMonth()">+ 다음달 주차 생성</button>
         </div>
         <div style="overflow-x:auto">
-          <table class="data-table">
+          <table class="data-table committee-table">
             <thead>
               <tr>
                 <th style="width:120px">날짜</th>
@@ -309,7 +312,7 @@
         <details id="committeeArchiveWrap" style="margin-top:14px;">
           <summary id="committeeArchiveSummary" style="cursor:pointer;font-size:13px;color:#888;">지난 기록 보기 (0개)</summary>
           <div style="overflow-x:auto;margin-top:10px;">
-            <table class="data-table">
+            <table class="data-table committee-table">
               <thead>
                 <tr>
                   <th style="width:120px">날짜</th>
@@ -912,6 +915,22 @@ function committeeRowHtml(w, byWeek) {
     </tr>`;
 }
 
+function committeeMonthOf(weekId) { return weekId.slice(0, 7); }
+
+function buildCommitteeRowsHtml(weeks, byWeek) {
+  let html = '';
+  let prevMonth = null;
+  weeks.forEach(w => {
+    const m = committeeMonthOf(w);
+    if (prevMonth !== null && m !== prevMonth) {
+      html += `<tr class="c-month-gap"><td colspan="5"></td></tr>`;
+    }
+    html += committeeRowHtml(w, byWeek);
+    prevMonth = m;
+  });
+  return html;
+}
+
 function renderCommitteeTable() {
   // week_id별 그룹핑
   const byWeek = {};
@@ -927,11 +946,10 @@ function renderCommitteeTable() {
   const visible  = weeks.filter(w => new Date(w + 'T00:00:00') >= cutoff);
   const archived = weeks.filter(w => new Date(w + 'T00:00:00') <  cutoff).sort((a, b) => b.localeCompare(a));
 
-  document.getElementById('committeeTableBody').innerHTML =
-    visible.map(w => committeeRowHtml(w, byWeek)).join('');
+  document.getElementById('committeeTableBody').innerHTML = buildCommitteeRowsHtml(visible, byWeek);
 
   const archiveBody = document.getElementById('committeeArchiveBody');
-  if (archiveBody) archiveBody.innerHTML = archived.map(w => committeeRowHtml(w, byWeek)).join('');
+  if (archiveBody) archiveBody.innerHTML = buildCommitteeRowsHtml(archived, byWeek);
   const archiveSummary = document.getElementById('committeeArchiveSummary');
   if (archiveSummary) archiveSummary.textContent = `지난 기록 보기 (${archived.length}개)`;
 }
