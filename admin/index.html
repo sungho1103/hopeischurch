@@ -286,6 +286,7 @@
         <div class="committee-top">
           <input id="newWeekId" type="date">
           <button onclick="addCommitteeWeek()">+ 주차 추가</button>
+          <button onclick="generateNextMonth()">+ 다음달 주차 생성</button>
         </div>
         <div style="overflow-x:auto">
           <table class="data-table">
@@ -301,6 +302,23 @@
             <tbody id="committeeTableBody"></tbody>
           </table>
         </div>
+        <details id="committeeArchiveWrap" style="margin-top:14px;">
+          <summary id="committeeArchiveSummary" style="cursor:pointer;font-size:13px;color:#888;">지난 기록 보기 (0개)</summary>
+          <div style="overflow-x:auto;margin-top:10px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:120px">날짜</th>
+                  <th>기도</th>
+                  <th>찬양</th>
+                  <th>헌금위원</th>
+                  <th style="width:50px"></th>
+                </tr>
+              </thead>
+              <tbody id="committeeArchiveBody"></tbody>
+            </table>
+          </div>
+        </details>
         <button class="btn-save" onclick="saveCommittee()">저장</button>
       </div>
     </div>
@@ -873,6 +891,23 @@ async function loadCommittee() {
   }
 }
 
+function committeeCutoffDate() {
+  // 지난달 1일 — 이 날짜 이상(지난달·현재달·미래)은 기본 노출, 그 이전(지지난달까지)은 접어둠
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() - 1, 1);
+}
+
+function committeeRowHtml(w, byWeek) {
+  return `
+    <tr>
+      <td><input class="c-week" readonly value="${esc(w)}" style="width:110px;background:#fafafa;color:#888;"></td>
+      <td><input class="c-input" data-week="${esc(w)}" data-role="기도"   value="${esc(byWeek[w].pray)}"></td>
+      <td><input class="c-input" data-week="${esc(w)}" data-role="찬양"   value="${esc(byWeek[w].praise)}"></td>
+      <td><input class="c-input" data-week="${esc(w)}" data-role="헌금위원" value="${esc(byWeek[w].offering)}"></td>
+      <td><button class="btn-del" onclick="deleteCommitteeWeek('${esc(w)}')">삭제</button></td>
+    </tr>`;
+}
+
 function renderCommitteeTable() {
   // week_id별 그룹핑
   const byWeek = {};
@@ -882,16 +917,55 @@ function renderCommitteeTable() {
     if (r.role === '찬양')   byWeek[r.week_id].praise   = r.name;
     if (r.role === '헌금위원') byWeek[r.week_id].offering = r.name;
   });
+
+  const cutoff = committeeCutoffDate();
   const weeks = Object.keys(byWeek).sort();
-  document.getElementById('committeeTableBody').innerHTML = weeks.map(w => `
-    <tr>
-      <td><input class="c-week" readonly value="${esc(w)}" style="width:110px;background:#fafafa;color:#888;"></td>
-      <td><input class="c-input" data-week="${esc(w)}" data-role="기도"   value="${esc(byWeek[w].pray)}"></td>
-      <td><input class="c-input" data-week="${esc(w)}" data-role="찬양"   value="${esc(byWeek[w].praise)}"></td>
-      <td><input class="c-input" data-week="${esc(w)}" data-role="헌금위원" value="${esc(byWeek[w].offering)}"></td>
-      <td><button class="btn-del" onclick="deleteCommitteeWeek('${esc(w)}')">삭제</button></td>
-    </tr>
-  `).join('');
+  const visible  = weeks.filter(w => new Date(w + 'T00:00:00') >= cutoff);
+  const archived = weeks.filter(w => new Date(w + 'T00:00:00') <  cutoff).sort((a, b) => b.localeCompare(a));
+
+  document.getElementById('committeeTableBody').innerHTML =
+    visible.map(w => committeeRowHtml(w, byWeek)).join('');
+
+  const archiveBody = document.getElementById('committeeArchiveBody');
+  if (archiveBody) archiveBody.innerHTML = archived.map(w => committeeRowHtml(w, byWeek)).join('');
+  const archiveSummary = document.getElementById('committeeArchiveSummary');
+  if (archiveSummary) archiveSummary.textContent = `지난 기록 보기 (${archived.length}개)`;
+}
+
+function getSundaysInMonth(year, monthIndex) {
+  const dates = [];
+  const d = new Date(year, monthIndex, 1);
+  while (d.getDay() !== 0) d.setDate(d.getDate() + 1);
+  while (d.getMonth() === monthIndex) {
+    dates.push(d.toISOString().slice(0, 10));
+    d.setDate(d.getDate() + 7);
+  }
+  return dates;
+}
+
+function generateNextMonth() {
+  // 기존 데이터 중 가장 마지막 주차의 "다음 달"을 생성 (데이터가 없으면 이번 달 기준 다음 달)
+  const existingWeeks = [...new Set(_committeeData.map(r => r.week_id))].sort();
+  const baseStr = existingWeeks.length ? existingWeeks[existingWeeks.length - 1] : new Date().toISOString().slice(0, 10);
+  const base = new Date(baseStr + 'T00:00:00');
+  const targetMonth = (base.getMonth() + 1) % 12;
+  const targetYear  = base.getMonth() === 11 ? base.getFullYear() + 1 : base.getFullYear();
+
+  const sundays = getSundaysInMonth(targetYear, targetMonth);
+  let added = 0;
+  sundays.forEach(w => {
+    if (!_committeeData.some(r => r.week_id === w)) {
+      _committeeData.push({ week_id: w, role: '기도', name: '' });
+      _committeeData.push({ week_id: w, role: '찬양', name: '' });
+      _committeeData.push({ week_id: w, role: '헌금위원', name: '' });
+      added++;
+    }
+  });
+  _committeeData.sort((a, b) => a.week_id.localeCompare(b.week_id));
+  renderCommitteeTable();
+
+  if (added > 0) toast(`${targetYear}년 ${targetMonth + 1}월 주차 ${added}개 생성됨 (저장을 눌러야 반영됩니다)`);
+  else toast(`${targetYear}년 ${targetMonth + 1}월 주차가 이미 모두 있습니다`, 'err');
 }
 
 function deleteCommitteeWeek(weekId) {
