@@ -57,6 +57,47 @@
       color:#fff;
     }
 
+    /* 설교 목록 선택 버튼 + 팝업 */
+    .page-sermon .sp-btn{
+      width:100%; display:flex; align-items:center; gap:10px; text-align:left;
+      padding:10px 12px; border:1.5px solid var(--c-accent); border-radius:var(--radius-sm);
+      background:var(--c-accent); color:#fff; font:inherit; font-size:0.9rem; cursor:pointer;
+    }
+    .page-sermon .sp-btn:hover{ background:var(--c-accent-hover); }
+    .page-sermon .sp-btn .sp-cur{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .page-sermon .sp-btn .sp-arrow{ flex-shrink:0; font-size:0.75rem; opacity:.85; }
+    .sp-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000;
+      display:none; align-items:center; justify-content:center; padding:16px;
+    }
+    .sp-overlay.open{ display:flex; }
+    .sp-modal{
+      background:var(--c-bg,#fff); color:var(--c-text,#111); width:100%; max-width:560px;
+      max-height:min(640px, 80vh); display:flex; flex-direction:column;
+      border-radius:var(--radius-md,12px); box-shadow:0 20px 50px rgba(0,0,0,.25); overflow:hidden;
+    }
+    .sp-head{ display:flex; align-items:center; gap:10px; padding:14px 16px 10px; }
+    .sp-head h3{ margin:0; font-size:1rem; font-weight:700; flex:1; }
+    .sp-close{ background:none; border:none; font-size:1.5rem; line-height:1; cursor:pointer; color:inherit; padding:0 4px; }
+    .sp-search{ margin:0 16px 10px; padding:9px 12px; border:1px solid var(--c-border,#ddd); border-radius:8px; font:inherit; font-size:0.9rem; outline:none; background:#fff; color:#111; }
+    .sp-search:focus{ border-color:var(--c-accent); }
+    .sp-list{ overflow-y:auto; padding:0 8px 12px; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+    .sp-month{ position:sticky; top:0; background:var(--c-bg,#fff); font-size:0.75rem; font-weight:700; color:var(--c-text-sub,#555); padding:10px 8px 6px; letter-spacing:.02em; }
+    .sp-item{
+      display:grid; grid-template-columns:64px 1fr; gap:2px 12px; width:100%; text-align:left;
+      background:none; border:none; border-radius:8px; padding:10px 8px; cursor:pointer; font:inherit; color:inherit;
+    }
+    .sp-item:hover{ background:var(--c-bg-subtle,#f3f3f3); }
+    .sp-item.is-current{ background:var(--c-accent-light,#ffe1d6); }
+    .sp-date{ grid-row:span 2; font-size:0.82rem; font-weight:700; color:var(--c-accent); padding-top:1px; }
+    .sp-title{ font-size:0.95rem; font-weight:600; line-height:1.35; }
+    .sp-ref{ font-size:0.8rem; color:var(--c-text-sub,#666); }
+    .sp-empty{ text-align:center; padding:24px 0; font-size:0.85rem; color:var(--c-text-sub,#666); }
+    @media (max-width:768px){
+      .sp-overlay{ align-items:flex-end; padding:0; }
+      .sp-modal{ max-width:none; max-height:85vh; border-radius:16px 16px 0 0; }
+    }
+
     .page-sermon .sermon-title{
       font-size:2.1rem;
       font-weight:400;
@@ -202,10 +243,11 @@
           <section class="panel">
             <div class="muted" style="margin-bottom:10px;">설교 목록</div>
 
-            <!-- ✅ 드롭다운 -->
-            <select class="select" id="select">
-              <option>불러오는 중…</option>
-            </select>
+            <!-- ✅ 설교 목록 (누르면 팝업으로 열림) -->
+            <button type="button" class="sp-btn" id="spBtn" aria-haspopup="dialog">
+              <span class="sp-cur" id="spCur">불러오는 중…</span>
+              <span class="sp-arrow">목록 ▾</span>
+            </button>
 
             <!-- 주차별 사진 -->
             <div id="sermonImg" style="display:none;margin-top:24px;">
@@ -335,7 +377,10 @@
     document.getElementById('fsMinus').disabled = fsLevel === 0;
     document.getElementById('fsPlus').disabled  = fsLevel === 4;
   }
-  const selectEl = document.getElementById("select");
+  const spBtn = document.getElementById("spBtn");
+  const spCur = document.getElementById("spCur");
+  let sermonFiles = [], selectedFile = null;
+  const sermonMeta = {}; // filename → { date, title, ref }
   const viewerEl = document.getElementById("viewer");
   const statusEl = document.getElementById("status");
 
@@ -402,18 +447,16 @@
       .sort((a,b) => b.localeCompare(a));
 
     if(!files.length){
-      selectEl.innerHTML = `<option>(설교 파일 없음)</option>`;
+      spCur.textContent = "(설교 파일 없음)";
       statusEl.textContent = "목록 없음";
       return { files, selected: null };
     }
 
     const selected = (currentFile && files.includes(currentFile)) ? currentFile : files[0];
 
-    selectEl.innerHTML = files.map(name => {
-      const label = formatTitleFromFilename(name);
-      const sel = (name === selected) ? "selected" : "";
-      return `<option value="${escapeHtml(name)}" ${sel}>${escapeHtml(label)}</option>`;
-    }).join("");
+    sermonFiles = files;
+    selectedFile = selected;
+    spCur.textContent = formatTitleFromFilename(selected);
 
     statusEl.textContent = `총 ${files.length}개`;
     return { files, selected };
@@ -426,6 +469,11 @@
     const txt = await fetchText(url);
 
     const { meta, body } = parseSermonTxt(txt);
+    rememberMeta(filename, meta);
+    if (filename === selectedFile) {
+      const m = sermonMeta[filename];
+      spCur.textContent = [m.date, m.title].filter(Boolean).join("  ·  ");
+    }
 
     const title  = meta["제목"] || meta["title"] || formatTitleFromFilename(filename);
     const date   = meta["날짜"] || meta["date"] || formatTitleFromFilename(filename);
@@ -468,15 +516,92 @@
     document.dispatchEvent(new CustomEvent("sermonLoaded", { detail: { file: filename } }));
   }
 
-  selectEl.addEventListener("change", () => {
-    const filename = selectEl.value;
-    if(filename) setFileParam(filename);
+  /* ── 설교 목록 팝업 ── */
+  function rememberMeta(filename, meta){
+    sermonMeta[filename] = {
+      date:  meta["날짜"] || meta["date"] || formatTitleFromFilename(filename),
+      title: meta["제목"] || meta["title"] || "",
+      ref:   meta["본문"] || meta["text"] || ""
+    };
+  }
+
+  let metaPromise = null;
+  function loadAllMeta(){
+    if (!metaPromise) {
+      metaPromise = Promise.all(sermonFiles.map(async f => {
+        if (sermonMeta[f]) return;
+        try { rememberMeta(f, parseSermonTxt(await fetchText(TEXT_BASE + encodeURIComponent(f))).meta); }
+        catch(_) { sermonMeta[f] = { date: formatTitleFromFilename(f), title: "", ref: "" }; }
+      }));
+    }
+    return metaPromise;
+  }
+
+  const spOverlay = document.createElement("div");
+  spOverlay.className = "sp-overlay";
+  spOverlay.innerHTML = `
+    <div class="sp-modal" role="dialog" aria-modal="true" aria-label="설교 목록">
+      <div class="sp-head"><h3>설교 목록</h3><button type="button" class="sp-close" aria-label="닫기">×</button></div>
+      <input class="sp-search" type="search" placeholder="제목·본문·날짜로 찾기">
+      <div class="sp-list"></div>
+    </div>`;
+  document.body.appendChild(spOverlay);
+  const spList   = spOverlay.querySelector(".sp-list");
+  const spSearch = spOverlay.querySelector(".sp-search");
+
+  function renderPicker(){
+    const q = spSearch.value.trim().toLowerCase();
+    let html = "", lastMonth = "";
+    for (const f of sermonFiles) {
+      const m = sermonMeta[f] || { date: formatTitleFromFilename(f), title: "", ref: "" };
+      if (q && !`${m.date} ${m.title} ${m.ref}`.toLowerCase().includes(q)) continue;
+      const d = m.date.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      const month = d ? `${d[1]}년 ${Number(d[2])}월` : "";
+      if (month && month !== lastMonth) { html += `<div class="sp-month">${month}</div>`; lastMonth = month; }
+      const short = d ? `${Number(d[2])}.${String(Number(d[3])).padStart(2,"0")}` : m.date;
+      html += `<button type="button" class="sp-item${f === selectedFile ? " is-current" : ""}" data-file="${escapeHtml(f)}">
+        <span class="sp-date">${escapeHtml(short)}</span>
+        <span class="sp-title">${escapeHtml(m.title || m.date)}</span>
+        <span class="sp-ref">${escapeHtml(m.ref)}</span>
+      </button>`;
+    }
+    spList.innerHTML = html || `<div class="sp-empty">찾는 설교가 없습니다.</div>`;
+  }
+
+  function openPicker(){
+    if (!sermonFiles.length) return;
+    spSearch.value = "";
+    renderPicker();
+    spOverlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+    const cur = spList.querySelector(".is-current");
+    if (cur) cur.scrollIntoView({ block: "center" });
+    loadAllMeta().then(() => { if (spOverlay.classList.contains("open")) {
+      const top = spList.scrollTop; renderPicker(); spList.scrollTop = top;
+    } });
+  }
+  function closePicker(){
+    spOverlay.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  spBtn.addEventListener("click", openPicker);
+  spOverlay.addEventListener("click", e => { if (e.target === spOverlay) closePicker(); });
+  spOverlay.querySelector(".sp-close").addEventListener("click", closePicker);
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && spOverlay.classList.contains("open")) closePicker(); });
+  spSearch.addEventListener("input", renderPicker);
+  spList.addEventListener("click", e => {
+    const item = e.target.closest(".sp-item");
+    if (!item) return;
+    closePicker();
+    if (item.dataset.file !== selectedFile) setFileParam(item.dataset.file);
   });
 
   (async function main(){
     try{
       const { selected } = await loadList();
       if(selected) await renderFile(selected);
+      loadAllMeta(); // 목록 팝업용 제목·본문 미리 불러오기
     }catch(err){
       console.error(err);
       statusEl.textContent = "불러오기 실패";
