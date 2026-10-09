@@ -1477,9 +1477,37 @@ async function loadSermonIndex() {
       sel.value = _sermonFiles[0];
       loadSermon(_sermonFiles[0]);
     }
+    labelSermonOptions(sel);
   } catch(e) {
     toast('설교 목록 로드 실패: ' + e.message, 'err');
   }
+}
+
+// 설교 목록 항목을 "날짜 · 제목 · 본문" 형태로 표시
+function parseSermonMeta(txt) {
+  const meta = {};
+  for (const raw of txt.replace(/\r\n/g, '\n').split('\n')) {
+    const line = raw.trim();
+    if (line === '') break;
+    const m = line.match(/^([^:]+)\s*:\s*(.*)$/);
+    if (m) meta[m[1].trim()] = m[2].trim();
+  }
+  return meta;
+}
+
+async function labelSermonOptions(sel) {
+  await Promise.all(_sermonFiles.map(async f => {
+    try {
+      const res = await fetch(`/sermon/texts/${f}?_=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const meta  = parseSermonMeta(await res.text());
+      const date  = normalizeDate(meta['날짜'] || meta['date'] || '') || f.replace(/\.txt$/i, '');
+      const title = meta['제목'] || meta['title'] || '';
+      const ref   = meta['본문'] || meta['text'] || '';
+      const opt = [...sel.options].find(o => o.value === f);
+      if (opt) opt.textContent = [date, title, ref].filter(Boolean).join('  ·  ');
+    } catch (_) { /* 실패 시 파일명 그대로 표시 */ }
+  }));
 }
 
 async function loadSermon(filename) {
