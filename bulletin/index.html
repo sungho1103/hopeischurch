@@ -31,13 +31,51 @@
     .page-bulletin main h1{ margin:0; font-size:var(--fs-h1,2.4rem); font-weight:800; letter-spacing:-.03em; }
     .page-bulletin .controls{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
     .page-bulletin #weekSelect{
+      display:flex; align-items:center; gap:10px; text-align:left;
       padding:10px 12px;
       border:1.5px solid var(--c-accent);
       border-radius:var(--radius-sm);
       background:var(--c-accent);
       color:#fff;
-      font-size:0.9rem;
-      min-width:220px;
+      font:inherit; font-size:0.9rem;
+      min-width:220px; max-width:100%;
+    }
+    .page-bulletin #weekSelect:hover{ background:var(--c-accent-hover); }
+    .page-bulletin #weekSelect .sp-cur{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .page-bulletin #weekSelect .sp-arrow{ flex-shrink:0; font-size:0.75rem; opacity:.85; }
+
+    /* 주보 목록 팝업 (주일설교 페이지와 같은 스타일) */
+    .sp-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000;
+      display:none; align-items:center; justify-content:center; padding:16px;
+    }
+    .sp-overlay.open{ display:flex; }
+    .sp-overlay .sp-modal{
+      background:var(--c-bg,#fff); color:var(--c-text,#111); width:100%; max-width:560px;
+      max-height:min(640px, 80vh); display:flex; flex-direction:column;
+      border-radius:var(--radius-md,12px); box-shadow:0 20px 50px rgba(0,0,0,.25); overflow:hidden;
+    }
+    .sp-overlay .sp-head{ display:flex; align-items:center; gap:10px; padding:14px 16px 10px; }
+    .sp-overlay .sp-head h3{ margin:0; font-size:1rem; font-weight:700; flex:1; }
+    .sp-overlay .sp-close{ background:none; border:none; font-size:1.5rem; line-height:1; cursor:pointer; color:inherit; padding:0 4px; }
+    .sp-overlay .sp-close:hover{ background:none; }
+    .sp-overlay .sp-search{ margin:0 16px 10px; padding:9px 12px; border:1px solid var(--c-border,#ddd); border-radius:8px; font:inherit; font-size:0.9rem; outline:none; background:#fff; color:#111; }
+    .sp-overlay .sp-search:focus{ border-color:var(--c-accent); }
+    .sp-overlay .sp-list{ overflow-y:auto; padding:0 8px 12px; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+    .sp-overlay .sp-month{ position:sticky; top:0; z-index:1; background:var(--c-bg,#fff); font-size:0.75rem; font-weight:700; color:var(--c-text-sub,#555); padding:10px 8px 6px; letter-spacing:.02em; }
+    .sp-overlay .sp-item{
+      display:grid; grid-template-columns:64px 1fr; gap:2px 12px; width:100%; text-align:left;
+      background:none; border:none; border-radius:8px; padding:10px 8px; cursor:pointer; font:inherit; color:inherit;
+    }
+    .sp-overlay .sp-item:hover{ background:var(--c-bg-subtle,#f3f3f3); }
+    .sp-overlay .sp-item.is-current{ background:var(--c-accent-light,#ffe1d6); }
+    .sp-overlay .sp-date{ grid-row:span 2; font-size:0.82rem; font-weight:700; color:var(--c-accent); padding-top:1px; }
+    .sp-overlay .sp-title{ font-size:0.95rem; font-weight:600; line-height:1.35; }
+    .sp-overlay .sp-ref{ font-size:0.8rem; color:var(--c-text-sub,#666); }
+    .sp-overlay .sp-empty{ text-align:center; padding:24px 0; font-size:0.85rem; color:var(--c-text-sub,#666); }
+    @media (max-width:768px){
+      .sp-overlay{ align-items:flex-end; padding:0; }
+      .sp-overlay .sp-modal{ max-width:none; max-height:85vh; border-radius:16px 16px 0 0; }
     }
     .page-bulletin button{
       padding:10px 12px;
@@ -182,8 +220,11 @@
         <div>
           <h1>주보</h1>
           <div class="controls" style="margin-top:10px;">
-            <label class="muted" for="weekSelect">주차 선택</label>
-            <select id="weekSelect"></select>
+            <span class="muted">주차 선택</span>
+            <button type="button" id="weekSelect" aria-haspopup="dialog">
+              <span class="sp-cur" id="weekCur">불러오는 중…</span>
+              <span class="sp-arrow">목록 ▾</span>
+            </button>
             <button id="prevBtn" type="button">이전 주</button>
             <button id="nextBtn" type="button">다음 주</button>
           </div>
@@ -307,19 +348,110 @@
       .sort((a, b) => b.week_id.localeCompare(a.week_id));
 
     if (!weeks.length) {
-      weekSelect.innerHTML = "<option value=''>주차 데이터가 없습니다</option>";
+      document.getElementById("weekCur").textContent = "주차 데이터가 없습니다";
       return { weeks: [], selected: "" };
     }
 
-    weekSelect.innerHTML = weeks.map(w =>
-      "<option value='" + escapeHtml(w.week_id) + "'>" + escapeHtml(formatWeekLabel(w)) + "</option>"
-    ).join("");
-
     const selected = (weekParam && weeks.some(w => w.week_id === weekParam))
       ? weekParam : weeks[0].week_id;
-    weekSelect.value = selected;
-    weekSelect.addEventListener("change", () => { setWeekInUrl(weekSelect.value); });
+    initWeekPicker(weeks, selected);
     return { weeks, selected };
+  }
+
+  /* ── 주보 목록 팝업 (날짜 · 설교 제목 · 성경본문) ── */
+  const weekInfo = {}; // week_id → { title, ref }
+  function rememberWeek(data){
+    const w = data.week || {};
+    const order = data.worship_order || [];
+    const sermon = order.find(r => String(r.step||"").replace(/\s/g,"") === "설교");
+    const reading = order.find(r => String(r.step||"").replace(/\s/g,"") === "성경봉독");
+    const verse = (data.memory_verse || [])[0] || {};
+    weekInfo[w.week_id] = {
+      title: (sermon && sermon.content) || w.title || "",
+      ref: (reading && reading.content) || verse.reference || ""
+    };
+  }
+
+  function initWeekPicker(weeks, selected){
+    const cur = document.getElementById("weekCur");
+    const curWeek = weeks.find(w => w.week_id === selected);
+    cur.textContent = formatWeekLabel(curWeek);
+
+    let infoPromise = null;
+    function loadAllInfo(){
+      if (!infoPromise) {
+        infoPromise = Promise.all(weeks.map(async w => {
+          if (weekInfo[w.week_id]) return;
+          try { rememberWeek(await fetchJSON(DATA_BASE + "/" + encodeURIComponent(w.week_id) + ".json")); }
+          catch(_) { weekInfo[w.week_id] = { title: w.title || "", ref: "" }; }
+        }));
+      }
+      return infoPromise;
+    }
+
+    const overlay = document.createElement("div");
+    overlay.className = "sp-overlay";
+    overlay.innerHTML = `
+      <div class="sp-modal" role="dialog" aria-modal="true" aria-label="주보 목록">
+        <div class="sp-head"><h3>주보 목록</h3><button type="button" class="sp-close" aria-label="닫기">×</button></div>
+        <input class="sp-search" type="search" placeholder="설교 제목·본문·날짜로 찾기">
+        <div class="sp-list"></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const list = overlay.querySelector(".sp-list");
+    const search = overlay.querySelector(".sp-search");
+
+    function render(){
+      const q = search.value.trim().toLowerCase();
+      let html = "", lastMonth = "";
+      for (const w of weeks) {
+        const info = weekInfo[w.week_id] || { title: w.title || "", ref: "" };
+        const issue = w.issue ? w.issue + "호" : "";
+        if (q && !`${w.week_id} ${w.date||""} ${info.title} ${info.ref} ${issue}`.toLowerCase().includes(q)) continue;
+        const d = String(w.week_id).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        const month = d ? `${d[1]}년 ${Number(d[2])}월` : "";
+        if (month && month !== lastMonth) { html += `<div class="sp-month">${month}</div>`; lastMonth = month; }
+        const short = d ? `${Number(d[2])}.${String(Number(d[3])).padStart(2,"0")}` : (w.date || w.week_id);
+        const sub = [info.ref, issue].filter(Boolean).join("  ·  ");
+        html += `<button type="button" class="sp-item${w.week_id === selected ? " is-current" : ""}" data-week="${escapeHtml(w.week_id)}">
+          <span class="sp-date">${escapeHtml(short)}</span>
+          <span class="sp-title">${escapeHtml(info.title || formatWeekLabel(w))}</span>
+          <span class="sp-ref">${escapeHtml(sub)}</span>
+        </button>`;
+      }
+      list.innerHTML = html || `<div class="sp-empty">찾는 주보가 없습니다.</div>`;
+    }
+
+    function open(){
+      search.value = "";
+      render();
+      overlay.classList.add("open");
+      document.body.style.overflow = "hidden";
+      const c = list.querySelector(".is-current");
+      if (c) c.scrollIntoView({ block: "center" });
+      loadAllInfo().then(() => { if (overlay.classList.contains("open")) {
+        const top = list.scrollTop; render(); list.scrollTop = top;
+      } });
+    }
+    function close(){
+      overlay.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+
+    weekSelect.addEventListener("click", open);
+    overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
+    overlay.querySelector(".sp-close").addEventListener("click", close);
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && overlay.classList.contains("open")) close(); });
+    search.addEventListener("input", render);
+    list.addEventListener("click", e => {
+      const item = e.target.closest(".sp-item");
+      if (!item) return;
+      close();
+      if (item.dataset.week !== selected) setWeekInUrl(item.dataset.week);
+    });
+
+    // 현재 주보를 그린 뒤 나머지 주차 정보 미리 불러오기
+    window.__loadWeekInfo = loadAllInfo;
   }
 
   function hookPrevNext(weeks, selected){
@@ -387,6 +519,13 @@
     const monthCommittees = Object.values(byWeek).sort((a,b) => a.week_id.localeCompare(b.week_id));
 
     renderBulletin(data, monthCommittees);
+    rememberWeek(data);
+    const info = weekInfo[selected];
+    if (info && info.title) {
+      const w = weeks.find(x => x.week_id === selected) || {};
+      document.getElementById("weekCur").textContent = [w.date || selected, info.title].filter(Boolean).join("  ·  ");
+    }
+    if (window.__loadWeekInfo) window.__loadWeekInfo();
   }
   main().catch(err => {
     console.error(err);
