@@ -331,6 +331,10 @@ h2{ font-family:var(--font-display); font-weight:900; font-size:1.4rem; margin-b
 /* =================================================
    Footer
 ================================================= */
+.footer-brand{ text-align:center; padding:28px 24px 20px; }
+.footer-brand a{ display:inline-block; line-height:0; opacity:.85; transition:opacity .2s; }
+.footer-brand a:hover{ opacity:1; }
+.footer-brand img{ height:28px; width:auto; display:block; }
 .site-footer{
   border-top:2px solid var(--c-border);
   margin-top:0;
