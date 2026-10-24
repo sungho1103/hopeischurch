@@ -1064,40 +1064,72 @@ const _bibleBookMap = {
   '유다서':'jud','유':'jud','요한계시록':'re','계':'re'
 };
 
+// 본문(bVerseText)이 어떤 구절 기준으로 채워졌는지 기록 → 구절이 바뀌었으면 저장 시 다시 가져옴
+let _verseTextRef = '';
+
+function _resolveBibleBook(name) {
+  const n = String(name || '').replace(/\s+/g, '');
+  if (_bibleBookMap[n]) return _bibleBookMap[n];
+  // '요나서', '호세아서', '말라기서', '에스더기' 등 접미사가 붙은 표기 허용
+  const stripped = n.replace(/(서|기)$/, '');
+  return _bibleBookMap[stripped] || null;
+}
+
+// 예) "요 3:16", "요나서 2:1-10", "요나서 2:1-3:1", "요나 2장 1절~3장 1절"
+function _parseBibleRef(reference) {
+  const m = String(reference || '').trim().match(
+    /^(.+?)\s*(\d+)\s*(?::|장)\s*(\d+)\s*절?\s*(?:[-~–]\s*(?:(\d+)\s*(?::|장)\s*)?(\d+)\s*절?)?/
+  );
+  if (!m) return null;
+  const c1 = parseInt(m[2]), v1 = parseInt(m[3]);
+  const c2 = m[4] ? parseInt(m[4]) : c1;
+  const v2 = m[5] ? parseInt(m[5]) : (m[4] ? null : v1);
+  return { book: m[1].trim(), c1, v1, c2, v2 };
+}
+
 async function fetchBibleVerse(reference) {
-  if (!reference) return;
-  const m = reference.trim().match(/^(.+?)\s*(\d+)\s*:\s*(\d+)\s*(?:[-~]\s*(\d+))?/);
-  if (!m) return;
-  const bookName = m[1].trim();
-  const chapter = m[2];
-  const startV = parseInt(m[3]);
-  const endV = m[4] ? parseInt(m[4]) : startV;
-  const bookId = _bibleBookMap[bookName];
-  if (!bookId) { console.warn('성경책 매핑 없음:', bookName); return; }
+  if (!reference) return null;
+  const ref = _parseBibleRef(reference);
+  if (!ref) { toast('성경구절 형식을 인식하지 못했습니다 (예: 요나서 2:1-3:1)', 'err'); return null; }
+  const bookId = _resolveBibleBook(ref.book);
+  if (!bookId) { toast(`성경책 이름을 찾지 못했습니다: ${ref.book}`, 'err'); return null; }
+  if (ref.c2 < ref.c1 || (ref.c2 === ref.c1 && ref.v2 != null && ref.v2 < ref.v1)) {
+    toast('성경구절 범위가 올바르지 않습니다', 'err'); return null;
+  }
 
   const baseUrl = 'https://raw.githubusercontent.com/maatheusgois/bible/main/versions/ko/ko';
   const texts = [];
   try {
-    for (let v = startV; v <= endV; v++) {
-      const res = await fetch(`${baseUrl}/${bookId}/${chapter}/${v}.json`);
-      if (!res.ok) { console.warn(`${bookId}/${chapter}/${v} 로드 실패`); continue; }
-      const raw = await res.text();
-      // JSON 파싱 시도, 실패하면 원문 텍스트 사용
-      try {
-        const json = JSON.parse(raw);
-        const t = (typeof json === 'string') ? json : (json.text || json.verse || raw);
-        texts.push(t.replace(/[\s!]+$/g, '').trim());
-      } catch(e) {
-        texts.push(raw.replace(/^"|"$/g, '').replace(/[\s!]+$/g, '').trim());
+    for (let ch = ref.c1; ch <= ref.c2; ch++) {
+      const start = (ch === ref.c1) ? ref.v1 : 1;
+      const end   = (ch === ref.c2 && ref.v2 != null) ? ref.v2 : 200; // 중간 장은 마지막 절까지
+      for (let v = start; v <= end; v++) {
+        const res = await fetch(`${baseUrl}/${bookId}/${ch}/${v}.json`);
+        if (!res.ok) break; // 장의 마지막 절을 넘음
+        const raw = await res.text();
+        // JSON 파싱 시도, 실패하면 원문 텍스트 사용
+        try {
+          const json = JSON.parse(raw);
+          const t = (typeof json === 'string') ? json : (json.text || json.verse || raw);
+          texts.push(t.replace(/[\s!]+$/g, '').trim());
+        } catch(e) {
+          texts.push(raw.replace(/^"|"$/g, '').replace(/[\s!]+$/g, '').trim());
+        }
       }
     }
-    if (texts.length > 0) {
-      document.getElementById('bVerseText').value = texts.join(' ');
+    if (texts.length === 0) { toast('해당 구절의 본문을 찾지 못했습니다', 'err'); return null; }
+    const text = texts.join(' ');
+    // 가져오는 동안 구절이 다시 바뀌었으면 덮어쓰지 않음
+    if (document.getElementById('bVerseRef').value.trim() === reference.trim()) {
+      document.getElementById('bVerseText').value = text;
+      _verseTextRef = reference.trim();
       toast('성경본문 자동 입력 완료');
     }
+    return text;
   } catch(e) {
     console.error('성경본문 가져오기 실패:', e);
     toast('성경본문 자동 가져오기 실패', 'err');
+    return null;
   }
 }
 
@@ -1230,6 +1262,7 @@ function fillBulletinForm(data) {
   const verseRef = (bibleStep && bibleStep.content) || mv.reference || '';
   document.getElementById('bVerseRef').value  = verseRef;
   document.getElementById('bVerseText').value = mv.text || '';
+  _verseTextRef = (mv.reference || '').trim();
 
   // 성경봉독 내용이 있고 기존 본문과 구절이 다르면 자동 fetch
   if (verseRef && verseRef !== (mv.reference || '')) {
@@ -1356,6 +1389,10 @@ async function saveBulletin() {
   });
 
   const verseRef  = document.getElementById('bVerseRef').value.trim();
+  // 구절이 바뀌었는데 본문이 예전 구절 기준이면 저장 전에 새로 가져옴
+  if (verseRef && verseRef !== _verseTextRef) {
+    await fetchBibleVerse(verseRef);
+  }
   const verseText = document.getElementById('bVerseText').value.trim();
   const memory_verse = (verseRef || verseText)
     ? [{ week_id: weekId, reference: verseRef, text: verseText }] : [];
@@ -2081,8 +2118,17 @@ window.onload = function() {
     login(document.getElementById('pwInput').value);
   });
 
-  // 예배순서 성경봉독 내용 변경 시 → 성경구절/본문 자동 동기화
   let _verseFetchTimer = null;
+  // 성경구절 칸을 직접 수정했을 때도 본문 자동 가져오기
+  document.getElementById('bVerseRef').addEventListener('change', e => {
+    const ref = e.target.value.trim();
+    if (ref && ref !== _verseTextRef) {
+      clearTimeout(_verseFetchTimer);
+      _verseFetchTimer = setTimeout(() => fetchBibleVerse(ref), 300);
+    }
+  });
+
+  // 예배순서 성경봉독 내용 변경 시 → 성경구절/본문 자동 동기화
   document.getElementById('orderTableBody').addEventListener('change', e => {
     const input = e.target;
     if (!input.classList.contains('o-content')) return;
