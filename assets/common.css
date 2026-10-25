@@ -468,6 +468,21 @@ h2{ font-family:var(--font-display); font-weight:900; font-size:1.4rem; margin-b
   }
   #installBtn.visible{ display:block; }
 
+  /* 모바일 메뉴 맨 아래 — 유튜브 채널 바로가기 */
+  .drawer a.drawer-yt{
+    margin-top:auto;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:12px 0;
+    border:2px solid var(--c-text);
+    border-radius:var(--radius-sm);
+    font-size:1rem;
+    color:var(--c-text);
+    background:transparent;
+  }
+  .drawer img + a.drawer-yt{ margin-top:12px; }
+  .drawer a.drawer-yt:active{ background:var(--c-text); color:var(--c-bg); }
+  .drawer a:nth-last-of-type(2){ border-bottom:none; }
+
   /* ── Mobile notice ── */
   .mobile-notice{
     overflow-x:auto;
