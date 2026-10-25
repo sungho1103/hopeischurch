@@ -261,14 +261,21 @@
           return m ? m[1].trim() : null;
         }
 
-        function applyQuote(quote, dateLabel) {
+        function formatPreacher(fullText) {
+          var m = fullText && fullText.match(/설교자\s*[:：]\s*(.+)/);
+          var name = m ? m[1].trim() : '';
+          if (!name) return '이일례 목사';
+          return name.replace(/\s*(목사|전도사|강도사|장로)$/, ' $1');
+        }
+
+        function applyQuote(quote, dateLabel, preacher) {
           var eyebrow = document.getElementById('heroEyebrow');
           var titleEl = document.getElementById('heroTitle');
           var descEl  = document.getElementById('heroDesc');
           if (!titleEl) return;
           if (eyebrow) eyebrow.textContent = '이번 주 말씀 중에서';
           titleEl.innerHTML = '<span style="color:var(--c-accent)">“</span>' + quote + '<span style="color:var(--c-accent)">”</span>';
-          if (descEl) descEl.innerHTML = (dateLabel ? dateLabel + ' 주일설교 · ' : '') + '이일례 목사';
+          if (descEl) descEl.innerHTML = (dateLabel ? dateLabel + ' 주일설교 · ' : '') + (preacher || '이일례 목사');
         }
 
         function reveal() {
@@ -294,7 +301,7 @@
                 .then(function (text) {
                   var quote = extractQuestionField(text) || extractHeroQuote(text);
                   if (!quote) return;
-                  applyQuote(quote, file.replace('.txt', ''));
+                  applyQuote(quote, file.replace('.txt', ''), formatPreacher(text));
                 });
             })
             .catch(function () { /* 실패 시 기본 문구 유지 */ })
@@ -557,7 +564,7 @@
           titleEl.textContent = ytTitle;
           metaEl.innerHTML = '<span>📅 ' + dateLabel + '</span>' +
             '<span class="dot"></span>' +
-            '<span>이일례 목사</span>' +
+            '<span id="hero-preacher">이일례 목사</span>' +
             '<span class="dot"></span>' +
             '<span>희망은교회</span>';
 
@@ -570,6 +577,8 @@
             textPromise
               .then(function(fullText){
                 var meta = parseMetaHeader(fullText);
+                var prEl = document.getElementById('hero-preacher');
+                if (prEl && meta['설교자']) prEl.textContent = meta['설교자'].replace(/\s*(목사|전도사|강도사|장로)$/, ' $1');
                 var bullets = [meta['핵심문장1'], meta['핵심문장2'], meta['질문']].filter(Boolean);
                 if (!bullets.length) bullets = extractSummary(fullText);
                 if (bullets.length) {
