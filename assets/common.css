@@ -468,9 +468,9 @@ h2{ font-family:var(--font-display); font-weight:900; font-size:1.4rem; margin-b
   }
   #installBtn.visible{ display:block; }
 
-  /* 모바일 메뉴 맨 아래 — 유튜브 채널 바로가기 */
+  /* 모바일 메뉴 — 찾아오는 길 바로 아래 유튜브 채널 바로가기 */
   .drawer a.drawer-yt{
-    margin-top:auto;
+    margin-top:12px;
     display:flex; align-items:center; justify-content:center; gap:8px;
     padding:12px 0;
     border:2px solid var(--c-text);
@@ -479,7 +479,6 @@ h2{ font-family:var(--font-display); font-weight:900; font-size:1.4rem; margin-b
     color:var(--c-text);
     background:transparent;
   }
-  .drawer img + a.drawer-yt{ margin-top:12px; }
   .drawer a.drawer-yt:active{ background:var(--c-text); color:var(--c-bg); }
   .drawer a:nth-last-of-type(2){ border-bottom:none; }
 
