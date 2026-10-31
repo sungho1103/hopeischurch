@@ -53,6 +53,16 @@
       display: inline-flex; align-items: center;
     }
     .header-btns a.home-link:hover { background: #e8e8e8; }
+    #idleModal { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.55); align-items: center; justify-content: center; padding: 20px; }
+    #idleModal.open { display: flex; }
+    #idleModal .idle-card { background: #fff; border-radius: 14px; padding: 28px 26px 22px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+    #idleModal h3 { font-size: 1.1rem; margin-bottom: 10px; }
+    #idleModal p { font-size: 14px; color: #555; line-height: 1.7; }
+    #idleModal .idle-count { font-size: 2rem; font-weight: 800; margin: 12px 0 4px; color: #c0392b; font-variant-numeric: tabular-nums; }
+    #idleModal .idle-btns { display: flex; gap: 8px; margin-top: 18px; }
+    #idleModal .idle-btns button { flex: 1; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid #111; }
+    #idleModal .idle-keep { background: #111; color: #fff; }
+    #idleModal .idle-out { background: #fff; color: #111; }
     .login-home { display: block; margin-top: 16px; text-align: center; font-size: 13px; color: #888; text-decoration: none; }
     .login-home:hover { color: #111; text-decoration: underline; }
 
@@ -518,6 +528,19 @@
   </div><!-- /admin-body -->
 </div><!-- /adminApp -->
 
+<!-- 자동 로그아웃 안내 -->
+<div id="idleModal" role="alertdialog" aria-modal="true" aria-labelledby="idleTitle">
+  <div class="idle-card">
+    <h3 id="idleTitle">로그인을 연장할까요?</h3>
+    <p>60분 동안 아무 작업이 없었어요.<br>답이 없으면 아래 시간이 지나 자동으로 로그아웃돼요.<br>저장하지 않은 내용은 사라질 수 있어요.</p>
+    <div class="idle-count" id="idleCount">5:00</div>
+    <div class="idle-btns">
+      <button type="button" class="idle-keep" onclick="idleExtend()">로그인 연장</button>
+      <button type="button" class="idle-out" onclick="logout()">지금 로그아웃</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════ GitHub TOKEN MODAL ═══════════════ -->
 <div id="tokenModal" class="modal-wrap">
   <div class="modal-overlay" onclick="closeTokenModal()"></div>
@@ -710,6 +733,7 @@ function login(pw) {
     localStorage.removeItem(FAIL_KEY);
     localStorage.removeItem(LOCK_KEY);
     sessionStorage.setItem('admin', '1');
+    sessionStorage.setItem(LAST_KEY, String(Date.now()));
     showAdmin();
   } else {
     const fails = getFailCount() + 1;
@@ -728,12 +752,58 @@ function login(pw) {
 
 function logout() {
   sessionStorage.removeItem('admin');
+  sessionStorage.removeItem('admin_last');
   location.reload();
+}
+
+/* ── 자동 로그아웃: 60분 동안 작업이 없으면 연장 여부를 묻고, 5분 안에 답이 없으면 로그아웃 ── */
+const IDLE_MS  = 60 * 60 * 1000;
+const GRACE_MS = 5 * 60 * 1000;
+const LAST_KEY = 'admin_last';
+let idleTimer = null, idleLastWrite = 0;
+
+function idleLast() { return parseInt(sessionStorage.getItem(LAST_KEY) || '0', 10) || Date.now(); }
+function idleTouch() {
+  // 안내창이 떠 있는 동안에는 마우스를 움직여도 연장되지 않고, 버튼으로만 연장한다
+  if (document.getElementById('idleModal').classList.contains('open')) return;
+  const now = Date.now();
+  if (now - idleLastWrite < 1000) return;
+  idleLastWrite = now;
+  sessionStorage.setItem(LAST_KEY, String(now));
+}
+function idleExtend() {
+  idleLastWrite = 0;
+  sessionStorage.setItem(LAST_KEY, String(Date.now()));
+  document.getElementById('idleModal').classList.remove('open');
+}
+function idleCheck() {
+  if (!isLoggedIn()) return;
+  const idle = Date.now() - idleLast();
+  const modal = document.getElementById('idleModal');
+  if (idle >= IDLE_MS + GRACE_MS) { logout(); return; }
+  if (idle >= IDLE_MS) {
+    const left = Math.max(0, IDLE_MS + GRACE_MS - idle);
+    const sec = Math.ceil(left / 1000);
+    document.getElementById('idleCount').textContent = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    modal.classList.add('open');
+  } else if (modal.classList.contains('open')) {
+    modal.classList.remove('open'); // 다른 탭에서 연장한 경우
+  }
+}
+function startIdleWatch() {
+  if (idleTimer) return;
+  if (!sessionStorage.getItem(LAST_KEY)) sessionStorage.setItem(LAST_KEY, String(Date.now()));
+  ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'input', 'click'].forEach(ev =>
+    window.addEventListener(ev, idleTouch, { passive: true, capture: true })
+  );
+  idleTimer = setInterval(idleCheck, 1000);
+  idleCheck();
 }
 
 function showAdmin() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminApp').style.display = 'block';
+  startIdleWatch();
   switchTab('notice');
 }
 
