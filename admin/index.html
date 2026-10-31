@@ -47,6 +47,14 @@
       background: transparent; color: #ccc; border: 1px solid #444;
     }
     .header-btns button:hover { background: #222; color: #fff; }
+    .header-btns a.home-link {
+      padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer;
+      background: #fff; color: #111; border: 1px solid #fff; text-decoration: none; font-weight: 700;
+      display: inline-flex; align-items: center;
+    }
+    .header-btns a.home-link:hover { background: #e8e8e8; }
+    .login-home { display: block; margin-top: 16px; text-align: center; font-size: 13px; color: #888; text-decoration: none; }
+    .login-home:hover { color: #111; text-decoration: underline; }
 
     /* ── Tab bar ── */
     .tab-bar {
@@ -252,6 +260,7 @@
       <div id="lockMsg" style="display:none;margin-bottom:12px;padding:10px 12px;background:#fff3f3;border:1px solid #f5c6c6;border-radius:8px;font-size:13px;color:#c0392b;line-height:1.6;"></div>
       <button id="loginBtn" type="submit">로그인</button>
     </form>
+    <a class="login-home" href="/">← 홈페이지로 돌아가기</a>
   </div>
 </div>
 
@@ -260,6 +269,7 @@
   <header class="admin-header">
     <span class="admin-brand">희망은교회 관리자</span>
     <div class="header-btns">
+      <a class="home-link" href="/">🏠 홈페이지</a>
       <button onclick="openTokenModal()">🔑 GitHub 토큰</button>
       <button onclick="openGeminiModal()">🤖 Gemini API 키</button>
       <button onclick="logout()">로그아웃</button>
