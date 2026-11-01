@@ -657,6 +657,7 @@ textEl.addEventListener("input", () => {
 
 // 비밀번호 커스텀 마스킹: 첫 2글자만 표시, 나머지 •
 let realPw = "";
+let shownPw = "";
 
 function updatePwDisplay(){
   if(realPw.length === 0){
@@ -669,17 +670,31 @@ function updatePwDisplay(){
     pwEl.value = realPw.slice(0,2) + "•".repeat(realPw.length - 2);
     pwEl.classList.add("has-value");
   }
+  shownPw = pwEl.value;
 }
 
-pwEl.addEventListener("keydown", e => {
-  if(e.ctrlKey || e.metaKey) { e.preventDefault(); return; }
-  if(e.key.length > 1 && e.key !== "Backspace" && e.key !== "Delete") return;
-  e.preventDefault();
-  if(e.key === "Backspace")     realPw = realPw.slice(0,-1);
-  else if(e.key === "Delete")   realPw = "";
-  else if(realPw.length < 20)  realPw += e.key;
+// 키 이벤트(keydown)는 휴대폰·한글 입력기에서 글자 값을 주지 않아 비밀번호가 비어 버리므로,
+// 입력된 값의 변화(input)를 보고 실제 비밀번호를 갱신한다 (표시는 그대로 앞 2글자만).
+function syncPw(){
+  const v = pwEl.value;
+  if(v.length > shownPw.length){
+    // 항상 끝에 덧붙인 글자만 받는다
+    realPw = (realPw + v.slice(shownPw.length)).slice(0, 20);
+  } else if(v.length < shownPw.length){
+    realPw = realPw.slice(0, v.length);
+  }
   updatePwDisplay();
+  shownPw = pwEl.value;
+}
+pwEl.addEventListener("input", e => { if(!e.isComposing) syncPw(); });
+pwEl.addEventListener("compositionend", () => syncPw());
+pwEl.addEventListener("keydown", e => {
+  if(e.ctrlKey || e.metaKey) e.preventDefault();
 });
+// 클릭·선택으로 커서를 중간에 두지 않게 한다
+["focus","click","select"].forEach(ev => pwEl.addEventListener(ev, () => {
+  const n = pwEl.value.length; try{ pwEl.setSelectionRange(n, n); }catch(_){}
+}));
 pwEl.addEventListener("paste",  e => e.preventDefault());
 pwEl.addEventListener("drop",   e => e.preventDefault());
 
@@ -850,9 +865,11 @@ submitEl.addEventListener("click", async () => {
       textEl.value = "";
       realPw = "";
       updatePwDisplay();
+      shownPw = "";
       countEl.textContent = "0 / 200";
     } catch(e){
-      errorEl.textContent = "저장에 실패했습니다.";
+      console.warn("댓글 저장 실패:", e);
+      errorEl.textContent = "저장에 실패했습니다." + (e && e.code ? " (" + e.code + ")" : "");
     } finally {
       submitEl.disabled = false;
     }
