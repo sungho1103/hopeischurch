@@ -362,6 +362,22 @@
       </div>
 
       <div id="bulletinForm" style="display:none">
+        <!-- 사진으로 자동 채우기 -->
+        <details open>
+          <summary>📷 주보 사진으로 자동 채우기 (AI)</summary>
+          <div class="detail-body">
+            <div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.6;">
+              예배순서지·소식지 사진을 올리면 Gemini가 읽어서 <b>예배순서·성경구절·교회소식</b>을 자동으로 채웁니다 (날짜·호수는 비어있을 때만 채움).<br>
+              사진은 여러 장(순서 무관) 선택 가능합니다. 사진 1장당 5MB 이하를 권장하며, <b>채워진 내용은 저장 전에 꼭 확인</b>하세요.
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input id="bPhotoFiles" type="file" accept="image/*" multiple capture="environment" style="flex:1;min-width:200px;font-size:12px;">
+              <button type="button" id="bAnalyzeBtn" class="btn-add" style="margin-top:0;white-space:nowrap;" onclick="analyzeBulletinPhotos()">🤖 AI로 분석해서 채우기</button>
+            </div>
+            <div id="bPhotoHint" style="font-size:11px;color:#999;margin-top:6px;"></div>
+          </div>
+        </details>
+
         <!-- 기본 정보 -->
         <details open>
           <summary>기본 정보</summary>
@@ -1330,6 +1346,11 @@ async function newBulletinWeek() {
 }
 
 function fillBulletinForm(data) {
+  const photoFiles = document.getElementById('bPhotoFiles');
+  if (photoFiles) photoFiles.value = '';
+  const photoHint = document.getElementById('bPhotoHint');
+  if (photoHint) photoHint.textContent = '';
+
   const w = data.week || {};
   document.getElementById('bWeekId').value   = w.week_id || '';
   document.getElementById('bDate').value     = w.date    || (w.week_id ? w.week_id.replace(/-/g, '.') : '');
@@ -1531,6 +1552,147 @@ async function saveBulletin() {
   }
 }
 
+
+/* ════════════════════════════════════════════
+   주보 사진 → AI 자동 채우기 (Gemini Vision)
+════════════════════════════════════════════ */
+const BULLETIN_STEP_WHITELIST = ['묵도','경배찬송','신앙고백','성시교독','기도','성경봉독','특송','설교','헌금','말씀암송','광고','송영','축도'];
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('파일을 읽지 못했습니다'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// 모델 응답에서 ```json 코드블록이나 잡다한 텍스트가 섞여 와도 JSON 객체만 뽑아낸다
+function extractJsonFromText(text) {
+  let t = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+  const s = t.indexOf('{'), e = t.lastIndexOf('}');
+  if (s === -1 || e === -1 || e < s) throw new Error('응답에서 JSON을 찾지 못했습니다');
+  return JSON.parse(t.slice(s, e + 1));
+}
+
+function bulletinPhotoPrompt() {
+  return (
+    '다음 이미지는 교회 주보(예배 순서지와 교회 소식지) 사진입니다. 여러 장일 수 있고 순서는 무작위일 수 있습니다. ' +
+    '내용을 정확히 읽어서 아래 JSON 형식으로만 응답하세요. 다른 설명, 인사말, 마크다운, 코드블록 기호(```) 없이 순수 JSON 객체 하나만 출력하세요.\n\n' +
+    '{\n' +
+    '  "date": "YYYY.MM.DD 형식의 예배 날짜 (없으면 빈 문자열)",\n' +
+    '  "issue": "주보 호수, 예: 26-47 (없으면 빈 문자열)",\n' +
+    '  "worship_order": [ { "step": "항목명", "content": "내용", "person": "담당자" } ],\n' +
+    '  "bible_ref": "성경봉독 구절 참조만, 예: 시편 139:13-22 또는 에스겔 1:1-3",\n' +
+    '  "news": ["소식 문장1", "소식 문장2"]\n' +
+    '}\n\n' +
+    '규칙:\n' +
+    '1. worship_order의 "step"은 반드시 다음 13개 표준 명칭 중 사진에 실제로 있는 것만 사용하고, 없는 항목을 만들어내지 마세요: ' +
+    '묵도, 경배찬송, 신앙고백, 성시교독, 기도, 성경봉독, 특송, 설교, 헌금, 말씀암송, 광고, 송영, 축도.\n' +
+    '   - "말씀선포" "말씀" "설교말씀" 은 모두 "설교"로 통일.\n' +
+    '   - "찬송" "찬양" 단독 표기는 문맥상 맞으면 "경배찬송"으로.\n' +
+    '2. "설교" 항목의 content에는 설교 제목만 넣으세요(성경구절 아님). person에는 설교자 이름+직분을 그대로 넣으세요 (예: "이일례목사").\n' +
+    '3. content에 찬송가 번호가 있으면 "찬OOO장" 형식 그대로, 성시교독은 "87요한계시록21장"처럼 책 번호와 장을 원문 그대로 옮기세요.\n' +
+    '4. person은 직분을 포함한 이름을 원문 그대로 옮기세요 (예: "임문진권사", "다함께", "사회자").\n' +
+    '5. news는 \'희망은 소식\' 또는 \'교회소식\' 섹션의 글머리 기호 항목들만 하나씩 문자열로 담으세요. 괄호 안 날짜·이름도 원문 그대로 포함하세요.\n' +
+    '6. \'희망은 기도제목\'·찬송가 악보·예배위원 표는 무시하세요 — 웹사이트에 반영되지 않는 항목입니다.\n' +
+    '7. 글씨가 흐리거나 손글씨여도 최선을 다해 읽고, 정말 읽을 수 없는 글자만 "?"로 표시하세요.\n' +
+    '8. 반드시 유효한 JSON만 출력하세요.'
+  );
+}
+
+async function analyzeBulletinPhotos() {
+  const fileInput = document.getElementById('bPhotoFiles');
+  const files = Array.from(fileInput.files || []);
+  const hint = document.getElementById('bPhotoHint');
+  hint.textContent = '';
+  if (!files.length) { toast('사진을 먼저 선택하세요', 'err'); return; }
+
+  const key = geminiKey();
+  if (!key) { toast('Gemini API 키를 먼저 설정하세요 (🤖 버튼)', 'err'); openGeminiModal(); return; }
+
+  const hasExisting = document.querySelectorAll('#orderTableBody tr').length > 0 ||
+    document.querySelectorAll('#newsContainer .news-row').length > 0;
+  if (hasExisting && !confirm('예배순서·성경구절·교회소식을 사진에서 읽은 내용으로 덮어쓸까요?\n(날짜·호수는 비어있을 때만 채워집니다)')) return;
+
+  const btn = document.getElementById('bAnalyzeBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  setBtnStatus(btn, 'loading', '분석 중');
+
+  try {
+    const imageParts = [];
+    for (const file of files) {
+      const dataUrl = await readFileAsDataUrl(file);
+      const m = dataUrl.match(/^data:(.+?);base64,(.+)$/);
+      if (!m) throw new Error(`이미지를 읽지 못했습니다: ${file.name}`);
+      imageParts.push({ inlineData: { mimeType: m[1], data: m[2] } });
+    }
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [...imageParts, { text: bulletinPhotoPrompt() }] }],
+          generationConfig: { responseMimeType: 'application/json' }
+        })
+      }
+    );
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
+    if (!text) throw new Error('분석 결과가 비어 있습니다 (사진이 흐리거나 인식할 수 없는 형식일 수 있습니다)');
+
+    const parsed = extractJsonFromText(text);
+
+    // 날짜/호수: 이미 입력돼 있으면 건드리지 않는다
+    const dateEl  = document.getElementById('bDate');
+    const issueEl = document.getElementById('bIssue');
+    if (!dateEl.value.trim()  && parsed.date)  dateEl.value  = String(parsed.date).trim();
+    if (!issueEl.value.trim() && parsed.issue) issueEl.value = String(parsed.issue).trim();
+
+    // 예배순서
+    const order = Array.isArray(parsed.worship_order) ? parsed.worship_order : [];
+    const cleanedOrder = order
+      .map(o => ({
+        step:    String(o.step    || '').trim(),
+        content: String(o.content || '').trim(),
+        person:  String(o.person  || '').trim()
+      }))
+      .filter(o => o.step || o.content || o.person);
+    renderOrderRows(cleanedOrder);
+
+    // 성경구절 (성경봉독 항목 우선, 없으면 bible_ref) → 본문은 기존 성경 API로 자동 조회
+    const bibleStep = cleanedOrder.find(o => o.step === '성경봉독');
+    const verseRef = (bibleStep && bibleStep.content) || String(parsed.bible_ref || '').trim();
+    if (verseRef) {
+      document.getElementById('bVerseRef').value = verseRef;
+      await fetchBibleVerse(verseRef);
+    }
+
+    // 교회소식
+    const news = Array.isArray(parsed.news) ? parsed.news.filter(Boolean) : [];
+    renderNewsItems(news.map(t => ({ text: t })));
+
+    const unknownSteps = cleanedOrder.filter(o => o.step && !BULLETIN_STEP_WHITELIST.includes(o.step));
+    const msg = `사진 분석 완료: 예배순서 ${cleanedOrder.length}개 · 소식 ${news.length}개 — 저장 전에 꼭 확인하세요`;
+    hint.textContent = msg + (unknownSteps.length ? ` (표준 명칭이 아닌 항목 ${unknownSteps.length}개 포함, 확인 필요)` : '');
+    toast(msg + ' ✓');
+    setBtnStatus(btn, 'done');
+  } catch(e) {
+    toast('사진 분석 실패: ' + e.message, 'err');
+    hint.textContent = '분석 실패: ' + e.message;
+    setBtnStatus(btn, 'idle');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
 
 /* ════════════════════════════════════════════
    주보 → 설교 자동 채우기
