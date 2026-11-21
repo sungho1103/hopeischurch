@@ -371,9 +371,10 @@
               사진은 여러 장(순서 무관) 선택 가능합니다. 사진 1장당 5MB 이하를 권장하며, <b>채워진 내용은 저장 전에 꼭 확인</b>하세요.
             </div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-              <input id="bPhotoFiles" type="file" accept="image/*" multiple capture="environment" style="flex:1;min-width:200px;font-size:12px;">
+              <input id="bPhotoFiles" type="file" accept="image/*" multiple capture="environment" style="flex:1;min-width:200px;font-size:12px;" onchange="addBulletinPhotoFiles(this)">
               <button type="button" id="bAnalyzeBtn" class="btn-add" style="margin-top:0;white-space:nowrap;" onclick="analyzeBulletinPhotos()">🤖 AI로 분석해서 채우기</button>
             </div>
+            <div id="bPhotoFileList" style="display:flex;flex-direction:column;gap:4px;margin-top:8px;"></div>
             <div id="bPhotoHint" style="font-size:11px;color:#999;margin-top:6px;"></div>
           </div>
         </details>
@@ -1350,6 +1351,8 @@ function fillBulletinForm(data) {
   if (photoFiles) photoFiles.value = '';
   const photoHint = document.getElementById('bPhotoHint');
   if (photoHint) photoHint.textContent = '';
+  _bulletinPhotoFiles = [];
+  renderBulletinPhotoFileList();
 
   const w = data.week || {};
   document.getElementById('bWeekId').value   = w.week_id || '';
@@ -1558,6 +1561,33 @@ async function saveBulletin() {
 ════════════════════════════════════════════ */
 const BULLETIN_STEP_WHITELIST = ['묵도','경배찬송','신앙고백','성시교독','기도','성경봉독','특송','설교','헌금','말씀암송','광고','송영','축도'];
 
+// 파일 선택창을 여러 번 열어도 계속 누적되는 사진 목록 (선택할 때마다 덮어쓰지 않음)
+let _bulletinPhotoFiles = [];
+
+function renderBulletinPhotoFileList() {
+  const box = document.getElementById('bPhotoFileList');
+  if (!box) return;
+  box.innerHTML = _bulletinPhotoFiles.map((f, i) => `
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;background:#fafafa;border:1px solid #e4e4e4;border-radius:6px;padding:5px 8px;">
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📎 ${esc(f.name)}</span>
+      <button type="button" class="btn-icon" style="padding:2px 8px;" onclick="removeBulletinPhotoFile(${i})" title="제거">✕</button>
+    </div>
+  `).join('');
+}
+
+// 파일 선택창에서 고른 사진을 기존 목록에 추가 (input은 바로 비워서 같은 파일도 다시 고를 수 있게 함)
+function addBulletinPhotoFiles(input) {
+  const newFiles = Array.from(input.files || []);
+  if (newFiles.length) _bulletinPhotoFiles = _bulletinPhotoFiles.concat(newFiles);
+  input.value = '';
+  renderBulletinPhotoFileList();
+}
+
+function removeBulletinPhotoFile(i) {
+  _bulletinPhotoFiles.splice(i, 1);
+  renderBulletinPhotoFileList();
+}
+
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1602,8 +1632,7 @@ function bulletinPhotoPrompt() {
 }
 
 async function analyzeBulletinPhotos() {
-  const fileInput = document.getElementById('bPhotoFiles');
-  const files = Array.from(fileInput.files || []);
+  const files = _bulletinPhotoFiles;
   const hint = document.getElementById('bPhotoHint');
   hint.textContent = '';
   if (!files.length) { toast('사진을 먼저 선택하세요', 'err'); return; }
